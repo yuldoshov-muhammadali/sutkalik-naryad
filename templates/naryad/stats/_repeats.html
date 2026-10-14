@@ -1,0 +1,12 @@
+{% if f.repeats %}
+<details class="mt-2 rounded-lg bg-white px-3 py-2 text-sm ring-1 ring-slate-200">
+  <summary class="cursor-pointer font-medium text-amber-800">Ketma-ket ikki naryadi bir joyga tushgan: {{ f.repeats|length }} ta holat</summary>
+  <ul class="mt-2 space-y-1">
+    {% for x in f.repeats %}
+    <li>{{ x.cadet.short_name }} — {{ x.post_name }}: {{ x.first|date:"d.m.Y" }} va {{ x.second|date:"d.m.Y" }}</li>
+    {% endfor %}
+  </ul>
+</details>
+{% else %}
+<p class="mt-2 text-sm text-slate-500">Ketma-ket ikki naryadi bir joyga tushgan holat yo‘q.</p>
+{% endif %}

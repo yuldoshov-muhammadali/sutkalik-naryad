@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Jurnal {{ date|date:"d.m.Y" }}{% endblock %}
+{% block content %}
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="Yo‘l"><a href="{% url 'week_list' %}" class="hover:underline">Haftalar</a> / <a href="{% url 'day_detail' date|date:'Y-m-d' %}" class="hover:underline">{{ date|date:"d.m.Y" }}</a> / Jurnal</nav>
+<h1 class="text-xl font-semibold">{{ date|date:"d.m.Y" }} sutkasi jurnali</h1>
+<p class="text-sm text-slate-600">Barcha o‘zgarishlar vaqt tartibida.</p>
+<ol class="mt-4 space-y-2">
+  {% for e in entries %}
+  <li class="rounded-xl bg-white px-4 py-3 text-sm shadow-sm ring-1 ring-slate-200">
+    <p class="flex flex-wrap items-baseline justify-between gap-2">
+      <span class="font-semibold">{{ e.get_action_display }}</span>
+      <span class="text-xs text-slate-500">{{ e.created_at|date:"d.m.Y H:i:s" }} · {{ e.user.get_full_name|default:e.user.username|default:"tizim" }}</span>
+    </p>
+    {% if e.post_slot %}<p class="text-slate-600">{{ e.post_slot.print_label }}</p>{% endif %}
+    {% if e.old_cadet or e.new_cadet %}<p>{% if e.old_cadet %}{{ e.old_cadet.short_name }}{% else %}bo‘sh{% endif %} → {% if e.new_cadet %}{{ e.new_cadet.short_name }}{% else %}—{% endif %}</p>{% endif %}
+    {% if e.details %}<p class="text-slate-700">{{ e.details }}</p>{% endif %}
+    {% if e.reason %}<p class="text-slate-700">Sabab: {{ e.reason }}</p>{% endif %}
+  </li>
+  {% empty %}
+  <li class="text-sm text-slate-500">Yozuv yo‘q.</li>
+  {% endfor %}
+</ol>
+{% endblock %}

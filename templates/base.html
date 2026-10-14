@@ -1,0 +1,58 @@
+{% load static %}<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14532d">
+  <title>{% block title %}Sutkalik naryad{% endblock %} — 2-kurs</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/htmx-2.0.4.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900 antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <header class="bg-green-900 text-white shadow">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+      <a href="{% if ui_role %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}" class="flex min-h-[44px] min-w-0 items-center gap-2">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/15 text-sm font-bold" aria-hidden="true">SN</span>
+        <span class="min-w-0 leading-tight">
+          <span class="block truncate font-semibold">Sutkalik naryad</span>
+          <span class="block truncate text-xs text-green-100">Bojxona instituti · 2-kurs</span>
+        </span>
+      </a>
+      {% if ui_role %}
+      <details class="group relative md:hidden">
+        <summary class="flex cursor-pointer list-none items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium hover:bg-white/20" aria-label="Menyu">
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 5h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2z" clip-rule="evenodd"/></svg>
+          Menyu
+        </summary>
+        <nav class="absolute right-0 z-20 mt-2 w-64 rounded-xl bg-white p-2 text-slate-800 shadow-lg ring-1 ring-slate-200">
+          {% include "partials/menu_items.html" with mobile=True %}
+        </nav>
+      </details>
+      <nav class="hidden items-center gap-1 md:flex">
+        {% include "partials/menu_items.html" with mobile=False %}
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-5">
+    {% if messages %}
+    <div class="mb-4 space-y-2" role="status">
+      {% for message in messages %}
+      <div class="rounded-lg border px-4 py-3 text-sm
+        {% if message.tags == 'success' %}border-green-200 bg-green-50 text-green-900
+        {% elif message.tags == 'warning' %}border-amber-200 bg-amber-50 text-amber-900
+        {% elif message.tags == 'error' %}border-red-200 bg-red-50 text-red-900
+        {% else %}border-sky-200 bg-sky-50 text-sky-900{% endif %}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="mx-auto max-w-5xl px-4 pb-6 text-center text-xs text-slate-500">
+    {% if ui_role %}{{ request.user.get_full_name|default:request.user.username }} · {{ ui_role_title }}{% endif %}
+  </footer>
+</body>
+</html>

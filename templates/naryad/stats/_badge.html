@@ -1,0 +1,6 @@
+<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold
+  {% if f.status == 'green' %}bg-green-100 text-green-800{% elif f.status == 'yellow' %}bg-amber-100 text-amber-800{% elif f.status == 'red' %}bg-red-100 text-red-800{% else %}bg-slate-100 text-slate-600{% endif %}"
+  data-status="{{ f.status }}" title="{{ f.status_label }}">
+  <span class="h-2 w-2 rounded-full {% if f.status == 'green' %}bg-green-600{% elif f.status == 'yellow' %}bg-amber-500{% elif f.status == 'red' %}bg-red-600{% else %}bg-slate-400{% endif %}" aria-hidden="true"></span>
+  {% if f.diff is None %}ma’lumot yo‘q{% else %}farq {{ f.diff }}{% endif %}
+</span>

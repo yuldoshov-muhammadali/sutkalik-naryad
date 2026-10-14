@@ -1,0 +1,12 @@
+# Caddy: domen .env dagi DOMAIN dan olinadi.
+#   DOMAIN=naryad.example.uz  → avtomatik HTTPS (Let's Encrypt sertifikati, HTTP→HTTPS)
+#   DOMAIN=:80                → internetsiz ichki tarmoq: faqat HTTP (docs/joylashtirish.md, B variant)
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:8000
+	header -Server
+	log {
+		output stdout
+		format console
+	}
+}

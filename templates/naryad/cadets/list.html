@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Kursantlar{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-xl font-semibold sm:text-2xl">Kursantlar bazasi</h1>
+  {% if can.cadets_manage %}
+  <div class="flex gap-2">
+    <a href="{% url 'cadet_import' %}" class="rounded-lg bg-white px-3 py-2 text-sm font-semibold text-green-900 ring-1 ring-green-800 hover:bg-green-50">Excel import</a>
+    <a href="{% url 'cadet_create' %}" class="rounded-lg bg-green-800 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-green-900">+ Kursant qo‘shish</a>
+  </div>
+  {% endif %}
+</div>
+
+<section class="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200" aria-labelledby="summary-title">
+  <h2 id="summary-title" class="px-4 pt-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Guruhlar bo‘yicha (faol kursantlar)</h2>
+  <div class="overflow-x-auto">
+    <table class="mt-2 w-full text-sm">
+      <thead class="bg-slate-50 text-left text-xs text-slate-500">
+        <tr><th class="px-3 py-2 font-medium">Guruh</th><th class="px-2 py-2 text-right font-medium">O‘g‘il</th><th class="px-2 py-2 text-right font-medium">Qiz</th><th class="px-2 py-2 text-right font-medium">Kutilgan</th><th class="px-2 py-2 text-right font-medium" title="Faol o‘g‘il bolalar, naryaddan ozodlarsiz">Naryadga chiqadi</th><th class="px-3 py-2 text-right font-medium">Faol emas</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for row in summary %}
+        <tr>
+          <td class="px-3 py-2 font-medium">{{ row.group.code }}</td>
+          <td class="px-2 py-2 text-right">{{ row.boys }}</td>
+          <td class="px-2 py-2 text-right">{{ row.girls }}</td>
+          <td class="px-2 py-2 text-right {% if row.ok %}text-green-700{% else %}font-semibold text-red-700{% endif %}">{% if row.expected %}{{ row.expected.0 }}/{{ row.expected.1 }} {% if row.ok %}✓{% else %}✗{% endif %}{% else %}—{% endif %}</td>
+          <td class="px-2 py-2 text-right font-semibold" data-testid="on-duty-{{ row.group.code }}">{{ row.on_duty }}{% if row.exempt %} <span class="text-xs font-normal text-indigo-700">({{ row.exempt }} ozod)</span>{% endif %}</td>
+          <td class="px-3 py-2 text-right text-slate-500">{{ row.inactive|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="bg-slate-50 font-semibold">
+        <tr>
+          <td class="px-3 py-2">Jami</td>
+          <td class="px-2 py-2 text-right">{{ totals.boys }}</td>
+          <td class="px-2 py-2 text-right">{{ totals.girls }}</td>
+          <td class="px-2 py-2 text-right {% if totals.ok %}text-green-700{% else %}text-red-700{% endif %}">{{ totals.expected.0 }}/{{ totals.expected.1 }} {% if totals.ok %}✓{% else %}✗{% endif %}</td>
+          <td class="px-2 py-2 text-right">{{ totals.on_duty }}{% if totals.exempt %} <span class="text-xs font-normal text-indigo-700">({{ totals.exempt }} ozod)</span>{% endif %}</td>
+          <td class="px-3 py-2"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+
+<form id="filters" class="mt-4 grid grid-cols-2 gap-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:grid-cols-4"
+      hx-get="{% url 'cadet_list' %}" hx-target="#results" hx-swap="innerHTML" hx-push-url="true"
+      hx-trigger="input changed delay:300ms from:#q, change" role="search">
+  <label class="col-span-2 sm:col-span-1">
+    <span class="sr-only">Familiya bo‘yicha qidirish</span>
+    <input id="q" type="search" name="q" value="{{ filters.q }}" placeholder="Familiya bo‘yicha qidirish…" autocomplete="off"
+           class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-base focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/30">
+  </label>
+  <label><span class="sr-only">Guruh</span>
+    <select name="guruh" class="block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+      <option value="">Hamma guruh</option>
+      {% for g in groups %}<option value="{{ g.code }}" {% if filters.guruh == g.code %}selected{% endif %}>{{ g.code }}</option>{% endfor %}
+    </select>
+  </label>
+  <label><span class="sr-only">Jinsi</span>
+    <select name="jins" class="block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+      <option value="">Hammasi</option>
+      <option value="M" {% if filters.jins == "M" %}selected{% endif %}>O‘g‘il</option>
+      <option value="F" {% if filters.jins == "F" %}selected{% endif %}>Qiz</option>
+    </select>
+  </label>
+  <label class="col-span-2 sm:col-span-1"><span class="sr-only">Holat</span>
+    <select name="holat" class="block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+      <option value="">Barcha holatlar</option>
+      <option value="faol" {% if filters.holat == "faol" %}selected{% endif %}>Faol</option>
+      <option value="faol-emas" {% if filters.holat == "faol-emas" %}selected{% endif %}>Faol emas</option>
+      <option value="naryadga" {% if filters.holat == "naryadga" %}selected{% endif %}>Naryadga chiqadi</option>
+      <option value="ozod" {% if filters.holat == "ozod" %}selected{% endif %}>Naryaddan ozod</option>
+    </select>
+  </label>
+  <noscript><button class="col-span-2 rounded-lg bg-green-800 px-3 py-2 text-sm font-semibold text-white sm:col-span-4">Qidirish</button></noscript>
+</form>
+
+<div id="results" class="mt-4" aria-live="polite">
+  {% include "naryad/cadets/_results.html" %}
+</div>
+{% endblock %}

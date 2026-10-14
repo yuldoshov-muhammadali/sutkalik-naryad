@@ -1,0 +1,15 @@
+[project]
+name = "sutkalik-naryad"
+version = "0.3.0"
+description = "Bojxona instituti 2-kurs sutkalik naryad platformasi"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"

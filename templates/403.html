@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Ruxsat yo‘q{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200">
+  <p class="text-4xl font-bold text-slate-300">403</p>
+  <h1 class="mt-2 text-lg font-semibold">Ruxsat yo‘q: bu sahifa sizning rolingiz uchun yopiq</h1>
+  {% if reason %}<p class="mt-2 text-sm text-slate-600">{{ reason }}</p>{% endif %}
+  <a href="{% url 'home' %}" class="mt-5 inline-block rounded-lg bg-green-800 px-4 py-2 text-sm font-semibold text-white hover:bg-green-900">Bosh sahifaga</a>
+</div>
+{% endblock %}

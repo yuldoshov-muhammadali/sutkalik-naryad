@@ -1,0 +1,20 @@
+/* Tailwind manbasi. Yig'ish: bash scripts/build_css.sh  (natija: static/css/app.css) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+details > summary::-webkit-details-marker { display: none; }
+
+/* 10-bosqich: barmoq bilan bosiladigan elementlar kamida 44 px (telefon). Utility klasslar ustun turadi. */
+@layer base {
+  button, select, textarea,
+  input:not([type=checkbox]):not([type=radio]):not([type=hidden]) { min-height: 2.75rem; }
+  summary { display: flex; align-items: center; min-height: 2.75rem; }
+}
+@layer components {
+  a.rounded-lg, a.rounded-xl { min-height: 2.75rem; }
+  .crumbs a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+  a.rounded-lg:not(.flex):not(.block):not(.grid):not(.inline-flex) {
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+}

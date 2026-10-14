@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Statistika{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-2">
+  <div>
+    <h1 class="text-xl font-semibold sm:text-2xl">Statistika va adolat</h1>
+    <p class="text-sm text-slate-600">Faqat tasdiqlangan sutkalar bo‘yicha · <span class="font-medium text-slate-800" data-testid="period-label">{{ period.label }}</span></p>
+  </div>
+  <a href="{% url 'stats_excel' %}{% if excel_query %}?{{ excel_query }}{% endif %}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-green-900 shadow-sm ring-1 ring-green-800 hover:bg-green-50">Excel’ga yuklab olish</a>
+</div>
+
+{# ---------------------------------------------------------------- Filtr #}
+<form method="get" class="mt-4 grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:grid-cols-2 lg:grid-cols-5" aria-label="Davr va guruh">
+  <label class="block text-sm font-medium">Davr
+    <select name="davr" class="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+      <option value="all" {% if period.mode == 'all' %}selected{% endif %}>Butun tarix</option>
+      <option value="range" {% if period.mode == 'range' %}selected{% endif %}>Sanadan sanagacha</option>
+      <option value="week" {% if period.mode == 'week' %}selected{% endif %}>Bitta 2-kurs haftasi</option>
+    </select>
+  </label>
+  <div class="grid grid-cols-2 gap-2 lg:col-span-2">
+    <label class="block text-sm font-medium">Dan
+      <input type="date" name="dan" value="{% if period.mode == 'range' and period.start %}{{ period.start|date:'Y-m-d' }}{% endif %}" class="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+    </label>
+    <label class="block text-sm font-medium">Gacha
+      <input type="date" name="gacha" value="{% if period.mode == 'range' and period.end %}{{ period.end|date:'Y-m-d' }}{% endif %}" class="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+    </label>
+  </div>
+  <label class="block text-sm font-medium">Hafta
+    <select name="hafta" class="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+      {% for w in weeks %}<option value="{{ w.start_date|date:'Y-m-d' }}" {% if period.week and period.week.pk == w.pk %}selected{% endif %}>{{ w.start_date|date:"d.m.Y" }} – {{ w.end_date|date:"d.m.Y" }}</option>{% empty %}<option value="">Hafta yo‘q</option>{% endfor %}
+    </select>
+  </label>
+  <label class="block text-sm font-medium">Guruh (o‘g‘il bolalar jadvali)
+    <select name="guruh" class="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-2 text-base">
+      {% for g in groups %}<option value="{{ g.code }}" {% if g.code == selected %}selected{% endif %}>{{ g.code }}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="sm:col-span-2 lg:col-span-5">
+    <button type="submit" class="w-full rounded-lg bg-green-800 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900 sm:w-auto">Ko‘rsatish</button>
+  </div>
+</form>
+
+{# ---------------------------------------------------------------- Adolat #}
+<section class="mt-6" aria-labelledby="fair-title">
+  <h2 id="fair-title" class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">Adolat ko‘rsatkichi (guruh kesimida)</h2>
+  <p class="mb-2 text-xs text-slate-500">Jami naryadlar bo‘yicha: yashil — farq (max − min) ≤ 1, sariq — 2, qizil — 3 va undan ko‘p. Faqat naryadga chiqadiganlar hisobga olinadi (faol emaslar va naryaddan ozodlar — komandirlar, kurs lavozimlari — kirmaydi).</p>
+  <ul class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+    {% for f in fairness %}
+    <li class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200" data-pool="{{ f.pool }}">
+      <div class="flex items-center justify-between gap-2">
+        <p class="font-semibold">{{ f.title }}</p>
+        {% include "naryad/stats/_badge.html" %}
+      </div>
+      {% if f.diff is not None %}
+      <dl class="mt-2 grid grid-cols-3 gap-1 text-center text-xs">
+        <div class="rounded bg-slate-50 py-1"><dt class="text-slate-500">min</dt><dd class="text-base font-semibold tabular-nums">{{ f.min }}</dd></div>
+        <div class="rounded bg-slate-50 py-1"><dt class="text-slate-500">max</dt><dd class="text-base font-semibold tabular-nums">{{ f.max }}</dd></div>
+        <div class="rounded bg-slate-50 py-1"><dt class="text-slate-500">o‘rtacha</dt><dd class="text-base font-semibold tabular-nums">{{ f.mean }}</dd></div>
+      </dl>
+      <p class="mt-2 text-xs text-slate-600">O‘rtachadan ±1 ichida: <span class="font-semibold">{{ f.within_one_pct }}%</span> ({{ f.members }} kursant)</p>
+      <p class="text-xs text-slate-600">Ketma-ket bir joy: {% if f.repeats_applicable %}<span class="font-semibold {% if f.repeats %}text-amber-700{% endif %}">{{ f.repeats|length }}</span>{% else %}<span title="Qizlarda joy bitta">—</span>{% endif %}</p>
+      {% if f.pool == 'qizlar' %}<p class="text-xs text-slate-600">Ketma-ket 2 marta navbatchi: <span class="font-semibold {% if f.duty_repeats %}text-amber-700{% endif %}">{{ f.duty_repeats|length }}</span></p>{% endif %}
+      {% else %}
+      <p class="mt-2 text-xs text-slate-500">Bu davrda tasdiqlangan naryad yo‘q.</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+{# ---------------------------------------------------------------- O'g'il bolalar jadvali #}
+<section class="mt-6" aria-labelledby="boys-title">
+  <div class="mb-2 flex flex-wrap items-center gap-2">
+    <h2 id="boys-title" class="text-sm font-semibold uppercase tracking-wide text-slate-500">{{ selected }} guruhi: kursant × joy</h2>
+    {% if boys_fair %}{% include "naryad/stats/_badge.html" with f=boys_fair %}{% endif %}
+  </div>
+  {% if boys %}
+  <div class="max-h-[70vh] overflow-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200" data-testid="boys-table">
+    <table class="min-w-full border-separate border-spacing-0 text-sm">
+      <thead class="text-xs text-slate-600">
+        <tr>
+          <th scope="col" class="sticky left-0 top-0 z-30 min-w-[9rem] border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium">Kursant</th>
+          {% for p in posts %}<th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium" title="{{ p.name }}">{{ p.short }}</th>{% endfor %}
+          {% for r in roles %}<th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-sky-50 px-2 py-2 text-center font-medium">{{ r }}</th>{% endfor %}
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-100 px-2 py-2 text-center font-semibold">Jami</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Shu haftada</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Oxirgi naryad</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in boys %}
+        <tr>
+          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-3 py-1.5 text-left font-medium"><a href="{% url 'cadet_detail' t.row.cadet.pk %}" class="hover:underline">{{ t.row.cadet.short_name }}</a>{% if not t.row.cadet.is_active %} <span class="text-xs font-normal text-slate-400">(faol emas)</span>{% elif t.row.cadet.duty_exempt %} <span class="text-xs font-normal text-indigo-700" title="{{ t.row.cadet.duty_position }}">(ozod)</span>{% endif %}</th>
+          {% for c in t.posts %}<td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" style="{{ c.style }}">{{ c.value|default:"·" }}</td>{% endfor %}
+          {% for c in t.roles %}<td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" style="{{ c.style }}">{{ c.value|default:"·" }}</td>{% endfor %}
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center font-semibold tabular-nums" style="{{ t.total.style }}">{{ t.total.value }}</td>
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums">{{ t.row.this_week }}</td>
+          <td class="whitespace-nowrap border-b border-slate-100 px-2 py-1.5 text-center tabular-nums text-slate-600">{{ t.row.last_date|date:"d.m.Y"|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-1 text-xs text-slate-500">Rang: ko‘p — to‘q, kam — och (joylar va lavozimlar alohida; “Jami” — eng kami och, eng ko‘pi to‘q). “Shu haftada” — {% if period.week %}tanlangan{% else %}joriy (oxirgi){% endif %} 2-kurs haftasi.</p>
+  {% if boys_fair %}{% include "naryad/stats/_repeats.html" with f=boys_fair %}{% endif %}
+  {% else %}
+  <p class="rounded-xl bg-white px-4 py-3 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">Guruh tanlanmagan.</p>
+  {% endif %}
+</section>
+
+{# ---------------------------------------------------------------- Qizlar #}
+<section class="mt-6" aria-labelledby="girls-title">
+  <div class="mb-2 flex flex-wrap items-center gap-2">
+    <h2 id="girls-title" class="text-sm font-semibold uppercase tracking-wide text-slate-500">Qizlar (alohida hovuz)</h2>
+    {% if girls_fair %}{% include "naryad/stats/_badge.html" with f=girls_fair %}{% endif %}
+  </div>
+  <div class="max-h-[70vh] overflow-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200" data-testid="girls-table">
+    <table class="min-w-full border-separate border-spacing-0 text-sm">
+      <thead class="text-xs text-slate-600">
+        <tr>
+          <th scope="col" class="sticky left-0 top-0 z-30 min-w-[9rem] border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium">Kursant</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Guruh</th>
+          {% for r in girl_roles %}<th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-sky-50 px-2 py-2 text-center font-medium">{{ r }}</th>{% endfor %}
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-100 px-2 py-2 text-center font-semibold">Jami</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Shu haftada</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Oxirgi naryad</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in girls %}
+        <tr>
+          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-3 py-1.5 text-left font-medium"><a href="{% url 'cadet_detail' t.row.cadet.pk %}" class="hover:underline">{{ t.row.cadet.short_name }}</a>{% if not t.row.cadet.is_active %} <span class="text-xs font-normal text-slate-400">(faol emas)</span>{% elif t.row.cadet.duty_exempt %} <span class="text-xs font-normal text-indigo-700" title="{{ t.row.cadet.duty_position }}">(ozod)</span>{% endif %}</th>
+          <td class="whitespace-nowrap border-b border-slate-100 px-2 py-1.5 text-center text-slate-600">{{ t.row.cadet.group.code }}</td>
+          {% for c in t.roles %}<td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" style="{{ c.style }}">{{ c.value|default:"·" }}</td>{% endfor %}
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center font-semibold tabular-nums" style="{{ t.total.style }}">{{ t.total.value }}</td>
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums">{{ t.row.this_week }}</td>
+          <td class="whitespace-nowrap border-b border-slate-100 px-2 py-1.5 text-center tabular-nums text-slate-600">{{ t.row.last_date|date:"d.m.Y"|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="px-3 py-3 text-slate-500">Qizlar yo‘q.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if girls_fair %}
+  {% if girls_fair.duty_repeats %}
+  <details class="mt-2 rounded-lg bg-white px-3 py-2 text-sm ring-1 ring-slate-200">
+    <summary class="cursor-pointer py-1 font-medium text-amber-800">Ketma-ket ikki naryadda navbatchi bo‘lgan: {{ girls_fair.duty_repeats|length }} ta holat</summary>
+    <ul class="mt-2 space-y-1">
+      {% for x in girls_fair.duty_repeats %}<li>{{ x.cadet.short_name }} — {{ x.first|date:"d.m.Y" }} va {{ x.second|date:"d.m.Y" }}</li>{% endfor %}
+    </ul>
+  </details>
+  {% else %}
+  <p class="mt-2 text-sm text-slate-500">Ketma-ket ikki naryadda navbatchi bo‘lgan qiz yo‘q.</p>
+  {% endif %}
+  {% endif %}
+</section>
+
+{# ---------------------------------------------------------------- Guruhlar kesimi #}
+<section class="mt-6" aria-labelledby="groups-title">
+  <h2 id="groups-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Guruhlar kesimi: guruh × joy (necha sutka bergan)</h2>
+  <div class="overflow-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200" data-testid="groups-table">
+    <table class="min-w-full border-separate border-spacing-0 text-sm">
+      <thead class="text-xs text-slate-600">
+        <tr>
+          <th scope="col" class="sticky left-0 top-0 z-30 border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium">Guruh</th>
+          {% for p in posts %}<th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium" title="{{ p.name }}">{{ p.short }}</th>{% endfor %}
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-100 px-2 py-2 text-center font-semibold">Sutkalar</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium" title="Faol, naryaddan ozodlarsiz">Naryadga chiqadi</th>
+          <th scope="col" class="sticky top-0 z-20 min-w-[11rem] border-b border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium">1 o‘g‘ilga o‘rtacha naryad</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for x in sections %}
+        <tr>
+          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-3 py-1.5 text-left font-medium">{{ x.s.group.code }}</th>
+          {% for c in x.posts %}<td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" style="{{ c.style }}">{{ c.value|default:"·" }}</td>{% endfor %}
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center font-semibold tabular-nums">{{ x.s.days }}</td>
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums">{{ x.s.boys }}</td>
+          <td class="border-b border-slate-100 px-3 py-1.5">
+            <div class="flex items-center gap-2">
+              <div class="h-2.5 flex-1 rounded-full bg-slate-100" aria-hidden="true"><div class="h-2.5 rounded-full bg-green-700" style="width: {{ x.bar }}%"></div></div>
+              <span class="w-10 text-right tabular-nums">{{ x.s.per_boy|default:"—" }}</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+    Aylanish to‘g‘ri ishlasa, har guruh har joyni deyarli teng marta beradi. Joy guruhga biriktiriladi, shuning uchun
+    <b>kursanti kam guruhda bir o‘g‘ilga ko‘proq naryad to‘g‘ri keladi</b> — bu qabul qilingan qoida (adolat guruh ichida o‘lchanadi, CLAUDE.md 4-B.5). O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi (naryaddan ozod komandirlar va kurs lavozimlari kirmaydi).
+  </p>
+</section>
+
+{# ---------------------------------------------------------------- Qo'lda tuzatishlar #}
+<section class="mt-6" aria-labelledby="manual-title">
+  <h2 id="manual-title" class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">Qo‘lda tuzatishlar nazorati</h2>
+  <p class="mb-2 text-xs text-slate-500">Tasdiqlangan sutkalardagi almashtirishlar (sutka qayta tuzilganda yo‘qolgan tuzatishlar sanalmaydi). Jami: <b>{{ manual.total }}</b>.</p>
+
+  {% if manual.alerts %}
+  <div class="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900" role="alert" data-testid="manual-alerts">
+    <p class="font-semibold">Diqqat: qo‘lda qo‘yilishi guruh o‘rtachasidan sezilarli ko‘p</p>
+    <ul class="mt-1 list-disc space-y-0.5 pl-5">
+      {% for r in manual.alerts %}<li>{{ r.cadet.short_name }} ({{ r.cadet.group.code }}) — qo‘lda {{ r.placed }} marta qo‘yilgan, hovuz o‘rtachasi {{ r.pool_mean }}</li>{% endfor %}
+    </ul>
+    <p class="mt-1 text-xs">Qoida: kamida 2 marta va hovuz (guruh o‘g‘illari yoki qizlar) o‘rtachasidan kamida 2 baravar ko‘p.</p>
+  </div>
+  {% endif %}
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <p class="mb-2 text-xs font-medium text-slate-500">Sabablar bo‘yicha</p>
+      {% for label, n, w in reason_bars %}
+      <div class="mb-1.5 flex items-center gap-2 text-sm">
+        <span class="w-20 shrink-0">{{ label }}</span>
+        <div class="h-2.5 flex-1 rounded-full bg-slate-100" aria-hidden="true"><div class="h-2.5 rounded-full bg-amber-500" style="width: {{ w }}%"></div></div>
+        <span class="w-8 text-right font-semibold tabular-nums">{{ n }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <p class="mb-2 text-xs font-medium text-slate-500">Kim tomonidan</p>
+      {% for user, n in manual.by_user %}<p class="flex justify-between text-sm"><span>{{ user }}</span><span class="font-semibold tabular-nums">{{ n }}</span></p>{% empty %}<p class="text-sm text-slate-500">Almashtirish yo‘q.</p>{% endfor %}
+    </div>
+  </div>
+
+  {% if manual.rows %}
+  <div class="mt-3 max-h-[60vh] overflow-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200" data-testid="manual-table">
+    <table class="min-w-full border-separate border-spacing-0 text-sm">
+      <thead class="text-xs text-slate-600">
+        <tr>
+          <th scope="col" class="sticky left-0 top-0 z-30 border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium">Kursant</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Guruh</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Qo‘lda qo‘yilgan</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Qo‘lda olingan</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">Hovuz o‘rtachasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in manual.rows %}
+        <tr class="{% if r.alert %}bg-red-50{% endif %}">
+          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 {% if r.alert %}bg-red-50 text-red-900{% else %}bg-white{% endif %} px-3 py-1.5 text-left font-medium">{% if r.alert %}⚠ {% endif %}{{ r.cadet.short_name }}</th>
+          <td class="whitespace-nowrap border-b border-slate-100 px-2 py-1.5 text-center text-slate-600">{{ r.cadet.group.code }}{% if r.pool == 'qizlar' %} (qiz){% endif %}</td>
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center font-semibold tabular-nums">{{ r.placed }}</td>
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums">{{ r.removed }}</td>
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums text-slate-600">{{ r.pool_mean }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

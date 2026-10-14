@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}{{ cadet.short_name }}{% endblock %}
+{% block content %}
+{% if is_admin %}<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="Yo‘l"><a href="{% url 'cadet_list' %}" class="hover:underline">Kursantlar</a> / {{ cadet.short_name }}</nav>{% endif %}
+
+<div class="flex flex-wrap items-start justify-between gap-3">
+  <div class="min-w-0">
+    <h1 class="text-xl font-semibold sm:text-2xl">{{ cadet.full_name }}</h1>
+    <p class="text-sm text-slate-600">{{ cadet.short_name }} · {{ cadet.group.code }} ({{ cadet.group.direction }}) · {{ cadet.get_gender_display }}</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+  {% if cadet.is_active %}
+  <span class="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-800">Faol</span>
+  {% else %}
+  <span class="rounded-full bg-slate-200 px-3 py-1 text-sm font-semibold text-slate-700">Faol emas</span>
+  {% endif %}
+  {% if cadet.duty_exempt %}<span class="rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-800" data-testid="exempt-badge">Naryaddan ozod</span>{% endif %}
+  </div>
+</div>
+
+{% if cadet.duty_exempt %}
+<div class="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+  <b>Naryaddan ozod — {{ cadet.duty_position }}.</b> Sutkalik naryadga qo‘yilmaydi va adolat hisobiga kirmaydi; avvalgi naryadlari tarixda saqlanadi.
+</div>
+{% endif %}
+
+{% if not cadet.is_active %}
+<div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+  Faolsizlantirilgan: {{ cadet.deactivated_at|date:"d.m.Y" }} — {{ cadet.deactivation_reason }}. Generatorga tushmaydi, tarixi saqlanadi.
+</div>
+{% endif %}
+
+{% if is_admin %}
+<div class="mt-4 flex flex-wrap gap-2">
+  <a href="{% url 'cadet_edit' cadet.pk %}" class="rounded-lg bg-green-800 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-green-900">Tahrirlash</a>
+  {% if cadet.is_active %}
+  <details class="group w-full sm:w-auto">
+    <summary class="cursor-pointer list-none rounded-lg px-4 py-2 text-sm font-semibold text-red-700 ring-1 ring-red-300 hover:bg-red-50">Faolsizlantirish…</summary>
+    <form method="post" action="{% url 'cadet_deactivate' cadet.pk %}" class="mt-2 space-y-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:w-96">
+      {% csrf_token %}
+      <p class="text-sm text-slate-600">Kursant o‘chirilmaydi: tarixi va statistikasi saqlanadi, lekin generatorga tushmaydi{% if account %} va tizimga kira olmaydi{% endif %}.</p>
+      <label class="block text-sm font-medium">Sabab * {{ deactivate_form.reason }}</label>
+      <label class="block text-sm font-medium">Izoh {{ deactivate_form.note }}</label>
+      <button type="submit" class="w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">Faolsizlantirish</button>
+    </form>
+  </details>
+  {% if cadet.duty_exempt %}
+  <details class="group w-full sm:w-auto">
+    <summary class="cursor-pointer list-none rounded-lg px-4 py-2 text-sm font-semibold text-indigo-800 ring-1 ring-indigo-300 hover:bg-indigo-50">Naryadga qaytarish…</summary>
+    <form method="post" action="{% url 'cadet_unexempt' cadet.pk %}" class="mt-2 space-y-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:w-96">
+      {% csrf_token %}
+      <p class="text-sm text-slate-600">Lavozimdan bo‘shagan bo‘lsa, kursant yana naryadga tushadi. Algoritm uni haftalik va jami hisob bo‘yicha o‘zi oldinga qo‘yadi.</p>
+      <label class="block text-sm font-medium">Sabab * {{ unexempt_form.reason }}</label>
+      <button type="submit" class="w-full rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-800">Naryadga qaytarish</button>
+    </form>
+  </details>
+  {% else %}
+  <details class="group w-full sm:w-auto">
+    <summary class="cursor-pointer list-none rounded-lg px-4 py-2 text-sm font-semibold text-indigo-800 ring-1 ring-indigo-300 hover:bg-indigo-50">Naryaddan ozod qilish…</summary>
+    <form method="post" action="{% url 'cadet_exempt' cadet.pk %}" class="mt-2 space-y-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:w-96">
+      {% csrf_token %}
+      <p class="text-sm text-slate-600">Komandirlar va kurs lavozimlari: kursant faol qoladi (tizimga kiradi), faqat sutkalik naryadga qo‘yilmaydi.</p>
+      <label class="block text-sm font-medium">Lavozimi * {{ exempt_form.position }}</label>
+      <label class="block text-sm font-medium">Sabab * {{ exempt_form.reason }}</label>
+      <button type="submit" class="w-full rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-800">Naryaddan ozod qilish</button>
+    </form>
+  </details>
+  {% endif %}
+  {% else %}
+  <form method="post" action="{% url 'cadet_activate' cadet.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="rounded-lg px-4 py-2 text-sm font-semibold text-green-900 ring-1 ring-green-800 hover:bg-green-50">Qayta faollashtirish</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="mt-4 grid gap-3 sm:grid-cols-3">
+  <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <p class="text-xs text-slate-500">Jami naryadlar (tasdiqlangan)</p>
+    <p class="text-3xl font-semibold tabular-nums">{{ history|length }}</p>
+  </div>
+  <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <p class="mb-1 text-xs text-slate-500">Joylar bo‘yicha</p>
+    {% for post, n in by_post %}<p class="flex justify-between text-sm"><span>{{ post.name }}</span><span class="font-semibold tabular-nums">{{ n }}</span></p>{% empty %}<p class="text-sm text-slate-500">—</p>{% endfor %}
+  </div>
+  <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <p class="mb-1 text-xs text-slate-500">Lavozimlar bo‘yicha</p>
+    {% for role, n in by_role %}<p class="flex justify-between text-sm"><span>{{ role }}</span><span class="font-semibold tabular-nums">{{ n }}</span></p>{% empty %}<p class="text-sm text-slate-500">—</p>{% endfor %}
+  </div>
+</div>
+
+{% if comparison %}
+<section class="mt-3 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby="compare-title" data-testid="comparison">
+  <h2 id="compare-title" class="text-xs text-slate-500">Guruh o‘rtachasi bilan solishtirish ({{ comparison.pool_title }}, {{ comparison.members }} kursant, butun tarix)</h2>
+  <div class="mt-2 grid grid-cols-3 gap-2 text-center">
+    <div class="rounded-lg bg-slate-50 py-2"><p class="text-xs text-slate-500">{% if is_admin %}Kursantda{% else %}Menda{% endif %}</p><p class="text-2xl font-semibold tabular-nums">{{ comparison.own }}</p></div>
+    <div class="rounded-lg bg-slate-50 py-2"><p class="text-xs text-slate-500">Guruh o‘rtachasi</p><p class="text-2xl font-semibold tabular-nums">{{ comparison.mean }}</p></div>
+    <div class="rounded-lg py-2 {% if comparison.diff > 1 %}bg-amber-50 text-amber-900{% elif comparison.diff < -1 %}bg-sky-50 text-sky-900{% else %}bg-green-50 text-green-900{% endif %}"><p class="text-xs">Farq</p><p class="text-2xl font-semibold tabular-nums">{% if comparison.diff > 0 %}+{% endif %}{{ comparison.diff }}</p></div>
+  </div>
+  <p class="mt-2 text-xs text-slate-500">{% if comparison.exempt %}Naryaddan ozod — o‘rtacha faqat naryadga chiqadiganlar bo‘yicha; bu kursant adolat hisobiga kirmaydi.{% elif comparison.diff > 1 %}O‘rtachadan ko‘proq — keyingi sutkalarda algoritm kamroq tanlaydi.{% elif comparison.diff < -1 %}O‘rtachadan kamroq — keyingi sutkalarda algoritm birinchi navbatda tanlaydi.{% else %}O‘rtacha atrofida (±1) — adolatli.{% endif %}</p>
+</section>
+{% endif %}
+
+<section class="mt-5" aria-labelledby="history-title">
+  <h2 id="history-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Naryad tarixi</h2>
+  {% if history %}
+  <ul class="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+    {% for a in history %}
+    <li class="flex items-center justify-between gap-3 px-4 py-3">
+      <div class="min-w-0">
+        <p class="font-medium">{{ a.post_slot.post.name }}</p>
+        <p class="text-xs text-slate-500">{{ a.post_slot.get_role_display }}{% if a.group_id != cadet.group_id %} · o‘sha paytda {{ a.group.code }}{% endif %}</p>
+      </div>
+      <span class="shrink-0 text-sm tabular-nums text-slate-600">{{ a.duty_day.date|date:"d.m.Y" }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="rounded-xl bg-white px-4 py-3 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">Hali tasdiqlangan naryad yo‘q.</p>
+  {% endif %}
+</section>
+
+{% if is_admin %}
+<section class="mt-5" aria-labelledby="log-title">
+  <h2 id="log-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">O‘zgarishlar jurnali</h2>
+  {% if log %}
+  <ul class="space-y-2">
+    {% for entry in log %}
+    <li class="rounded-xl bg-white px-4 py-3 text-sm shadow-sm ring-1 ring-slate-200">
+      <p class="font-medium">{{ entry.get_action_display }} <span class="font-normal text-slate-500">· {{ entry.created_at|date:"d.m.Y H:i" }} · {{ entry.user.username|default:"tizim" }}</span></p>
+      {% if entry.details %}<p class="text-slate-700">{{ entry.details }}</p>{% endif %}
+      {% if entry.reason %}<p class="text-slate-700">Sabab: {{ entry.reason }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="text-sm text-slate-500">Yozuv yo‘q.</p>
+  {% endif %}
+  {% if account %}<p class="mt-3 text-xs text-slate-500">Akkaunt: {{ account.username }}{% if not account.is_active %} (bloklangan){% endif %}</p>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

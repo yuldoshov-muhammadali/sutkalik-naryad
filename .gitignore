@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.env
+*.sqlite3
+staticfiles/
+db.sqlite3
+tailwindcss
+tailwindcss.exe
+data/akkauntlar_*.xlsx
+fonts/*.ttf
+fonts/*.TTF
+backups/
+logs/

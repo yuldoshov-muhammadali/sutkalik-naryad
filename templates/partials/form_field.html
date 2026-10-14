@@ -1,0 +1,10 @@
+<div>
+  <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">{{ field.label }}</label>
+  <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+         {% if field.value and field.field.widget.input_type != 'password' %}value="{{ field.value }}"{% endif %}
+         {% for name, value in field.field.widget.attrs.items %}{% if value is not False %} {{ name }}{% if value is not True %}="{{ value }}"{% endif %}{% endif %}{% endfor %}
+         {% if field.field.required %}required{% endif %}
+         class="block w-full rounded-lg border px-3 py-2.5 text-base shadow-sm focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/30 {% if field.errors %}border-red-400{% else %}border-slate-300{% endif %}">
+  {% for error in field.errors %}<p class="mt-1 text-sm text-red-700">{{ error }}</p>{% endfor %}
+  {% if field.help_text and show_help %}<div class="mt-1 text-xs text-slate-500 [&_ul]:list-disc [&_ul]:pl-4">{{ field.help_text|safe }}</div>{% endif %}
+</div>

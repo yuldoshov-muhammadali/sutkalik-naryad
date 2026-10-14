@@ -1,0 +1,11 @@
+/* Django boshqaruv paneli: telefon uchun kattaroq bosiladigan elementlar (10-bosqich) */
+#header { flex-wrap: wrap; gap: 6px; }
+#user-tools a, #user-tools button, #logout-form button, .naryad-back {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; border-bottom: 0 !important;
+}
+.naryad-back { color: var(--header-link-color); font-weight: 600; text-decoration: none; }
+.theme-toggle { min-width: 44px; min-height: 44px; }
+input[type=text], input[type=password], input[type=email], input[type=number], input[type=date], input[type=search],
+input[type=url], select, textarea, .vTextField { min-height: 44px !important; box-sizing: border-box; font-size: 16px; }
+input[type=submit], .button, a.button, button { min-height: 44px; }
+#site-name a { display: inline-flex; align-items: center; min-height: 44px; }

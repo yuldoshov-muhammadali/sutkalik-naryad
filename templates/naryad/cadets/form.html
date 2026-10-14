@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{% if creating %}Kursant qo‘shish{% else %}{{ cadet.short_name }} — tahrirlash{% endif %}{% endblock %}
+{% block content %}
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="Yo‘l"><a href="{% url 'cadet_list' %}" class="hover:underline">Kursantlar</a>{% if cadet %} / <a href="{% url 'cadet_detail' cadet.pk %}" class="hover:underline">{{ cadet.short_name }}</a>{% endif %}</nav>
+<div class="mx-auto max-w-xl rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+  <h1 class="text-xl font-semibold">{% if creating %}Yangi kursant{% else %}Kursant ma’lumotlarini tahrirlash{% endif %}</h1>
+  {% if has_history %}
+  <p class="mt-2 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-900">Bu kursantning naryad tarixi bor. Guruh yoki jins o‘zgartirilsa, tarix o‘chmaydi — o‘zgarish faqat keyingi naryadlarga ta’sir qiladi va jurnalga yoziladi.</p>
+  {% endif %}
+  {% if form.non_field_errors %}
+  <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>
+  {% endif %}
+
+  <form method="post" class="mt-4 space-y-4" novalidate>
+    {% csrf_token %}
+    {# Qisqa ismni yozish paytida ko'rsatish (HTMX) #}
+    <span hidden hx-get="{% url 'cadet_short_name' %}" hx-trigger="input changed delay:300ms from:#id_last_name, input changed delay:300ms from:#id_first_name"
+          hx-target="#short-auto" hx-include="#id_last_name, #id_first_name" hx-swap="innerHTML"></span>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="id_last_name" class="mb-1 block text-sm font-medium text-slate-700">{{ form.last_name.label }} *</label>
+        {{ form.last_name }}
+        {% for e in form.last_name.errors %}<p class="mt-1 text-sm text-red-700">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        <label for="id_first_name" class="mb-1 block text-sm font-medium text-slate-700">{{ form.first_name.label }} *</label>
+        {{ form.first_name }}
+        {% for e in form.first_name.errors %}<p class="mt-1 text-sm text-red-700">{{ e }}</p>{% endfor %}
+      </div>
+    </div>
+    <div>
+      <label for="id_patronymic" class="mb-1 block text-sm font-medium text-slate-700">{{ form.patronymic.label }}</label>
+      {{ form.patronymic }}
+      <p class="mt-1 text-xs text-slate-500">{{ form.patronymic.help_text }}</p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="id_group" class="mb-1 block text-sm font-medium text-slate-700">{{ form.group.label }} *</label>
+        {{ form.group }}
+        {% for e in form.group.errors %}<p class="mt-1 text-sm text-red-700">{{ e }}</p>{% endfor %}
+      </div>
+      <fieldset>
+        <legend class="mb-1 block text-sm font-medium text-slate-700">{{ form.gender.label }} *</legend>
+        <div class="flex gap-2">
+          {% for radio in form.gender %}
+          <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-2.5 has-[:checked]:border-green-700 has-[:checked]:bg-green-50">
+            {{ radio.tag }} <span>{{ radio.choice_label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% for e in form.gender.errors %}<p class="mt-1 text-sm text-red-700">{{ e }}</p>{% endfor %}
+      </fieldset>
+    </div>
+    <div>
+      <label for="id_short_name" class="mb-1 block text-sm font-medium text-slate-700">{{ form.short_name.label }} (PDF uchun)</label>
+      {{ form.short_name }}
+      <p class="mt-1 text-xs text-slate-500">Avtomatik: <strong id="short-auto" class="text-slate-800">{% if form.instance.pk %}{{ form.instance.short_name }}{% else %}—{% endif %}</strong>. {{ form.short_name.help_text }}</p>
+      {% for e in form.short_name.errors %}<p class="mt-1 text-sm text-red-700">{{ e }}</p>{% endfor %}
+    </div>
+
+    {% if form.history_change_needed or form.confirm_history_change.errors %}
+    <div class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" role="alert">
+      {% for e in form.confirm_history_change.errors %}<p class="mb-2">{{ e }}</p>{% endfor %}
+      <label class="flex items-start gap-2 font-medium">{{ form.confirm_history_change }} <span>{{ form.confirm_history_change.label }}</span></label>
+    </div>
+    {% endif %}
+
+    <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+      <a href="{% if cadet %}{% url 'cadet_detail' cadet.pk %}{% else %}{% url 'cadet_list' %}{% endif %}" class="rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50">Bekor qilish</a>
+      <button type="submit" class="rounded-lg bg-green-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900">Saqlash</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
