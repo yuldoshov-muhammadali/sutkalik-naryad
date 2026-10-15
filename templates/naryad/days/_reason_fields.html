@@ -1,11 +1,11 @@
-<fieldset class="grid gap-2 sm:grid-cols-2">
-  <label class="text-sm font-medium">Sabab (majburiy)
+{% load i18n %}<fieldset class="grid gap-2 sm:grid-cols-2">
+  <label class="text-sm font-medium">{% translate "Sabab (majburiy)" %}
     <select name="reason" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base">
-      <option value="">— tanlang —</option>
+      <option value="">{% translate "— tanlang —" %}</option>
       {% for code, label in reasons %}<option value="{{ code }}" {% if posted.reason == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </label>
-  <label class="text-sm font-medium">Izoh
-    <input type="text" name="note" maxlength="200" value="{{ posted.note|default:'' }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base" placeholder="masalan: tibbiy ma’lumotnoma">
+  <label class="text-sm font-medium">{% translate "Izoh" %}
+    <input type="text" name="note" maxlength="200" value="{{ posted.note|default:'' }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base" placeholder="{% translate "masalan: tibbiy ma’lumotnoma" %}">
   </label>
 </fieldset>

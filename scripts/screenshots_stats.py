@@ -22,7 +22,7 @@ def login(browser, user, device):
     page.goto(BASE + "/kirish/")
     page.fill("#id_username", user)
     page.fill("#id_password", PASSWORD)
-    page.click("button[type=submit]")
+    page.click("form:has(#id_password) button[type=submit]")
     page.wait_for_url(BASE + "/")
     return page
 

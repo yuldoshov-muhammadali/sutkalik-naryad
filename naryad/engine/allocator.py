@@ -7,6 +7,10 @@ Qizlar guruhga bog'lanmaydi: 13 qiz bitta umumiy navbat.
 
 Algoritm faqat tasdiqlangan sutkalar tarixini (Record) oladi va bitta sutka
 qoralamasini (DayResult) qaytaradi. Natija to'liq deterministik.
+
+Zalyotchiklar (15-bosqich): faol zalyotchiklar jazo o'rinlariga (1-NO‘J va 1-Yotoqxona, posbon)
+oddiy to'ldirishdan OLDIN qo'yiladi. Jazo naryadlari adolat hisobiga kirmaydi. Zalyotchik
+berilmasa, natija avvalgidek (bayt-bayt) qoladi.
 """
 
 from __future__ import annotations
@@ -16,15 +20,28 @@ import hashlib
 import itertools
 from collections.abc import Iterable, Mapping, Sequence
 
-from .config import DUTY_START_TIME, FEMALE_POST, MALE_POSTS, POSTS, POSTS_BY_CODE, ROTATION_CHAIN
+from .config import (
+    DUTY_START_TIME,
+    FEMALE_POST,
+    MALE_POSTS,
+    PENALTY_PER_POST_DEFAULT,
+    PENALTY_POSTS,
+    PENALTY_ROLE,
+    POSTS,
+    POSTS_BY_CODE,
+    ROTATION_CHAIN,
+)
 from .models import (
     FEMALE,
+    KIND_NORMAL,
+    KIND_PENALTY,
     MALE,
     Absence,
     Assignment,
     Cadet,
     CandidateScore,
     DayResult,
+    Offender,
     PickResult,
     Record,
     Slot,
@@ -35,6 +52,7 @@ EXCLUDED_INACTIVE = "faol emas"
 EXCLUDED_ABSENT = "sababli yo‘q"
 EXCLUDED_YESTERDAY = "kecha naryadda bo‘lgan"
 EXCLUDED_TAKEN = "bugun boshqa o‘ringa qo‘yilgan"
+EXCLUDED_OFFENDER = "faol zalyotchik — oddiy navbatda faqat 1-NO‘J yoki 1-Yotoqxonada"
 
 
 class AllocationError(ValueError):
@@ -75,13 +93,18 @@ def duty_bounds(day: dt.date) -> tuple[dt.datetime, dt.datetime]:
 
 
 class History:
-    """Tasdiqlangan yozuvlar ustidan tez so'rovlar (faqat `before` sanasidan oldingilar)."""
+    """Tasdiqlangan yozuvlar ustidan tez so'rovlar (faqat `before` sanasidan oldingilar).
+
+    `records` — faqat oddiy naryadlar: adolat hisobi, saralash kaliti va guruhlar aylanishi shulardan.
+    `all_records` — jazo naryadlari bilan: faqat “kecha turgan” cheklovi uchun (15-bosqich).
+    """
 
     def __init__(self, records: Iterable[Record], before: dt.date):
         self.before = before
-        self.records: list[Record] = sorted(
+        self.all_records: list[Record] = sorted(
             (r for r in records if r.day < before), key=lambda r: (r.day, r.post, r.position)
         )
+        self.records: list[Record] = [r for r in self.all_records if r.kind == KIND_NORMAL]
         self.by_cadet: dict[int, list[Record]] = {}
         for r in self.records:
             self.by_cadet.setdefault(r.cadet_id, []).append(r)
@@ -94,7 +117,8 @@ class History:
         return recs[-1] if recs else None
 
     def on_day(self, day: dt.date) -> list[Record]:
-        return [r for r in self.records if r.day == day]
+        """Shu sutkada turganlar — jazo naryadi bilan birga (ketma-ket ikki sutka turmaydi)."""
+        return [r for r in self.all_records if r.day == day]
 
     def last_day(self) -> dt.date | None:
         return self.records[-1].day if self.records else None
@@ -217,11 +241,13 @@ def pick_cadets(
     history: History,
     absences: Iterable[Absence] = (),
     taken: Iterable[int] = (),
+    offenders: Iterable[int] = (),
 ) -> PickResult:
     """Hovuzdan `need` ta kursant tanlaydi.
 
     Qat'iy cheklovlar: faol emas, sababli yo'q, kecha naryadda bo'lgan va bugun
-    boshqa o'ringa qo'yilgan kursantlar olinmaydi. Nomzod yetmasa, kamroq
+    boshqa o'ringa qo'yilgan kursantlar olinmaydi. `offenders` — oddiy navbatda shu joyga
+    qo'yilmaydigan faol zalyotchiklar (1-NO‘J va 1-Yotoqxonadan tashqari joylar, 15-bosqich). Nomzod yetmasa, kamroq
     tanlanadi (bo'sh o'rinni admin qo'lda to'ldiradi).
 
     Saralash kaliti (CLAUDE.md 4-D): haftadagi soni → jami (+1 jarima, agar oxirgi
@@ -230,6 +256,7 @@ def pick_cadets(
     """
     absences = list(absences)
     taken = set(taken)
+    offenders = set(offenders)
     yesterday_ids = {r.cadet_id for r in history.on_day(day - dt.timedelta(days=1))}
 
     excluded: dict[int, str] = {}
@@ -243,6 +270,8 @@ def pick_cadets(
             excluded[cadet.id] = EXCLUDED_TAKEN
         elif cadet.id in yesterday_ids:
             excluded[cadet.id] = EXCLUDED_YESTERDAY
+        elif cadet.id in offenders:
+            excluded[cadet.id] = EXCLUDED_OFFENDER
         else:
             eligible.append(score_candidate(cadet, post_code, day, history))
 
@@ -291,6 +320,60 @@ def assign_roles(cadet_ids: Sequence[int], slots: Sequence[Slot], history: Histo
 
 
 # ---------------------------------------------------------------------------
+# d') Zalyotchiklar — navbatdan tashqari jazo naryadi (15-bosqich)
+# ---------------------------------------------------------------------------
+
+
+def place_offenders(
+    day: dt.date,
+    offenders: Sequence[Offender],
+    cadets_by_id: Mapping[int, Cadet],
+    history: History,
+    absences: Iterable[Absence] = (),
+    per_post: int = PENALTY_PER_POST_DEFAULT,
+) -> tuple[list[Assignment], list[str]]:
+    """Faol zalyotchiklarni jazo o'rinlariga qo'yadi: 1-NO‘J yoki 1-Yotoqxona, posbon o'rni.
+
+    - navbat: tanbeh sanasi eng eskisi; teng bo'lsa — qolgan jazo naryadi ko'prog'i;
+    - har joyga ko'pi bilan `per_post` ta (posbon o'rinlari oxiridan olinadi);
+    - joy navbatma-navbat: oxirgi jazo naryadi 1-NO‘J da bo'lsa — endi 1-Yotoqxona (iloji bo'lsa);
+    - qat'iy cheklovlar o'zgarmaydi: faol emas, sababli yo'q, kecha turgan kursant qo'yilmaydi —
+      ogohlantirish yoziladi; o'rin qolmasa — keyingi sutkaga qoladi.
+    """
+    placed: list[Assignment] = []
+    warnings: list[str] = []
+    if not offenders:
+        return placed, warnings
+    absences = list(absences)
+    yesterday_ids = {r.cadet_id for r in history.on_day(day - dt.timedelta(days=1))}
+    free: dict[str, list[Slot]] = {
+        code: [s for s in reversed(POSTS_BY_CODE[code].slots) if s.role == PENALTY_ROLE][: max(0, per_post)]
+        for code in PENALTY_POSTS
+    }
+    for o in sorted(offenders, key=lambda o: (o.since, -o.remaining, o.cadet_id)):
+        if o.remaining <= 0:
+            continue
+        cadet = cadets_by_id.get(o.cadet_id)
+        name = cadet.display_name if cadet is not None else f"#{o.cadet_id}"
+        if cadet is None or not cadet.active or cadet.gender != MALE:
+            warnings.append(f"Zalyotchik {name} faol emasligi (yoki naryaddan ozodligi) uchun bugun qo‘yilmadi.")
+            continue
+        if _is_absent(cadet.id, day, absences):
+            warnings.append(f"Zalyotchik {name} sababli holatda bo‘lgani uchun bugun qo‘yilmadi.")
+            continue
+        if cadet.id in yesterday_ids:
+            warnings.append(f"Zalyotchik {name} kecha turgani uchun bugun qo‘yilmadi.")
+            continue
+        order = tuple(reversed(PENALTY_POSTS)) if o.last_post == PENALTY_POSTS[0] else PENALTY_POSTS
+        code = next((c for c in order if free[c]), None)
+        if code is None:
+            warnings.append(f"Zalyotchik {name}: bugun jazo o‘rni qolmadi — keyingi sutkaga qoldi.")
+            continue
+        placed.append(Assignment(slot=free[code].pop(0), cadet_id=cadet.id, group=cadet.group, kind=KIND_PENALTY))
+    return placed, warnings
+
+
+# ---------------------------------------------------------------------------
 # e) Butun sutka
 # ---------------------------------------------------------------------------
 
@@ -301,6 +384,8 @@ def generate_day(
     history: Iterable[Record],
     absences: Iterable[Absence] = (),
     initial_rotation: Mapping[str, str] | None = None,
+    offenders: Sequence[Offender] = (),
+    penalty_per_post: int = PENALTY_PER_POST_DEFAULT,
 ) -> DayResult:
     """Bitta sutka qoralamasini tuzadi.
 
@@ -308,7 +393,8 @@ def generate_day(
       guruhdan to'liq;
     - Qizlar yotoqxonasi: 13 qizning umumiy navbatidan;
     - bir kursant bir sutkada faqat bitta o'rinda;
-    - nomzod yetmasa o'rin bo'sh qoladi va ogohlantirish yoziladi.
+    - nomzod yetmasa o'rin bo'sh qoladi va ogohlantirish yoziladi;
+    - faol zalyotchiklar (bo'lsa) avval jazo o'rinlariga qo'yiladi, shu joy guruhi shuncha kam beradi.
     """
     absences = list(absences)
     hist = History(history, before=day)
@@ -322,6 +408,13 @@ def generate_day(
     warnings: list[str] = []
     picks: dict[str, PickResult] = {}
 
+    placed, penalty_warnings = place_offenders(day, offenders, by_id, hist, absences, penalty_per_post)
+    warnings.extend(penalty_warnings)
+    for a in placed:
+        taken.add(a.cadet_id)
+        assignments[(a.slot.post, a.slot.position)] = a
+    active_offenders = {o.cadet_id for o in offenders if o.remaining > 0}
+
     jobs: list[tuple[str, list[Cadet], str | None]] = []
     for post in MALE_POSTS:
         group = group_by_post[post.code]
@@ -331,13 +424,16 @@ def generate_day(
 
     for post_code, pool, group in jobs:
         post = POSTS_BY_CODE[post_code]
-        pick = pick_cadets(pool, post_code, post.size, day, hist, absences, taken)
+        free_slots = [s for s in post.slots if (post_code, s.position) not in assignments]
+        # Faol zalyotchik oddiy navbatda faqat 1-NO‘J / 1-Yotoqxonada (o'z guruhi bilan) tura oladi
+        barred = () if post_code in PENALTY_POSTS else active_offenders
+        pick = pick_cadets(pool, post_code, len(free_slots), day, hist, absences, taken, barred)
         picks[post_code] = pick
         taken.update(pick.chosen)
-        for slot, cid in assign_roles(pick.chosen, post.slots, hist):
+        for slot, cid in assign_roles(pick.chosen, free_slots, hist):
             assignments[(post_code, slot.position)] = Assignment(slot=slot, cadet_id=cid, group=by_id[cid].group)
-        if len(pick.chosen) < post.size:
-            missing = post.size - len(pick.chosen)
+        if len(pick.chosen) < len(free_slots):
+            missing = len(free_slots) - len(pick.chosen)
             who = f"{group} guruhida" if group else "Qizlar navbatida"
             reasons = _summarize_exclusions(pick.excluded)
             warnings.append(

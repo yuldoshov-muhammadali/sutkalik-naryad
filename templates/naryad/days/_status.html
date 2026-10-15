@@ -1,2 +1,2 @@
-<span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold
-  {% if status == 'approved' %}bg-green-100 text-green-800{% elif status == 'draft' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-600{% endif %}">{% if status == 'approved' %}Tasdiqlangan{% elif status == 'draft' %}Qoralama{% else %}Tuzilmagan{% endif %}</span>
+{% load i18n %}<span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold
+  {% if status == 'approved' %}bg-green-100 text-green-800{% elif status == 'draft' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-600{% endif %}">{% if status == 'approved' %}{% translate "Tasdiqlangan" %}{% elif status == 'draft' %}{% translate "Qoralama" %}{% else %}{% translate "Tuzilmagan" %}{% endif %}</span>

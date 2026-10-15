@@ -5,31 +5,33 @@ from __future__ import annotations
 from django import forms
 from django.db import transaction
 from django.db.models import Count, Q
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.translation import gettext as _, gettext_lazy as _lazy
 
 from naryad.engine.names import normalize_apostrophes, short_name as auto_short_name
 
-from .models import Assignment, Cadet, ChangeLog, DutyDay, Gender, StudyGroup
+from .models import Assignment, Cadet, ChangeLog, DutyDay, Gender, Penalty, StudyGroup
 
 FIELD_LABELS = {
-    "last_name": "Familiya",
-    "first_name": "Ism",
-    "patronymic": "Otasining ismi",
-    "group": "Guruh",
-    "gender": "Jinsi",
-    "short_name": "Qisqa ism",
+    "last_name": _lazy("Familiya"),
+    "first_name": _lazy("Ism"),
+    "patronymic": _lazy("Otasining ismi"),
+    "group": _lazy("Guruh"),
+    "gender": _lazy("Jinsi"),
+    "short_name": _lazy("Qisqa ism"),
 }
 
+# Qiymat (birinchi element) bazaga o'zbekcha yoziladi; faqat ko'rinadigan nomi tarjima qilinadi
 DEACTIVATION_REASONS = [
-    ("Chetlatilgan", "Chetlatilgan"),
-    ("Akademik ta’til", "Akademik ta’til"),
-    ("Boshqa kursga o‘tgan", "Boshqa kursga o‘tgan"),
-    ("Boshqa", "Boshqa (izohda yozing)"),
+    ("Chetlatilgan", _lazy("Chetlatilgan")),
+    ("Akademik ta’til", _lazy("Akademik ta’til")),
+    ("Boshqa kursga o‘tgan", _lazy("Boshqa kursga o‘tgan")),
+    ("Boshqa", _lazy("Boshqa (izohda yozing)")),
 ]
 
 INPUT_CLASS = (
     "block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base shadow-sm "
-    "focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/30"
+    "focus:border-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-700/30"
 )
 
 
@@ -58,7 +60,7 @@ class CadetForm(forms.ModelForm):
 
     confirm_history_change = forms.BooleanField(
         required=False,
-        label="Tushundim: tarix o‘chmaydi, o‘zgarish faqat keyingi naryadlarga ta’sir qiladi",
+        label=_lazy("Tushundim: tarix o‘chmaydi, o‘zgarish faqat keyingi naryadlarga ta’sir qiladi"),
     )
 
     class Meta:
@@ -66,15 +68,15 @@ class CadetForm(forms.ModelForm):
         fields = ["last_name", "first_name", "patronymic", "group", "gender", "short_name"]
         labels = FIELD_LABELS
         help_texts = {
-            "short_name": "Bo‘sh qoldirilsa avtomatik: familiya + ism bosh harfi (Sh, Ch, G‘, O‘ saqlanadi).",
-            "patronymic": "Masalan: Bahodir o‘g‘li, Oybek qizi, Davronovich.",
+            "short_name": _lazy("Bo‘sh qoldirilsa avtomatik: familiya + ism bosh harfi (Sh, Ch, G‘, O‘ saqlanadi)."),
+            "patronymic": _lazy("Masalan: Bahodir o‘g‘li, Oybek qizi, Davronovich."),
         }
         widgets = {"gender": forms.RadioSelect}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["group"].queryset = StudyGroup.objects.filter(is_active=True).order_by("display_order")
-        self.fields["group"].empty_label = "— guruhni tanlang —"
+        self.fields["group"].empty_label = _("— guruhni tanlang —")
         self.fields["patronymic"].required = False
         self.fields["short_name"].required = False
         for name in ("last_name", "first_name", "patronymic", "short_name", "group"):
@@ -107,25 +109,34 @@ class CadetForm(forms.ModelForm):
             dup = duplicate_of(group, last, first, patronymic, exclude_pk=self.instance.pk)
             if dup:
                 raise forms.ValidationError(
-                    f"{group.code} guruhida “{dup.full_name}” allaqachon bor — bir xil F.I.Sh. ikki marta kiritilmaydi."
+                    _("%(group)s guruhida “%(name)s” allaqachon bor — bir xil F.I.Sh. ikki marta kiritilmaydi.")
+                    % {"group": group.code, "name": dup.full_name}
                 )
             # Qisqa ism: bo'sh yoki avvalgi avtomatik qiymat bo'lsa — qayta hisoblanadi
             if cleaned.get("short_name", "") in ("", self._auto_before):
                 cleaned["short_name"] = auto_short_name(last, first)
 
         if self.instance.pk and has_history(self.instance):
-            changed = []
-            if group and group.pk != self._original["group_id"]:
-                changed.append("guruhi")
-            if cleaned.get("gender") and cleaned["gender"] != self._original["gender"]:
-                changed.append("jinsi")
+            group_changed = bool(group and group.pk != self._original["group_id"])
+            gender_changed = bool(cleaned.get("gender") and cleaned["gender"] != self._original["gender"])
+            if group_changed and gender_changed:
+                changed = _("guruhi va jinsi")
+            elif group_changed:
+                changed = _("guruhi")
+            elif gender_changed:
+                changed = _("jinsi")
+            else:
+                changed = ""
             if changed and not cleaned.get("confirm_history_change"):
                 self.history_change_needed = True
                 self.add_error(
                     "confirm_history_change",
-                    f"Bu kursantning naryad tarixi bor, siz {' va '.join(changed)}ni o‘zgartiryapsiz. "
-                    "Tarix o‘chmaydi (eski naryadlar o‘sha paytdagi guruh bilan qoladi), o‘zgarish faqat keyingi "
-                    "naryadlarga ta’sir qiladi. Davom etish uchun belgini qo‘ying.",
+                    _(
+                        "Bu kursantning naryad tarixi bor, siz %(fields)sni o‘zgartiryapsiz. "
+                        "Tarix o‘chmaydi (eski naryadlar o‘sha paytdagi guruh bilan qoladi), o‘zgarish faqat keyingi "
+                        "naryadlarga ta’sir qiladi. Davom etish uchun belgini qo‘ying."
+                    )
+                    % {"fields": changed},
                 )
         return cleaned
 
@@ -171,17 +182,16 @@ def save_cadet(form: CadetForm, user) -> tuple[Cadet, list[str]]:
     cadet.save()
 
     if creating:
-        ChangeLog.objects.create(
-            action=ChangeLog.Action.CADET_CREATE,
-            cadet=cadet,
-            user=user,
-            details=f"{cadet.full_name}, {cadet.group.code}, {cadet.get_gender_display()}",
-        )
+        with translation.override("uz"):  # jurnal matni doim o'zbekcha saqlanadi
+            details = f"{cadet.full_name}, {cadet.group.code}, {cadet.get_gender_display()}"
+        ChangeLog.objects.create(action=ChangeLog.Action.CADET_CREATE, cadet=cadet, user=user, details=details)
         return cadet, []
 
-    changes = describe_changes(before, cadet)
+    changes = describe_changes(before, cadet)  # joriy tilda — xabar uchun
+    with translation.override("uz"):  # jurnal matni doim o'zbekcha saqlanadi
+        stored = describe_changes(before, cadet)
     if changes:
-        details = "; ".join(changes)
+        details = "; ".join(stored)
         if history and (before["group"] != cadet.group or before["gender"] != cadet.gender):
             details += ". Naryad tarixi bor: tarix o‘chmaydi, o‘zgarish faqat keyingi naryadlarga ta’sir qiladi."
         ChangeLog.objects.create(action=ChangeLog.Action.CADET_UPDATE, cadet=cadet, user=user, details=details)
@@ -193,22 +203,23 @@ def save_cadet(form: CadetForm, user) -> tuple[Cadet, list[str]]:
 
 
 class DeactivateForm(forms.Form):
-    reason = forms.ChoiceField(label="Sabab", choices=DEACTIVATION_REASONS)
-    note = forms.CharField(label="Izoh", required=False, max_length=150)
+    reason = forms.ChoiceField(label=_lazy("Sabab"), choices=DEACTIVATION_REASONS)
+    note = forms.CharField(label=_lazy("Izoh"), required=False, max_length=150)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["reason"].widget.attrs["class"] = INPUT_CLASS
-        self.fields["note"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": "masalan: buyruq raqami"})
+        self.fields["note"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": _("masalan: buyruq raqami")})
 
     def clean(self):
         cleaned = super().clean()
         if cleaned.get("reason") == "Boshqa" and not (cleaned.get("note") or "").strip():
-            self.add_error("note", "“Boshqa” sabab uchun izoh majburiy.")
+            self.add_error("note", _("“Boshqa” sabab uchun izoh majburiy."))
         return cleaned
 
     @property
     def reason_text(self) -> str:
+        # Bazaga yoziladigan sabab: tanlov qiymati (o'zbekcha) + admin izohi — tarjima qilinmaydi
         reason, note = self.cleaned_data["reason"], (self.cleaned_data.get("note") or "").strip()
         if reason == "Boshqa":
             return note
@@ -252,13 +263,13 @@ def activate(cadet: Cadet, user) -> None:
 
 
 class ExemptForm(forms.Form):
-    position = forms.CharField(label="Lavozimi", max_length=100)
-    reason = forms.CharField(label="Sabab", max_length=200)
+    position = forms.CharField(label=_lazy("Lavozimi"), max_length=100)
+    reason = forms.CharField(label=_lazy("Sabab"), max_length=200)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["position"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": "masalan: BI-225 guruh komandiri"})
-        self.fields["reason"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": "masalan: buyruq raqami va sanasi"})
+        self.fields["position"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": _("masalan: BI-225 guruh komandiri")})
+        self.fields["reason"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": _("masalan: buyruq raqami va sanasi")})
 
     def clean_position(self):
         return normalize_apostrophes(self.cleaned_data["position"].strip())
@@ -268,19 +279,33 @@ class ExemptForm(forms.Form):
 
 
 class UnexemptForm(forms.Form):
-    reason = forms.CharField(label="Sabab", max_length=200)
+    reason = forms.CharField(label=_lazy("Sabab"), max_length=200)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["reason"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": "masalan: lavozimdan bo‘shadi (buyruq)"})
+        self.fields["reason"].widget.attrs.update({"class": INPUT_CLASS, "placeholder": _("masalan: lavozimdan bo‘shadi (buyruq)")})
 
     def clean_reason(self):
         return self.cleaned_data["reason"].strip()
 
 
+def exempt_blocker(cadet: Cadet) -> str | None:
+    """Faol zalyoti bor kursantni naryaddan ozod qilib bo'lmaydi (1.6.0 ochiq savoli, CLAUDE.md 62-band)."""
+    penalty = Penalty.objects.filter(cadet=cadet, status=Penalty.Status.ACTIVE).first()
+    if penalty is not None:
+        return _(
+            "%(name)s faol zalyotchik (%(count)s ta jazo naryadi) — avval zalyot bajarilishi yoki bekor qilinishi kerak, "
+            "keyin naryaddan ozod qilinadi."
+        ) % {"name": cadet.short_name, "count": penalty.count}
+    return None
+
+
 @transaction.atomic
 def set_exempt(cadet: Cadet, position: str, reason: str, user) -> None:
     """Naryaddan ozod: kursant faol qoladi (akkaunti ishlaydi), faqat naryadga qo'yilmaydi."""
+    blocker = exempt_blocker(cadet)
+    if blocker:
+        raise ValueError(blocker)
     old = cadet.duty_position if cadet.duty_exempt else ""
     cadet.duty_exempt = True
     cadet.duty_position = position[:100]

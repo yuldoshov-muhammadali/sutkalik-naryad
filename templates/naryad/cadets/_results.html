@@ -1,29 +1,29 @@
-<p class="mb-2 text-sm text-slate-600">{{ count }} ta kursant{% if filtered %} (filtr bo‘yicha){% endif %}</p>
+{% load i18n %}<p class="mb-2 text-sm text-slate-600">{% blocktranslate count n=count %}{{ n }} ta kursant{% plural %}{{ n }} ta kursant{% endblocktranslate %}{% if filtered %} {% translate "(filtr bo‘yicha)" %}{% endif %}</p>
 {% for group, cadets in grouped %}
 <section class="mb-5" aria-label="{{ group.code }}">
-  <h2 class="mb-2 flex items-baseline gap-2 text-base font-semibold">{{ group.code }} <span class="text-xs font-normal text-slate-500">{{ group.direction }} · {{ cadets|length }} ta</span></h2>
+  <h2 class="mb-2 flex items-baseline gap-2 text-base font-semibold">{{ group.code }} <span class="text-xs font-normal text-slate-500">{% translate group.direction %} · {% blocktranslate count n=cadets|length %}{{ n }} ta{% plural %}{{ n }} ta{% endblocktranslate %}</span></h2>
 
   {# Kompyuter: jadval #}
   <div class="hidden overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 md:block">
     <table class="w-full text-sm">
       <thead class="bg-slate-50 text-left text-xs text-slate-500">
         <tr>
-          <th class="px-4 py-2 font-medium">F.I.Sh.</th>
-          <th class="px-3 py-2 font-medium">Qisqa ism</th>
-          <th class="px-3 py-2 font-medium">Guruh</th>
-          <th class="px-3 py-2 font-medium">Jinsi</th>
-          <th class="px-3 py-2 font-medium">Holat</th>
-          <th class="px-4 py-2 text-right font-medium">Naryadlar</th>
+          <th class="px-4 py-2 font-medium">{% translate "F.I.Sh." %}</th>
+          <th class="px-3 py-2 font-medium">{% translate "Qisqa ism" %}</th>
+          <th class="px-3 py-2 font-medium">{% translate "Guruh" %}</th>
+          <th class="px-3 py-2 font-medium">{% translate "Jinsi" %}</th>
+          <th class="px-3 py-2 font-medium">{% translate "Holat" %}</th>
+          <th class="px-4 py-2 text-right font-medium">{% translate "Naryadlar" %}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         {% for c in cadets %}
         <tr class="hover:bg-slate-50 {% if not c.is_active %}text-slate-400{% endif %}">
-          <td class="px-4 py-2"><a href="{% url 'cadet_detail' c.pk %}" class="font-medium text-green-900 hover:underline">{{ c.full_name }}</a></td>
+          <td class="px-4 py-2"><a href="{% url 'cadet_detail' c.pk %}" class="font-medium text-brand-900 hover:underline">{{ c.full_name }}</a></td>
           <td class="px-3 py-2">{{ c.short_name }}{% if c.duty_exempt %}<span class="block text-xs text-indigo-700">{{ c.duty_position }}</span>{% endif %}</td>
           <td class="px-3 py-2">{{ c.group.code }}</td>
           <td class="px-3 py-2">{{ c.get_gender_display }}</td>
-          <td class="px-3 py-2">{% if c.is_active %}<span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">faol</span>{% else %}<span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-600" title="{{ c.deactivation_reason }}">faol emas</span>{% endif %}{% if c.duty_exempt %} <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800" title="{{ c.duty_position }}">ozod</span>{% endif %}</td>
+          <td class="px-3 py-2">{% if c.is_active %}<span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{% translate "faol" %}</span>{% else %}<span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-600" title="{{ c.deactivation_reason }}">{% translate "faol emas" %}</span>{% endif %}{% if c.duty_exempt %} <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800" title="{{ c.duty_position }}">{% translate "ozod" %}</span>{% endif %}</td>
           <td class="px-4 py-2 text-right tabular-nums">{{ c.duty_count }}</td>
         </tr>
         {% endfor %}
@@ -38,12 +38,12 @@
       <a href="{% url 'cadet_detail' c.pk %}" class="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200 {% if not c.is_active %}opacity-60{% endif %}">
         <span class="min-w-0">
           <span class="block font-medium">{{ c.full_name }}</span>
-          <span class="block text-xs text-slate-500">{{ c.short_name }} · {{ c.group.code }} · {{ c.get_gender_display }}{% if not c.is_active %} · <span class="font-semibold">faol emas</span>{% endif %}</span>
-          {% if c.duty_exempt %}<span class="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800">ozod · {{ c.duty_position }}</span>{% endif %}
+          <span class="block text-xs text-slate-500">{{ c.short_name }} · {{ c.group.code }} · {{ c.get_gender_display }}{% if not c.is_active %} · <span class="font-semibold">{% translate "faol emas" %}</span>{% endif %}</span>
+          {% if c.duty_exempt %}<span class="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800">{% translate "ozod" %} · {{ c.duty_position }}</span>{% endif %}
         </span>
         <span class="shrink-0 text-right">
           <span class="block text-lg font-semibold tabular-nums">{{ c.duty_count }}</span>
-          <span class="block text-[11px] text-slate-500">naryad</span>
+          <span class="block text-[11px] text-slate-500">{% translate "naryad" %}</span>
         </span>
       </a>
     </li>
@@ -51,5 +51,5 @@
   </ul>
 </section>
 {% empty %}
-<p class="rounded-xl bg-white px-4 py-6 text-center text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">Hech narsa topilmadi.</p>
+<p class="rounded-xl bg-white px-4 py-6 text-center text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">{% translate "Hech narsa topilmadi." %}</p>
 {% endfor %}

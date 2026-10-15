@@ -147,12 +147,13 @@ def test_download_and_filename(client, sept18, admin):
     assert resp["Content-Disposition"].startswith("inline;")
 
 
-def test_cadet_gets_approved_pdf_but_not_draft(client, sept18, rotation, admin):
+def test_cadet_gets_no_pdf(client, sept18, rotation, admin):
+    """14-bosqich: PDF’da butun ro'yxat bor — kursantga yopiq (tasdiqlangan ham, qoralama ham)."""
     cadet_client(client)
-    assert client.get(reverse("day_pdf", args=["2026-09-18"])).status_code == 200
+    assert client.get(reverse("day_pdf", args=["2026-09-18"])).status_code == 403
+    assert client.get(reverse("day_print", args=["2026-09-18"])).status_code == 403
     services.generate_draft(dt.date(2026, 9, 19), admin)
-    assert client.get(reverse("day_pdf", args=["2026-09-19"])).status_code == 404
-    assert client.get(reverse("day_print", args=["2026-09-19"])).status_code == 404
+    assert client.get(reverse("day_pdf", args=["2026-09-19"])).status_code == 403
     client.logout()
     resp = client.get(reverse("day_pdf", args=["2026-09-18"]))
     assert resp.status_code == 302 and resp["Location"].startswith(reverse("login"))
@@ -174,8 +175,7 @@ def test_week_pdf_pages_and_permissions(client, sept18, admin):
     pages, text = pdf_text(resp.content)
     assert pages == 2 and "18-sentabr kunidan" in text and "19-sentabr kunidan" in text
     cadet_client(client)
-    pages, text = pdf_text(client.get(reverse("week_pdf", args=["2026-09-13"])).content)
-    assert pages == 1 and "19-sentabr kunidan" not in text  # kursant faqat tasdiqlanganini oladi
+    assert client.get(reverse("week_pdf", args=["2026-09-13"])).status_code == 403  # 14-bosqich
 
 
 def test_print_page_embeds_pdf(client, sept18, admin):
@@ -190,8 +190,8 @@ def test_print_page_embeds_pdf(client, sept18, admin):
     assert pdf["X-Frame-Options"] == "SAMEORIGIN"
 
 
-def test_day_page_has_pdf_buttons(client, sept18):
-    cadet_client(client)
+def test_day_page_has_pdf_buttons(client, sept18, admin):
+    client.force_login(admin)
     body = client.get(reverse("day_detail", args=["2026-09-18"])).content.decode()
     assert "PDF yuklab olish" in body and "Chop etish" in body
 

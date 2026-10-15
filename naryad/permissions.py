@@ -12,13 +12,15 @@ from functools import wraps
 
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _lazy
 
 ADMIN = "admin"
 CADET = "cadet"
 
 ROLE_TITLES = {
-    ADMIN: "Admin (kurs boshlig‘i)",
-    CADET: "Kursant",
+    ADMIN: _lazy("Admin (kurs boshlig‘i)"),
+    CADET: _lazy("Kursant"),
 }
 
 ALL = frozenset({ADMIN, CADET})
@@ -26,24 +28,26 @@ ADMIN_ONLY = frozenset({ADMIN})
 
 # amal -> (tavsif, ruxsat etilgan rollar)
 PERMISSIONS: dict[str, tuple[str, frozenset[str]]] = {
-    "home.view": ("Bosh sahifa (rolga qarab)", ALL),
-    "account.password_change": ("O‘z parolini almashtirish", ALL),
-    "day.view_approved": ("Tasdiqlangan sutkalarni ko‘rish", ALL),
-    "history.own": ("O‘z kartochkasi va naryad tarixini ko‘rish", frozenset({CADET})),
-    "week.view": ("2-kurs haftalari va sutkalar holatini ko‘rish", ADMIN_ONLY),
-    "week.open": ("2-kurs haftasini ochish", ADMIN_ONLY),
-    "day.view_draft": ("Qoralama sutkalarni ko‘rish", ADMIN_ONLY),
-    "day.generate": ("Sutka qoralamasini tuzish (ro‘yxatni dastur avtomatik tuzadi)", ADMIN_ONLY),
-    "day.edit": ("Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi)", ADMIN_ONLY),
-    "day.approve": ("Sutkani tasdiqlash", ADMIN_ONLY),
-    "day.reopen": ("Tasdiqlangan sutkani qayta ochish (sabab majburiy)", ADMIN_ONLY),
-    "absence.manage": ("Sababli yo‘qliklarni (kasal, ta’til) kiritish", ADMIN_ONLY),
-    "history.all": ("Har qanday kursant kartochkasi, tarixi va statistika", ADMIN_ONLY),
-    "pdf.export": ("PDF yuklab olish va chop etish (kursant — faqat tasdiqlangan sutkalar)", ALL),
-    "cadets.view": ("Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv)", ADMIN_ONLY),
-    "cadets.manage": ("Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar", ADMIN_ONLY),
-    "settings.manage": ("Sozlamalar va boshlang‘ich taqsimot", ADMIN_ONLY),
-    "admin_panel": ("Django boshqaruv paneli (/admin/)", ADMIN_ONLY),
+    "home.view": (_lazy("Bosh sahifa (rolga qarab)"), ALL),
+    "account.password_change": (_lazy("O‘z parolini almashtirish"), ALL),
+    # 14-bosqich: kursant boshqa kursantlarning ro'yxatini (sutka sahifalari, PDF) ko'rmaydi — faqat o'z naryadi
+    "day.view_approved": (_lazy("Tasdiqlangan sutkalarni ko‘rish"), ADMIN_ONLY),
+    "history.own": (_lazy("O‘z kartochkasi va naryad tarixini ko‘rish"), frozenset({CADET})),
+    "week.view": (_lazy("2-kurs haftalari va sutkalar holatini ko‘rish"), ADMIN_ONLY),
+    "week.open": (_lazy("2-kurs haftasini ochish"), ADMIN_ONLY),
+    "day.view_draft": (_lazy("Qoralama sutkalarni ko‘rish"), ADMIN_ONLY),
+    "day.generate": (_lazy("Sutka qoralamasini tuzish (ro‘yxatni dastur avtomatik tuzadi)"), ADMIN_ONLY),
+    "day.edit": (_lazy("Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi)"), ADMIN_ONLY),
+    "day.approve": (_lazy("Sutkani tasdiqlash"), ADMIN_ONLY),
+    "day.reopen": (_lazy("Tasdiqlangan sutkani qayta ochish (sabab majburiy)"), ADMIN_ONLY),
+    "absence.manage": (_lazy("Sababli yo‘qliklarni (kasal, ta’til) kiritish"), ADMIN_ONLY),
+    "penalty.manage": (_lazy("Zalyotchiklar: navbatdan tashqari jazo naryadini kiritish va bekor qilish"), ADMIN_ONLY),
+    "history.all": (_lazy("Har qanday kursant kartochkasi, tarixi va statistika"), ADMIN_ONLY),
+    "pdf.export": (_lazy("PDF yuklab olish va chop etish"), ADMIN_ONLY),
+    "cadets.view": (_lazy("Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv)"), ADMIN_ONLY),
+    "cadets.manage": (_lazy("Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar"), ADMIN_ONLY),
+    "settings.manage": (_lazy("Sozlamalar va boshlang‘ich taqsimot"), ADMIN_ONLY),
+    "admin_panel": (_lazy("Django boshqaruv paneli (/admin/)"), ADMIN_ONLY),
 }
 
 
@@ -67,7 +71,7 @@ def check(request, action: str) -> None:
     if not request.user.is_authenticated:
         raise _LoginRequired
     if not can(request.user, action):
-        raise PermissionDenied(f"Bu sahifa uchun ruxsat yo‘q ({PERMISSIONS[action][0]}).")
+        raise PermissionDenied(_("Bu sahifa uchun ruxsat yo‘q (%(action)s).") % {"action": PERMISSIONS[action][0]})
 
 
 class _LoginRequired(Exception):

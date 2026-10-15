@@ -2,7 +2,8 @@
 
 Hammasi so'rov paytida faqat tasdiqlangan sutkalardagi Assignment dan hisoblanadi
 (CLAUDE.md 8-bo'lim: statistika alohida saqlanmaydi). Adolat har guruh kesimida
-va qizlar uchun alohida (CLAUDE.md 4-B.5).
+va qizlar uchun alohida (CLAUDE.md 4-B.5). Adolat, jadvallar va guruhlar kesimi faqat ODDIY
+naryadlar bo'yicha; navbatdan tashqari (jazo) naryadlari alohida ustunda (15-bosqich, 61-band).
 """
 
 from __future__ import annotations
@@ -12,6 +13,8 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 
 from django.db.models import Q
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _lazy
 
 from naryad.engine.allocator import week_start
 from naryad.engine.config import ROTATION_CHAIN
@@ -25,22 +28,25 @@ from .models import (
     DutyWeek,
     Gender,
     GroupPostAssignment,
+    Penalty,
     Post,
     SlotRole,
     StudyGroup,
 )
 
 ROLES = [SlotRole.DUTY, SlotRole.ASSISTANT, SlotRole.GUARD]
-ROLE_SHORT = {SlotRole.DUTY: "Navbatchi", SlotRole.ASSISTANT: "Yordamchi", SlotRole.GUARD: "Posbon"}
-REASONS = [("kasal", "Kasal"), ("tatil", "Ta’til"), ("sababli", "Sababli"), ("boshqa", "Boshqa")]
+ROLE_SHORT = {SlotRole.DUTY: _lazy("Navbatchi"), SlotRole.ASSISTANT: _lazy("Yordamchi"), SlotRole.GUARD: _lazy("Posbon")}
+REASONS = [("kasal", _lazy("Kasal")), ("tatil", _lazy("Ta’til")), ("sababli", _lazy("Sababli")), ("boshqa", _lazy("Boshqa"))]
+# Eski yozuvlar (reason_code yo'q): ChangeLog.reason bazada doim o'zbekcha — tarjimasiz solishtiriladi
+REASON_PREFIXES = [("kasal", "Kasal"), ("tatil", "Ta’til"), ("sababli", "Sababli")]
 GIRLS = "qizlar"
 POST_SHORT = {
-    "markaz": "Markaz",
-    "noj1": "1-NO‘J",
-    "noj2": "2-NO‘J",
-    "yotoq1": "1-Yotoqxona",
-    "oquv": "O‘quv binosi",
-    "patrul": "Patrul",
+    "markaz": _lazy("Markaz"),
+    "noj1": _lazy("1-NO‘J"),
+    "noj2": _lazy("2-NO‘J"),
+    "yotoq1": _lazy("1-Yotoqxona"),
+    "oquv": _lazy("O‘quv binosi"),
+    "patrul": _lazy("Patrul"),
 }
 
 
@@ -59,12 +65,14 @@ class Period:
     @property
     def label(self) -> str:
         if self.mode == "week" and self.week:
-            return f"2-kurs haftasi: {self.week.start_date:%d.%m.%Y} – {self.week.end_date:%d.%m.%Y}"
+            return _("2-kurs haftasi: %(start)s – %(end)s") % {
+                "start": f"{self.week.start_date:%d.%m.%Y}", "end": f"{self.week.end_date:%d.%m.%Y}",
+            }
         if self.mode == "range":
-            a = f"{self.start:%d.%m.%Y}" if self.start else "boshidan"
-            b = f"{self.end:%d.%m.%Y}" if self.end else "hozirgacha"
+            a = f"{self.start:%d.%m.%Y}" if self.start else _("boshidan")
+            b = f"{self.end:%d.%m.%Y}" if self.end else _("hozirgacha")
             return f"{a} – {b}"
-        return "Butun tarix"
+        return _("Butun tarix")
 
     def filter(self, qs, field_name: str = "duty_day__date"):
         if self.start:
@@ -97,7 +105,8 @@ def period_from_params(params) -> Period:
 
 
 def approved_assignments(period: Period):
-    qs = Assignment.objects.filter(duty_day__status=DutyDay.Status.APPROVED)
+    """Oddiy naryadlar (jazo naryadlari adolat hisobiga kirmaydi)."""
+    qs = Assignment.objects.filter(duty_day__status=DutyDay.Status.APPROVED, kind=Assignment.Kind.NORMAL)
     return period.filter(qs).select_related("duty_day", "post_slot__post", "cadet__group", "group")
 
 
@@ -125,6 +134,7 @@ class CadetRow:
     last_date: dt.date | None = None
     dates_posts: list[tuple[dt.date, str]] = field(default_factory=list)
     dates_roles: list[tuple[dt.date, str]] = field(default_factory=list)
+    penalty: int = 0  # navbatdan tashqari (jazo) naryadlari — yuqoridagi sonlarga kirmaydi
 
 
 def pool_cadets(pool: str):
@@ -146,7 +156,7 @@ def cadet_rows(pool: str, period: Period) -> list[CadetRow]:
 def rows_by_pool(period: Period) -> dict[str, list[CadetRow]]:
     """Barcha hovuzlar bitta so'rovda (bosh sahifa, statistika, Excel — N+1 bo'lmasin)."""
     rows = build_rows(list(Cadet.objects.select_related("group").order_by("last_name", "first_name")), period)
-    out: dict[str, list[CadetRow]] = {code: [] for code, _ in pools()}
+    out: dict[str, list[CadetRow]] = {code: [] for code, _title in pools()}
     for r in rows:
         out.setdefault(pool_of(r.cadet), []).append(r)
     return out
@@ -158,6 +168,9 @@ def build_rows(cadets: list[Cadet], period: Period) -> list[CadetRow]:
     qs = Assignment.objects.filter(duty_day__status=DutyDay.Status.APPROVED, cadet_id__in=rows.keys())
     for a in period.filter(qs).select_related("duty_day", "post_slot__post").order_by("duty_day__date"):
         row = rows[a.cadet_id]
+        if a.kind == Assignment.Kind.PENALTY:
+            row.penalty += 1
+            continue
         post = a.post_slot.post.code
         row.by_post[post] = row.by_post.get(post, 0) + 1
         row.by_role[a.post_slot.role] = row.by_role.get(a.post_slot.role, 0) + 1
@@ -168,7 +181,7 @@ def build_rows(cadets: list[Cadet], period: Period) -> list[CadetRow]:
         row.dates_posts.append((a.duty_day.date, post))
         row.dates_roles.append((a.duty_day.date, a.post_slot.role))
     # faol emas va bu davrda naryadi yo'q kursantlar jadvalga kirmaydi
-    return [r for r in rows.values() if r.cadet.is_active or r.total]
+    return [r for r in rows.values() if r.cadet.is_active or r.total or r.penalty]
 
 
 def heat(value: int, maximum: int, minimum: int = 0) -> str:
@@ -179,7 +192,7 @@ def heat(value: int, maximum: int, minimum: int = 0) -> str:
     span = maximum - minimum
     alpha = 0.12 + 0.78 * (max(0, value - minimum) / span if span > 0 else 0.5)
     color = "#fff" if alpha > 0.55 else "#0f172a"
-    return f"background-color: rgba(21, 128, 61, {alpha:.2f}); color: {color};"
+    return f"background-color: rgba(33, 59, 120, {alpha:.2f}); color: {color};"
 
 
 # ---------------------------------------------------------------------------
@@ -197,7 +210,10 @@ def fairness_status(diff: int | None) -> str:
     return "red"
 
 
-STATUS_LABELS = {"green": "Adolatli (farq ≤ 1)", "yellow": "Diqqat (farq = 2)", "red": "Adolatsiz (farq ≥ 3)", "none": "Ma’lumot yo‘q"}
+STATUS_LABELS = {
+    "green": _lazy("Adolatli (farq ≤ 1)"), "yellow": _lazy("Diqqat (farq = 2)"),
+    "red": _lazy("Adolatsiz (farq ≥ 3)"), "none": _lazy("Ma’lumot yo‘q"),
+}
 
 
 @dataclass
@@ -218,7 +234,7 @@ class Fairness:
 
     @property
     def status_label(self) -> str:
-        return STATUS_LABELS[self.status]
+        return str(STATUS_LABELS[self.status])  # joriy tilda (Excel — override("uz") ichida)
 
 
 def fairness_from_rows(pool: str, title: str, rows: list[CadetRow]) -> Fairness:
@@ -230,7 +246,7 @@ def fairness_from_rows(pool: str, title: str, rows: list[CadetRow]) -> Fairness:
     for r in rows if applicable else []:
         for (d1, p1), (d2, p2) in zip(r.dates_posts, r.dates_posts[1:]):
             if p1 == p2:
-                repeats.append({"cadet": r.cadet, "post": p1, "post_name": POST_SHORT.get(p1, p1), "first": d1, "second": d2})
+                repeats.append({"cadet": r.cadet, "post": p1, "post_name": str(POST_SHORT.get(p1, p1)), "first": d1, "second": d2})
     duty_repeats = consecutive_duty(rows) if pool == GIRLS else []
     if not totals or sum(totals) == 0:
         return Fairness(pool, title, len(active), 0, None, None, None, None, None, repeats, "none", applicable, duty_repeats)
@@ -255,7 +271,7 @@ def consecutive_duty(rows: list[CadetRow]) -> list[dict]:
 
 def pools() -> list[tuple[str, str]]:
     groups = [(g.code, g.code) for g in StudyGroup.objects.filter(is_active=True).order_by("display_order")]
-    return groups + [(GIRLS, "Qizlar (13)")]
+    return groups + [(GIRLS, _("Qizlar (13)"))]
 
 
 def fairness_all(period: Period, by_pool: dict[str, list[CadetRow]] | None = None) -> list[Fairness]:
@@ -315,7 +331,7 @@ class ManualRow:
 def reason_code_of(entry: ChangeLog) -> str:
     if entry.reason_code:
         return entry.reason_code
-    for code, label in REASONS[:3]:
+    for code, label in REASON_PREFIXES:
         if entry.reason.startswith(label):
             return code
     return "boshqa"
@@ -344,7 +360,7 @@ def manual_control(period: Period) -> dict:
     placed, removed = Counter(), Counter()
     for e in entries:
         by_reason[reason_code_of(e)] += 1
-        by_user[(e.user.get_full_name() or e.user.username) if e.user else "tizim"] += 1
+        by_user[(e.user.get_full_name() or e.user.username) if e.user else _("tizim")] += 1
         if e.new_cadet_id:
             placed[e.new_cadet_id] += 1
         if e.old_cadet_id:
@@ -356,7 +372,7 @@ def manual_control(period: Period) -> dict:
         Q(is_active=True, duty_exempt=False) | Q(pk__in=list(placed) + list(removed))
     ):
         members_by_pool[pool_of(c)].append(c)
-    for pool, _ in pools():
+    for pool, _title in pools():
         members = members_by_pool.get(pool, [])
         if not members:
             continue
@@ -369,7 +385,7 @@ def manual_control(period: Period) -> dict:
     rows.sort(key=lambda r: (-r.placed, -r.removed, r.cadet.last_name))
     return {
         "total": sum(by_reason.values()),
-        "by_reason": [(label, by_reason.get(code, 0)) for code, label in REASONS],
+        "by_reason": [(str(label), by_reason.get(code, 0)) for code, label in REASONS],
         "by_user": sorted(by_user.items(), key=lambda kv: -kv[1]),
         "rows": rows,
         "alerts": [r for r in rows if r.alert],
@@ -397,7 +413,7 @@ def cadet_comparison(cadet: Cadet) -> dict:
         "exempt": cadet.duty_exempt,
         "own": own,
         "mean": round(mean, 1),
-        "pool_title": "qizlar" if pool == GIRLS else f"{pool} guruhi",
+        "pool_title": _("qizlar") if pool == GIRLS else _("%(group)s guruhi") % {"group": pool},
         "members": len(active),
         "diff": round(own - mean, 1),
     }
@@ -409,6 +425,14 @@ def cadet_comparison(cadet: Cadet) -> dict:
 
 
 def excel_export(period: Period) -> bytes:
+    """Rasmiy hisobot: ustun nomlari va qiymatlar doim o'zbekcha (CLAUDE.md 59-band)."""
+    from django.utils import translation
+
+    with translation.override("uz"):
+        return _excel_export(period)
+
+
+def _excel_export(period: Period) -> bytes:
     import io
 
     from openpyxl import Workbook
@@ -437,7 +461,7 @@ def excel_export(period: Period) -> bytes:
         return ws
 
     by_pool = rows_by_pool(period)
-    for code, _ in pools():
+    for code, _label in pools():
         rows = by_pool.get(code, [])
         if code == GIRLS:
             header = ["F.I.Sh.", "Guruh", "Navbatchi", "Posbon", "Jami", "Joriy haftada", "Oxirgi naryad"]
@@ -445,10 +469,11 @@ def excel_export(period: Period) -> bytes:
                      r.total, r.this_week, r.last_date] for r in rows]
             sheet("Qizlar", header, data)
         else:
-            header = (["F.I.Sh."] + [p.name for p in posts] + [ROLE_SHORT[r] for r in ROLES]
-                      + ["Jami", "Joriy haftada", "Oxirgi naryad", "Naryaddan ozod"])
+            header = (["F.I.Sh."] + [p.name for p in posts] + [str(ROLE_SHORT[r]) for r in ROLES]
+                      + ["Jami", "Joriy haftada", "Oxirgi naryad", "Naryaddan ozod", "Jazo naryadlari (navbatdan tashqari)"])
             data = [[r.cadet.full_name] + [r.by_post.get(p.code, 0) for p in posts] + [r.by_role.get(x, 0) for x in ROLES]
-                    + [r.total, r.this_week, r.last_date, r.cadet.duty_position if r.cadet.duty_exempt else ""] for r in rows]
+                    + [r.total, r.this_week, r.last_date, r.cadet.duty_position if r.cadet.duty_exempt else "", r.penalty]
+                    for r in rows]
             sheet(f"Guruh {code}", header, data)
 
     fair = fairness_all(period, by_pool)
@@ -465,6 +490,13 @@ def excel_export(period: Period) -> bytes:
     sections = group_sections(period)
     sheet("Guruhlar kesimi", ["Guruh"] + [p.name for p in posts] + ["Sutkalar", "Jami o‘rin", "Naryadga chiqadigan o‘g‘il", "1 o‘g‘ilga o‘rtacha"],
           [[s.group.code] + [s.by_post[p.code] for p in posts] + [s.days, s.total, s.boys, s.per_boy] for s in sections])
+
+    from .penalties import with_served
+
+    sheet("Zalyotchiklar", ["F.I.Sh.", "Guruh", "Sabab", "Izoh", "Tanbeh sanasi", "Jami", "O‘tildi", "Qoldi", "Holat"],
+          [[p.cadet.full_name, p.cadet.group.code, p.get_reason_type_display(), p.note, p.order_date, p.count, p.served,
+            p.remaining if p.is_active else 0, p.get_status_display()]
+           for p in with_served(Penalty.objects.select_related("cadet__group")).order_by("status", "order_date", "pk")])
 
     manual = manual_control(period)
     ws = sheet("Qo‘lda tuzatishlar", ["Sabab", "Soni"], [list(x) for x in manual["by_reason"]])

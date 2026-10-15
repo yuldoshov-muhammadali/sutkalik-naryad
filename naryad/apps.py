@@ -1,12 +1,13 @@
 from django.apps import AppConfig
 from django.contrib.admin import apps as admin_apps
+from django.utils.translation import gettext_lazy as _lazy
 
 
 class NaryadConfig(AppConfig):
     default = True
     default_auto_field = "django.db.models.BigAutoField"
     name = "naryad"
-    verbose_name = "Sutkalik naryad"
+    verbose_name = _lazy("Sutkalik naryad")
 
 
 class NaryadAdminConfig(admin_apps.AdminConfig):

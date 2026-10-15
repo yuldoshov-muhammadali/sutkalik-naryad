@@ -20,7 +20,7 @@ SUNDAY = dt.date(2026, 9, 13)
 pytestmark = pytest.mark.django_db
 
 LIMITS = {
-    "home": 15,
+    "home": 18,  # 14-bosqich: ertangi ro'yxat banneri (+3: sozlama, 2 sutka, haftalar)
     "week_list": 10,
     "cadet_list": 10,
     "approved_days": 8,

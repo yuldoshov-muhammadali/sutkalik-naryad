@@ -12,6 +12,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.utils import translation
 
 from .days import sections
 from .models import DutyDay, Setting
@@ -78,7 +79,9 @@ def render_pdf(days: list[DutyDay]) -> bytes:
     from weasyprint import HTML
     from weasyprint.text.fonts import FontConfiguration
 
-    html = render_html(days)
+    # Rasmiy hujjat: foydalanuvchi qaysi tilni tanlagan bo'lishidan qat'i nazar doim o'zbekcha (CLAUDE.md 59-band)
+    with translation.override("uz"):
+        html = render_html(days)
     font_config = FontConfiguration()
     return HTML(string=html, base_url=str(settings.BASE_DIR)).write_pdf(font_config=font_config)
 

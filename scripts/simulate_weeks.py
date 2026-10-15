@@ -10,6 +10,11 @@ tuziladi: qoralama (algoritm) → ba'zan qo'lda almashtirish (sabab bilan) → t
 ikki haftada bir hafta navbatda turadi, shuning uchun haftalar orasida 14 kun.
 Bitta kursant ataylab bir necha marta qo'lda qo'yiladi — “qo'lda tuzatishlar nazorati” ogohlantirishini ko'rish uchun.
 Foydalanuvchilar: kursboshligi, kurs.ofitseri (admin), kursant (parol Demo-parol-2026).
+
+15-bosqich: `--zalyotchiklar` — 3-hafta boshida 3 ta zalyotchik (2–3 tadan jazo naryadi) kiritiladi;
+oxirida natija jadvali: jazo naryadlari faqat 1-NO‘J / 1-Yotoqxonada, guruhlar adolati (oddiy naryadlar).
+
+    DATABASE_URL=sqlite:///simulyatsiya-zalyot.sqlite3 python scripts/simulate_weeks.py --zalyotchiklar
 """
 
 from __future__ import annotations
@@ -35,6 +40,9 @@ from django.db import connection  # noqa: E402
 PASSWORD = "Demo-parol-2026"
 INITIAL_ROTATION = {"markaz": "BI-625", "noj1": "BI-525", "noj2": "BI-425", "yotoq1": "BI-225", "oquv": "BI-325", "patrul": "YuP-125"}
 FAVOURITE = ("BI-325", 6)  # (guruh, ro'yxat raqami) — ataylab qo'lda ko'p qo'yiladigan kursant
+# 15-bosqich: (guruh, jazo naryadlari soni, sabab) — guruhlari turli joylarda bo'lgan uch zalyotchik
+OFFENDERS = [("BI-625", 3, "tartib"), ("YuP-125", 2, "uxlash"), ("BI-325", 3, "boshqa")]
+OFFENDERS_WEEK = 3
 
 
 def main() -> None:
@@ -45,6 +53,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--weeks", type=int, default=12)
     parser.add_argument("--seed", type=int, default=9)
+    parser.add_argument("--zalyotchiklar", action="store_true", help="3 ta zalyotchik bilan (15-bosqich)")
     args = parser.parse_args()
 
     print(f"Baza: {connection.settings_dict['NAME']}")
@@ -78,6 +87,8 @@ def main() -> None:
 
     for n, start in enumerate(starts, 1):
         days.open_week(start, admin)
+        if args.zalyotchiklar and n == OFFENDERS_WEEK:
+            add_offenders(start, admin)
         favour_pending = n % 3 == 0  # har 3-haftada bir marta
         for i in range(7):
             date = start + dt.timedelta(days=i)
@@ -100,6 +111,43 @@ def main() -> None:
         print(f"{n:2}. hafta {start:%d.%m.%Y} — 7 sutka tasdiqlandi")
     total = Assignment.objects.filter(duty_day__status="approved").count()
     print(f"Tayyor: {len(starts) * 7} sutka, {total} tayinlash, {replaced} tasodifiy va {favoured} ataylab qo'lda almashtirish.")
+    if args.zalyotchiklar:
+        report_offenders()
+
+
+def add_offenders(start, admin) -> None:
+    from naryad import penalties
+    from naryad.models import Cadet
+
+    for group, count, reason in OFFENDERS:
+        cadet = Cadet.objects.filter(group__code=group, gender="M", is_active=True, duty_exempt=False).order_by("list_number").first()
+        penalties.add(cadet, reason, "Simulyatsiya: tanbeh", start, count, admin)
+        print(f"   zalyot: {cadet.short_name} ({group}) — {count} ta jazo naryadi")
+
+
+def report_offenders() -> None:
+    """Natija jadvali: har zalyot, jazo naryadlari joylari, guruhlar adolati (faqat oddiy naryadlar)."""
+    from collections import Counter
+
+    from naryad import stats
+    from naryad.models import Assignment, GroupPostAssignment, Penalty
+
+    print("\nZalyotchiklar (jazo naryadlari):")
+    print(f"{'Kursant':<18}{'Guruh':<9}{'Jami':>5}{'O‘tildi':>8}  {'Holat':<10} Sutkalar (joy, o‘sha kuni joy guruhi)")
+    for p in Penalty.objects.select_related("cadet__group").order_by("pk"):
+        rows = Assignment.objects.filter(penalty=p, duty_day__status="approved").select_related("duty_day", "post_slot__post")
+        cells = []
+        for a in rows.order_by("duty_day__date"):
+            gpa = GroupPostAssignment.objects.get(duty_day=a.duty_day, post=a.post_slot.post)
+            cells.append(f"{a.duty_day.date:%d.%m} {a.post_slot.post.code} ({gpa.group.code})")
+        print(f"{p.cadet.short_name:<18}{p.cadet.group.code:<9}{p.count:>5}{rows.count():>8}  {p.status:<10} {', '.join(cells)}")
+    posts = Counter(Assignment.objects.filter(kind="penalty", duty_day__status="approved").values_list("post_slot__post__code", flat=True))
+    roles = Counter(Assignment.objects.filter(kind="penalty", duty_day__status="approved").values_list("post_slot__role", flat=True))
+    print(f"Jazo naryadlari joylari: {dict(posts)}; lavozimlar: {dict(roles)}")
+    print("\nGuruhlar adolati (faqat oddiy naryadlar, butun tarix):")
+    print(f"{'Hovuz':<10}{'Kursant':>8}{'Min':>5}{'Max':>5}{'Farq':>6}{'O‘rtacha':>10}  Holat")
+    for f in stats.fairness_all(stats.Period()):
+        print(f"{f.title:<10}{f.members:>8}{f.min!s:>5}{f.max!s:>5}{f.diff!s:>6}{f.mean!s:>10}  {f.status}")
 
 
 def put(day, cadet, code, note, user, days) -> bool:

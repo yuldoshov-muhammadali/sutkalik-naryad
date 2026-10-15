@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Zalyotchiklar" %}{% endblock %}
+{% block content %}
+<h1 class="text-xl font-semibold sm:text-2xl">{% translate "Zalyotchiklar" %}</h1>
+<p class="text-sm text-slate-600">{% translate "Navbatdan tashqari (jazo) naryadi: faol zalyotchik faqat 1-NO‘J yoki 1-Yotoqxonada posbon bo‘lib turadi, shu joy guruhi bitta kam kishi beradi. Jazo naryadi sutka tasdiqlanganda “o‘tildi” hisoblanadi va adolat hisobiga kirmaydi." %}</p>
+
+<section class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby="add-penalty">
+  <h2 id="add-penalty" class="font-semibold">{% translate "Zalyot kiritish" %}</h2>
+  <p class="mt-1 text-xs text-slate-500">{% translate "Faqat o‘g‘il, faol va naryaddan ozod bo‘lmagan kursant. Faol zalyoti bor kursantga yangisi qo‘shilsa, soni mavjudiga qo‘shiladi." %}</p>
+  {% if form.non_field_errors %}<div class="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+  <form method="post" class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" novalidate data-testid="penalty-form">
+    {% csrf_token %}
+    {% for field in form %}
+    <label class="text-sm font-medium {% if field.name == 'cadet' or field.name == 'note' %}sm:col-span-2{% endif %}">{{ field.label }} *
+      {{ field }}
+      {% for e in field.errors %}<span class="mt-1 block text-sm font-normal text-red-700">{{ e }}</span>{% endfor %}
+    </label>
+    {% endfor %}
+    <button type="submit" class="min-h-[44px] rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900 sm:col-span-2 lg:col-span-4 lg:justify-self-end">{% translate "Kiritish" %}</button>
+  </form>
+</section>
+
+<section class="mt-5" aria-labelledby="active-title">
+  <h2 id="active-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% blocktranslate with n=active|length %}Faol ({{ n }}){% endblocktranslate %}</h2>
+  {% include "naryad/penalties/_items.html" with items=active cancellable=True %}
+</section>
+
+{% if finished %}
+<section class="mt-5" aria-labelledby="finished-title">
+  <h2 id="finished-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% blocktranslate count n=finished|length %}Bajarilgan va bekor qilinganlar ({{ n }}){% plural %}Bajarilgan va bekor qilinganlar ({{ n }}){% endblocktranslate %}</h2>
+  {% include "naryad/penalties/_items.html" with items=finished %}
+</section>
+{% endif %}
+{% endblock %}

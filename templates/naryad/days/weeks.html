@@ -1,31 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Haftalar{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Haftalar" %}{% endblock %}
 {% block content %}
-<h1 class="text-xl font-semibold sm:text-2xl">2-kurs haftalari</h1>
+<h1 class="text-xl font-semibold sm:text-2xl">{% translate "2-kurs haftalari" %}</h1>
 
 {% if needs_rotation %}
 <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
-  Tarix ham, boshlang‘ich guruh → joy taqsimoti ham yo‘q — birinchi sutkani tuzib bo‘lmaydi.
-  {% if can.settings_manage %}<a class="font-semibold underline" href="{% url 'admin:naryad_setting_change' 1 %}">Sozlamalarda boshlang‘ich taqsimotni kiriting</a>{% endif %}
-  yoki o‘tgan sutkalarni <code>import_history</code> buyrug‘i bilan kiriting.
+  {% translate "Tarix ham, boshlang‘ich guruh → joy taqsimoti ham yo‘q — birinchi sutkani tuzib bo‘lmaydi." %}
+  {% if can.settings_manage %}<a class="font-semibold underline" href="{% url 'admin:naryad_setting_change' 1 %}">{% translate "Sozlamalarda boshlang‘ich taqsimotni kiriting" %}</a>{% endif %}
+  {% blocktranslate %}yoki o‘tgan sutkalarni <code>import_history</code> buyrug‘i bilan kiriting.{% endblocktranslate %}
 </div>
 {% endif %}
 
 {% if can.week_open %}
 <section class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby="open-week">
-  <h2 id="open-week" class="font-semibold">Yangi 2-kurs haftasini ochish</h2>
-  <p class="text-sm text-slate-600">Faqat yakshanba sanasini tanlang — hafta shu kuni 18:00 da boshlanadi va 7 sutka davom etadi.</p>
+  <h2 id="open-week" class="font-semibold">{% translate "Yangi 2-kurs haftasini ochish" %}</h2>
+  <p class="text-sm text-slate-600">{% translate "Faqat yakshanba sanasini tanlang — hafta shu kuni 18:00 da boshlanadi va 7 sutka davom etadi." %}</p>
   <form method="post" action="{% url 'week_open' %}" class="mt-3 grid gap-3 sm:grid-cols-[14rem_1fr_auto] sm:items-start">
     {% csrf_token %}
-    <label class="text-sm font-medium">Yakshanba
+    <label class="text-sm font-medium">{% translate "Yakshanba" %}
       <input type="date" name="start_date" value="{{ suggested|date:'Y-m-d' }}" required
              hx-get="{% url 'week_preview' %}" hx-trigger="change, load" hx-target="#week-preview" hx-include="this"
              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base">
     </label>
     <div id="week-preview" class="rounded-lg bg-slate-50 p-3" aria-live="polite"></div>
     <div class="flex flex-col gap-2">
-      <input type="text" name="note" maxlength="200" placeholder="Izoh (ixtiyoriy)" class="rounded-lg border border-slate-300 px-3 py-2 text-base">
-      <button type="submit" class="rounded-lg bg-green-800 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900">Haftani ochish</button>
+      <input type="text" name="note" maxlength="200" placeholder="{% translate "Izoh (ixtiyoriy)" %}" class="rounded-lg border border-slate-300 px-3 py-2 text-base">
+      <button type="submit" class="rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900">{% translate "Haftani ochish" %}</button>
     </div>
   </form>
 </section>
@@ -33,19 +34,19 @@
 
 <div class="mt-5 space-y-4">
   {% for item in weeks %}
-  {% if forloop.counter == 4 %}<details class="space-y-4"><summary class="cursor-pointer rounded-xl bg-white px-4 font-semibold text-green-900 shadow-sm ring-1 ring-slate-200">Oldingi haftalar ({{ weeks|length|add:"-3" }} ta)</summary><div class="mt-4 space-y-4">{% endif %}
+  {% if forloop.counter == 4 %}<details class="space-y-4"><summary class="cursor-pointer rounded-xl bg-white px-4 font-semibold text-brand-900 shadow-sm ring-1 ring-slate-200">{% blocktranslate count n=weeks|length|add:"-3" %}Oldingi haftalar ({{ n }} ta){% plural %}Oldingi haftalar ({{ n }} ta){% endblocktranslate %}</summary><div class="mt-4 space-y-4">{% endif %}
   <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
     <div class="flex flex-wrap items-center justify-between gap-2">
-      <h2 class="font-semibold">{{ item.week.start_date|date:"d.m.Y" }} (yakshanba 18:00) – {{ item.week.end_at|date:"d.m.Y" }} (yakshanba 18:00)
+      <h2 class="font-semibold">{% blocktranslate with start=item.week.start_date|date:"d.m.Y" end=item.week.end_at|date:"d.m.Y" %}{{ start }} (yakshanba 18:00) – {{ end }} (yakshanba 18:00){% endblocktranslate %}
         {% if item.week.note %}<span class="text-sm font-normal text-slate-500">· {{ item.week.note }}</span>{% endif %}</h2>
-      {% if item.has_days %}<a href="{% url 'week_pdf' item.week.start_date|date:'Y-m-d' %}" class="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50">⬇ Hafta PDF</a>{% endif %}
+      {% if item.has_days %}<a href="{% url 'week_pdf' item.week.start_date|date:'Y-m-d' %}" class="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50">⬇ {% translate "Hafta PDF" %}</a>{% endif %}
     </div>
     <ol class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {% for d in item.days %}
       <li>
-        <a href="{% url 'day_detail' d.date|date:'Y-m-d' %}" class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 ring-1 hover:bg-slate-50 {% if d.is_current %}ring-2 ring-green-700{% else %}ring-slate-200{% endif %}">
+        <a href="{% url 'day_detail' d.date|date:'Y-m-d' %}" class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 ring-1 hover:bg-slate-50 {% if d.is_current %}ring-2 ring-brand-700{% else %}ring-slate-200{% endif %}">
           <span class="min-w-0">
-            <span class="block text-xs text-slate-500">{{ forloop.counter }}-sutka · {{ d.weekday }}{% if d.is_current %} · <b class="text-green-800">hozir</b>{% endif %}</span>
+            <span class="block text-xs text-slate-500">{% blocktranslate with n=forloop.counter %}{{ n }}-sutka{% endblocktranslate %} · {{ d.weekday }}{% if d.is_current %} · <b class="text-brand-800">{% translate "hozir" %}</b>{% endif %}</span>
             <span class="block text-sm font-medium">{{ d.title }}</span>
           </span>
           {% include "naryad/days/_status.html" with status=d.status %}
@@ -56,7 +57,7 @@
   </section>
   {% if forloop.last and forloop.counter >= 4 %}</div></details>{% endif %}
   {% empty %}
-  <p class="rounded-xl bg-white px-4 py-6 text-center text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">Hali birorta ham hafta ochilmagan.</p>
+  <p class="rounded-xl bg-white px-4 py-6 text-center text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">{% translate "Hali birorta ham hafta ochilmagan." %}</p>
   {% endfor %}
 </div>
 {% endblock %}

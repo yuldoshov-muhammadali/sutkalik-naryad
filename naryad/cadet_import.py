@@ -13,6 +13,8 @@ from itertools import islice
 from dataclasses import asdict, dataclass, field
 
 from django.db import transaction
+from django.utils import translation
+from django.utils.translation import gettext as _
 
 from naryad.engine.names import normalize_apostrophes, short_name as auto_short_name
 
@@ -58,7 +60,8 @@ class Preview:
     rows: list[dict] = field(default_factory=list)  # sessiyada saqlash uchun
     new: list[dict] = field(default_factory=list)
     unchanged: list[dict] = field(default_factory=list)
-    updated: list[dict] = field(default_factory=list)  # {"row":…, "cadet_id":…, "changes":[…], "history_warning":bool}
+    # {"row":…, "cadet_id":…, "changes":[…] (o'zbekcha, jurnal uchun), "changes_display":[…] (joriy tilda), "history_warning":bool}
+    updated: list[dict] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     missing: list[dict] = field(default_factory=list)  # bazada bor, faylda yo'q
 
@@ -71,6 +74,13 @@ class ImportFileError(ValueError):
     pass
 
 
+def _add_change(changes: list[str], changes_display: list[str], build) -> None:
+    """O'zgarish matni ikki marta: o'zbekcha (jurnalga yoziladi) va joriy tilda (ekranda ko'rsatiladi)."""
+    changes_display.append(build())
+    with translation.override("uz"):
+        changes.append(build())
+
+
 MAX_UNPACKED_BYTES = 30 * 1024 * 1024
 
 
@@ -79,41 +89,43 @@ def check_xlsx_container(data: bytes) -> None:
     import zipfile
 
     if not data.startswith(b"PK\x03\x04"):
-        raise ImportFileError("Fayl .xlsx (Excel) formatida emas.")
+        raise ImportFileError(_("Fayl .xlsx (Excel) formatida emas."))
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
             names = zf.namelist()
             unpacked = sum(i.file_size for i in zf.infolist())
     except zipfile.BadZipFile as exc:
-        raise ImportFileError("Faylni o‘qib bo‘lmadi — .xlsx (Excel) formatida ekanini tekshiring.") from exc
+        raise ImportFileError(_("Faylni o‘qib bo‘lmadi — .xlsx (Excel) formatida ekanini tekshiring.")) from exc
     if "[Content_Types].xml" not in names or not any(n.startswith("xl/") for n in names):
-        raise ImportFileError("Fayl .xlsx (Excel) formatida emas.")
+        raise ImportFileError(_("Fayl .xlsx (Excel) formatida emas."))
     if unpacked > MAX_UNPACKED_BYTES:
-        raise ImportFileError("Fayl ichidagi ma’lumot juda katta.")
+        raise ImportFileError(_("Fayl ichidagi ma’lumot juda katta."))
 
 
 def read_xlsx(data: bytes) -> list[ImportRow]:
     if len(data) > MAX_FILE_BYTES:
-        raise ImportFileError("Fayl juda katta (2 MB dan oshmasin).")
+        raise ImportFileError(_("Fayl juda katta (2 MB dan oshmasin)."))
     check_xlsx_container(data)
     from openpyxl import load_workbook
 
     try:
         wb = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
     except Exception as exc:  # noqa: BLE001 — har qanday buzilgan fayl
-        raise ImportFileError("Faylni o‘qib bo‘lmadi — .xlsx (Excel) formatida ekanini tekshiring.") from exc
+        raise ImportFileError(_("Faylni o‘qib bo‘lmadi — .xlsx (Excel) formatida ekanini tekshiring.")) from exc
     ws = wb.worksheets[0]
     raw = list(islice(ws.iter_rows(values_only=True, max_col=30), MAX_ROWS + 2))
     wb.close()
     if len(raw) > MAX_ROWS + 1:
-        raise ImportFileError(f"Qatorlar juda ko‘p; ko‘pi bilan {MAX_ROWS} ta.")
+        raise ImportFileError(_("Qatorlar juda ko‘p; ko‘pi bilan %(max)s ta.") % {"max": MAX_ROWS})
     if not raw:
-        raise ImportFileError("Fayl bo‘sh.")
+        raise ImportFileError(_("Fayl bo‘sh."))
     header = [key(h) for h in raw[0]]
     missing = [c for c in COLUMNS if c not in header]
     if missing:
+        # Ustun nomlari (familiya, ism, …) — fayldagi o'zbekcha sarlavhalar, tarjima qilinmaydi
         raise ImportFileError(
-            "Sarlavha qatorida ustunlar yetishmaydi: " + ", ".join(missing) + ". Kerakli: " + ", ".join(COLUMNS) + "."
+            _("Sarlavha qatorida ustunlar yetishmaydi: %(missing)s. Kerakli: %(required)s.")
+            % {"missing": ", ".join(missing), "required": ", ".join(COLUMNS)}
         )
     idx = {COLUMNS[c]: header.index(c) for c in COLUMNS}
     rows = []
@@ -123,7 +135,7 @@ def read_xlsx(data: bytes) -> list[ImportRow]:
         get = lambda f: norm(values[idx[f]]) if idx[f] < len(values) else ""  # noqa: E731
         rows.append(ImportRow(line, get("last_name"), get("first_name"), get("patronymic"), get("group"), get("gender")))
     if len(rows) > MAX_ROWS:
-        raise ImportFileError(f"Qatorlar juda ko‘p ({len(rows)}); ko‘pi bilan {MAX_ROWS} ta.")
+        raise ImportFileError(_("Qatorlar juda ko‘p (%(count)s); ko‘pi bilan %(max)s ta.") % {"count": len(rows), "max": MAX_ROWS})
     return rows
 
 
@@ -143,43 +155,50 @@ def build_preview(rows: list[ImportRow]) -> Preview:
     for r in rows:
         problems = []
         if not r.last_name:
-            problems.append("familiya bo‘sh")
+            problems.append(_("familiya bo‘sh"))
         if not r.first_name:
-            problems.append("ism bo‘sh")
+            problems.append(_("ism bo‘sh"))
         group = groups.get(key(r.group))
         if group is None:
-            problems.append(f"guruh topilmadi: «{r.group}»" if r.group else "guruh bo‘sh")
+            problems.append(_("guruh topilmadi: «%(group)s»") % {"group": r.group} if r.group else _("guruh bo‘sh"))
         gender = GENDER_WORDS.get(key(r.gender).replace("'", "‘").replace("’", "‘"))
         if gender is None:
-            problems.append(f"jins noto‘g‘ri: «{r.gender}» (o‘g‘il yoki qiz)")
+            problems.append(_("jins noto‘g‘ri: «%(gender)s» (o‘g‘il yoki qiz)") % {"gender": r.gender})
         full_key = (key(r.last_name), key(r.first_name), key(r.patronymic))
         if r.last_name and r.first_name and group:
             dup_key = (group.pk, *full_key)
             if dup_key in seen:
-                problems.append(f"fayl ichida takrorlangan ({seen[dup_key]}-qator bilan bir xil)")
+                problems.append(_("fayl ichida takrorlangan (%(line)s-qator bilan bir xil)") % {"line": seen[dup_key]})
             seen.setdefault(dup_key, r.line)
         if problems:
-            preview.errors.extend(f"{r.line}-qator: {p}" for p in problems)
+            preview.errors.extend(_("%(line)s-qator: %(problem)s") % {"line": r.line, "problem": p} for p in problems)
             continue
 
-        item = {**asdict(r), "group": group.code, "gender": gender, "gender_label": Gender(gender).label}
+        item = {**asdict(r), "group": group.code, "gender": gender, "gender_label": str(Gender(gender).label)}
         exact = [c for c in by_full.get(full_key, []) if c.group_id == group.pk]
         same_person_other_group = [c for c in by_full.get(full_key, []) if c.group_id != group.pk]
         same_name_in_group = [
             c for c in by_name_group.get((group.pk, key(r.last_name), key(r.first_name)), []) if c not in exact
         ]
-        target, changes = None, []
+        target, changes, changes_display = None, [], []
         if exact:
             target = exact[0]
         elif len(same_person_other_group) == 1:
             target = same_person_other_group[0]
-            changes.append(f"Guruh: {target.group.code} → {group.code}")
+            _add_change(
+                changes, changes_display,
+                lambda: _("Guruh: %(old)s → %(new)s") % {"old": target.group.code, "new": group.code},
+            )
         elif len(same_name_in_group) == 1 and not same_person_other_group:
             target = same_name_in_group[0]
-            changes.append(f"Otasining ismi: {target.patronymic or '—'} → {r.patronymic or '—'}")
+            _add_change(
+                changes, changes_display,
+                lambda: _("Otasining ismi: %(old)s → %(new)s") % {"old": target.patronymic or "—", "new": r.patronymic or "—"},
+            )
         elif len(same_person_other_group) > 1:
             preview.errors.append(
-                f"{r.line}-qator: «{r.last_name} {r.first_name} {r.patronymic}» bir nechta guruhda bor — qaysi biri ekanini aniqlab bo‘lmaydi"
+                _("%(line)s-qator: «%(name)s» bir nechta guruhda bor — qaysi biri ekanini aniqlab bo‘lmaydi")
+                % {"line": r.line, "name": f"{r.last_name} {r.first_name} {r.patronymic}"}
             )
             continue
 
@@ -187,16 +206,24 @@ def build_preview(rows: list[ImportRow]) -> Preview:
             preview.new.append(item)
             continue
         if target.pk in matched_ids:
-            preview.errors.append(f"{r.line}-qator: bazadagi “{target.full_name}” faylda ikkinchi marta uchradi")
+            preview.errors.append(
+                _("%(line)s-qator: bazadagi “%(name)s” faylda ikkinchi marta uchradi") % {"line": r.line, "name": target.full_name}
+            )
             continue
         matched_ids.add(target.pk)
         if target.gender != gender:
-            changes.append(f"Jinsi: {target.get_gender_display()} → {Gender(gender).label}")
+            _add_change(
+                changes, changes_display,
+                lambda: _("Jinsi: %(old)s → %(new)s") % {"old": target.get_gender_display(), "new": Gender(gender).label},
+            )
         if not changes:
             preview.unchanged.append({**item, "cadet_id": target.pk})
             continue
-        history_warning = has_history(target) and any(c.startswith(("Guruh", "Jinsi")) for c in changes)
-        preview.updated.append({**item, "cadet_id": target.pk, "changes": changes, "history_warning": history_warning})
+        history_warning = has_history(target) and any(c.startswith(("Guruh", "Jinsi")) for c in changes)  # changes — o'zbekcha
+        preview.updated.append(
+            {**item, "cadet_id": target.pk, "changes": changes, "changes_display": changes_display,
+             "history_warning": history_warning}
+        )
 
     preview.missing = [
         {"id": c.pk, "name": c.full_name, "group": c.group.code, "active": c.is_active}
@@ -214,7 +241,7 @@ def preview_from_session(rows: list[dict]) -> Preview:
 def apply_preview(preview: Preview, user, filename: str = "") -> tuple[int, int]:
     """Oldindan ko'rilgan importni bitta tranzaksiyada yozadi. (yangi, yangilangan) sonini qaytaradi."""
     if preview.errors:
-        raise ImportFileError("Xatoli qatorlar bor — import tasdiqlanmaydi.")
+        raise ImportFileError(_("Xatoli qatorlar bor — import tasdiqlanmaydi."))
     groups = {g.code: g for g in StudyGroup.objects.all()}
     source = f" ({filename})" if filename else ""
     for item in preview.new:
@@ -228,10 +255,9 @@ def apply_preview(preview: Preview, user, filename: str = "") -> tuple[int, int]
             gender=item["gender"],
             short_name=auto_short_name(item["last_name"], item["first_name"]),
         )
-        ChangeLog.objects.create(
-            action=ChangeLog.Action.CADET_IMPORT, cadet=cadet, user=user,
-            details=f"Yangi kursant: {cadet.full_name}, {group.code}, {cadet.get_gender_display()}{source}",
-        )
+        with translation.override("uz"):  # jurnal matni doim o'zbekcha saqlanadi
+            details = f"Yangi kursant: {cadet.full_name}, {group.code}, {cadet.get_gender_display()}{source}"
+        ChangeLog.objects.create(action=ChangeLog.Action.CADET_IMPORT, cadet=cadet, user=user, details=details)
     for item in preview.updated:
         cadet = Cadet.objects.select_for_update().get(pk=item["cadet_id"])
         if cadet.group_id != groups[item["group"]].pk:

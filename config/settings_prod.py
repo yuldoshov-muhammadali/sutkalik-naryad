@@ -39,6 +39,7 @@ if HTTPS:
     SECURE_HSTS_PRELOAD = env_bool("DJANGO_HSTS_PRELOAD", default=True)
     SESSION_COOKIE_NAME = "__Secure-sessionid"
     CSRF_COOKIE_NAME = "__Secure-csrftoken"
+    LANGUAGE_COOKIE_SECURE = True
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"

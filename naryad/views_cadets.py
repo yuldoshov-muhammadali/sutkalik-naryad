@@ -9,12 +9,25 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
-from naryad.engine.names import normalize_apostrophes, short_name as auto_short_name
+from naryad.engine.names import normalize_apostrophes
+from naryad.engine.names import short_name as auto_short_name
 
-from . import permissions as perms, stats
-from .cadet_import import MAX_FILE_BYTES, ImportFileError, apply_preview, build_preview, preview_from_session, read_xlsx, template_xlsx
+from . import penalties as penalty_service
+from . import permissions as perms
+from . import stats
+from .cadet_import import (
+    MAX_FILE_BYTES,
+    ImportFileError,
+    apply_preview,
+    build_preview,
+    preview_from_session,
+    read_xlsx,
+    template_xlsx,
+)
 from .cadets import (
     CadetForm,
     DeactivateForm,
@@ -24,6 +37,7 @@ from .cadets import (
     approved_count_annotation,
     clear_exempt,
     deactivate,
+    exempt_blocker,
     has_history,
     open_drafts_with,
     save_cadet,
@@ -116,8 +130,10 @@ def cadet_list(request):
 def cadet_create(request):
     form = CadetForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        cadet, _ = save_cadet(form, request.user)
-        messages.success(request, f"Kursant qo‘shildi: {cadet.full_name} ({cadet.group.code}).")
+        cadet, _changes = save_cadet(form, request.user)
+        messages.success(
+            request, _("Kursant qo‘shildi: %(name)s (%(group)s).") % {"name": cadet.full_name, "group": cadet.group.code}
+        )
         return redirect("cadet_detail", pk=cadet.pk)
     return render(request, "naryad/cadets/form.html", {"form": form, "creating": True})
 
@@ -129,9 +145,9 @@ def cadet_edit(request, pk):
     if request.method == "POST" and form.is_valid():
         cadet, changes = save_cadet(form, request.user)
         if changes:
-            messages.success(request, "Saqlandi: " + "; ".join(changes) + ".")
+            messages.success(request, _("Saqlandi: %(changes)s.") % {"changes": "; ".join(changes)})
         else:
-            messages.info(request, "Hech narsa o‘zgarmadi.")
+            messages.info(request, _("Hech narsa o‘zgarmadi."))
         return redirect("cadet_detail", pk=cadet.pk)
     return render(
         request,
@@ -159,13 +175,15 @@ def cadet_deactivate(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = DeactivateForm(request.POST)
     if not cadet.is_active:
-        messages.info(request, "Kursant allaqachon faol emas.")
+        messages.info(request, _("Kursant allaqachon faol emas."))
     elif form.is_valid():
         deactivate(cadet, form.reason_text, request.user)
-        messages.success(request, f"{cadet.full_name} faolsizlantirildi. Tarixi saqlanadi, generatorga tushmaydi.")
+        messages.success(
+            request, _("%(name)s faolsizlantirildi. Tarixi saqlanadi, generatorga tushmaydi.") % {"name": cadet.full_name}
+        )
     else:
         errors = "; ".join(e for errs in form.errors.values() for e in errs)
-        messages.error(request, f"Faolsizlantirilmadi: {errors}")
+        messages.error(request, _("Faolsizlantirilmadi: %(errors)s") % {"errors": errors})
     return redirect("cadet_detail", pk=cadet.pk)
 
 
@@ -174,10 +192,10 @@ def cadet_deactivate(request, pk):
 def cadet_activate(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     if cadet.is_active:
-        messages.info(request, "Kursant allaqachon faol.")
+        messages.info(request, _("Kursant allaqachon faol."))
     else:
         activate(cadet, request.user)
-        messages.success(request, f"{cadet.full_name} qayta faollashtirildi.")
+        messages.success(request, _("%(name)s qayta faollashtirildi.") % {"name": cadet.full_name})
     return redirect("cadet_detail", pk=cadet.pk)
 
 
@@ -187,15 +205,25 @@ def cadet_exempt(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = ExemptForm(request.POST)
     if not cadet.is_active:
-        messages.error(request, "Faol bo‘lmagan kursantni naryaddan ozod qilib bo‘lmaydi — u baribir naryadga tushmaydi.")
+        messages.error(request, _("Faol bo‘lmagan kursantni naryaddan ozod qilib bo‘lmaydi — u baribir naryadga tushmaydi."))
+    elif exempt_blocker(cadet):
+        messages.error(request, exempt_blocker(cadet))
     elif form.is_valid():
         set_exempt(cadet, form.cleaned_data["position"], form.cleaned_data["reason"], request.user)
-        messages.success(request, f"{cadet.full_name} naryaddan ozod qilindi ({cadet.duty_position}). Tarixi saqlanadi.")
+        messages.success(
+            request,
+            _("%(name)s naryaddan ozod qilindi (%(position)s). Tarixi saqlanadi.")
+            % {"name": cadet.full_name, "position": cadet.duty_position},
+        )
         for day in open_drafts_with(cadet):
-            messages.warning(request, f"{day.date:%d.%m.%Y} qoralamasida turibdi — almashtiring yoki qayta tuzing (tasdiqlab bo‘lmaydi).")
+            messages.warning(
+                request,
+                _("%(date)s qoralamasida turibdi — almashtiring yoki qayta tuzing (tasdiqlab bo‘lmaydi).")
+                % {"date": f"{day.date:%d.%m.%Y}"},
+            )
     else:
         errors = "; ".join(e for errs in form.errors.values() for e in errs)
-        messages.error(request, f"Ozod qilinmadi: {errors}")
+        messages.error(request, _("Ozod qilinmadi: %(errors)s") % {"errors": errors})
     return redirect("cadet_detail", pk=cadet.pk)
 
 
@@ -205,16 +233,17 @@ def cadet_unexempt(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = UnexemptForm(request.POST)
     if not cadet.duty_exempt:
-        messages.info(request, "Kursant naryaddan ozod emas.")
+        messages.info(request, _("Kursant naryaddan ozod emas."))
     elif form.is_valid():
         clear_exempt(cadet, form.cleaned_data["reason"], request.user)
         messages.success(
             request,
-            f"{cadet.full_name} naryadga qaytarildi. Algoritm uni haftalik va jami hisob bo‘yicha avtomatik oldinga qo‘yadi.",
+            _("%(name)s naryadga qaytarildi. Algoritm uni haftalik va jami hisob bo‘yicha avtomatik oldinga qo‘yadi.")
+            % {"name": cadet.full_name},
         )
     else:
         errors = "; ".join(e for errs in form.errors.values() for e in errs)
-        messages.error(request, f"Qaytarilmadi: {errors}")
+        messages.error(request, _("Qaytarilmadi: %(errors)s") % {"errors": errors})
     return redirect("cadet_detail", pk=cadet.pk)
 
 
@@ -230,23 +259,30 @@ def cadet_detail(request, pk):
     if not is_admin:
         own = getattr(request.user, "cadet_id", None)
         if not (perms.can(request.user, "history.own") and own == cadet.pk):
-            raise PermissionDenied("Kursant faqat o‘zining kartochkasini ko‘radi.")
+            raise PermissionDenied(_("Kursant faqat o‘zining kartochkasini ko‘radi."))
 
     history = list(
         Assignment.objects.filter(cadet=cadet, duty_day__status=DutyDay.Status.APPROVED)
         .select_related("duty_day", "post_slot__post", "group")
         .order_by("-duty_day__date")
     )
-    by_post = Counter(a.post_slot.post for a in history)
-    by_role = Counter(a.post_slot.get_role_display() for a in history)
+    normal = [a for a in history if a.kind == Assignment.Kind.NORMAL]  # jazo naryadlari adolat hisobiga kirmaydi
+    by_post = Counter(a.post_slot.post for a in normal)
+    by_role = Counter(a.post_slot.get_role_display() for a in normal)
     context = {
         "cadet": cadet,
         "history": history,
+        "normal_total": len(normal),
+        "penalty_total": len(history) - len(normal),
+        "penalties": list(
+            penalty_service.with_served(cadet.penalties.select_related("created_by")).order_by("-created_at")
+        ) if is_admin else [],
         "by_post": sorted(by_post.items(), key=lambda kv: kv[0].display_order),
         "by_role": sorted(by_role.items()),
         "is_admin": is_admin,
         "deactivate_form": DeactivateForm() if is_admin else None,
         "exempt_form": ExemptForm(initial={"position": cadet.duty_position}) if is_admin else None,
+        "exempt_blocker": exempt_blocker(cadet) if is_admin and not cadet.duty_exempt else None,
         "unexempt_form": UnexemptForm() if is_admin else None,
         "log": ChangeLog.objects.filter(cadet=cadet).select_related("user")[:20] if is_admin else [],
         "account": getattr(cadet, "user", None) if is_admin else None,
@@ -258,7 +294,7 @@ def cadet_detail(request, pk):
 @perms.role_required("history.own")
 def my_card(request):
     if not request.user.cadet_id:
-        messages.warning(request, "Akkauntingiz kursantga bog‘lanmagan.")
+        messages.warning(request, _("Akkauntingiz kursantga bog‘lanmagan."))
         return redirect("home")
     return redirect("cadet_detail", pk=request.user.cadet_id)
 
@@ -273,10 +309,10 @@ def cadet_import(request):
     if request.method == "POST" and "file" in request.FILES:
         upload = request.FILES["file"]
         if not upload.name.lower().endswith(".xlsx"):
-            messages.error(request, "Faqat .xlsx (Excel) fayl yuklang.")
+            messages.error(request, _("Faqat .xlsx (Excel) fayl yuklang."))
             return redirect("cadet_import")
         if upload.size > MAX_FILE_BYTES:
-            messages.error(request, "Fayl juda katta (2 MB dan oshmasin).")
+            messages.error(request, _("Fayl juda katta (2 MB dan oshmasin)."))
             return redirect("cadet_import")
         try:
             rows = read_xlsx(upload.read())
@@ -290,20 +326,29 @@ def cadet_import(request):
     if request.method == "POST" and request.POST.get("action") == "confirm":
         stored = request.session.get(SESSION_KEY)
         if not stored:
-            messages.error(request, "Oldindan ko‘rish topilmadi — faylni qayta yuklang.")
+            messages.error(request, _("Oldindan ko‘rish topilmadi — faylni qayta yuklang."))
             return redirect("cadet_import")
         preview = preview_from_session(stored["rows"])  # baza o'zgargan bo'lishi mumkin — qayta hisoblanadi
         if preview.errors:
-            messages.error(request, "Xatoli qatorlar bor — import tasdiqlanmadi. Faylni tuzatib, qayta yuklang.")
+            messages.error(request, _("Xatoli qatorlar bor — import tasdiqlanmadi. Faylni tuzatib, qayta yuklang."))
             return render(request, "naryad/cadets/import.html", {"preview": preview, "filename": stored["filename"]})
         created, updated = apply_preview(preview, request.user, stored["filename"])
         del request.session[SESSION_KEY]
-        messages.success(request, f"Import bajarildi: {created} ta yangi, {updated} ta yangilandi, {len(preview.unchanged)} ta o‘zgarmadi.")
+        messages.success(
+            request,
+            _("Import bajarildi: %(created)s, %(updated)s, %(unchanged)s.")
+            % {
+                "created": ngettext("%(n)s ta yangi", "%(n)s ta yangi", created) % {"n": created},
+                "updated": ngettext("%(n)s ta yangilandi", "%(n)s ta yangilandi", updated) % {"n": updated},
+                "unchanged": ngettext("%(n)s ta o‘zgarmadi", "%(n)s ta o‘zgarmadi", len(preview.unchanged))
+                % {"n": len(preview.unchanged)},
+            },
+        )
         return redirect("cadet_list")
 
     if request.method == "POST" and request.POST.get("action") == "cancel":
         request.session.pop(SESSION_KEY, None)
-        messages.info(request, "Import bekor qilindi.")
+        messages.info(request, _("Import bekor qilindi."))
         return redirect("cadet_import")
 
     return render(request, "naryad/cadets/import.html", {"preview": None})

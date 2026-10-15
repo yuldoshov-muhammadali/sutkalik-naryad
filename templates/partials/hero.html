@@ -1,0 +1,27 @@
+{% load static i18n %}{# Bosh sahifa banneri: institut rasmi, gradient, emblema, jonli soat va joriy sutka (static/js/app.js) #}
+<section class="relative isolate overflow-hidden bg-brand-950 text-white" aria-labelledby="hero-title" data-testid="hero">
+  {% include "partials/institut_picture.html" with img_class="absolute inset-0 -z-20 h-full w-full object-cover object-top dark:brightness-[.65]" %}
+  <div class="absolute inset-0 -z-10 bg-gradient-to-b from-brand-950/70 via-brand-950/75 to-brand-950/95" aria-hidden="true"></div>
+  <div class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pb-28 pt-5 sm:flex-row sm:items-end sm:justify-between sm:pb-36 sm:pt-10">
+    <div class="flex items-center gap-3 sm:gap-4">
+      <img src="{% static 'img/emblema-192.png' %}" width="80" height="80" alt="" class="h-14 w-14 shrink-0 drop-shadow-lg sm:h-20 sm:w-20" data-testid="hero-emblem">
+      <div class="min-w-0">
+        <p class="text-xs font-semibold uppercase tracking-wider text-gold-300">{% translate "Bojxona instituti" %}</p>
+        <h1 id="hero-title" class="text-xl font-bold leading-tight drop-shadow sm:text-3xl">{{ title }}</h1>
+        {% if subtitle or tag %}<p class="mt-0.5 text-sm text-slate-200">{{ subtitle }}{% if subtitle and tag %} · {% endif %}{% if tag %}<span class="whitespace-nowrap">{{ tag }}</span>{% endif %}</p>{% endif %}
+      </div>
+    </div>
+    <div class="w-full rounded-2xl bg-brand-950/55 p-3 ring-1 ring-white/15 backdrop-blur-sm sm:w-80 sm:p-4" data-clock data-server-now="{{ clock.server_now_ms }}" data-weekdays="{{ clock.js.weekdays }}" data-months="{{ clock.js.months }}"
+         data-day-month="{{ clock.js.day_month }}" data-left-hm="{{ clock.js.left_hm }}" data-left-m="{{ clock.js.left_m }}" aria-live="off">
+      <div class="flex items-baseline justify-between gap-3">
+        <p class="text-3xl font-bold tabular-nums tracking-tight" data-clock-time>{{ clock.time }}</p>
+        <p class="text-right text-xs text-slate-200 sm:text-sm" data-clock-date>{{ clock.date }}</p>
+      </div>
+      <p class="mt-2 text-xs text-slate-200">{% translate "Joriy sutka:" %} <span class="font-semibold text-white" data-duty-label>{{ clock.duty_label }}</span></p>
+      <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-white/20" role="progressbar" aria-label="{% translate "Joriy sutka o‘tgan qismi" %}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ clock.duty_pct|floatformat:0 }}">
+        <div class="h-2 rounded-full bg-gold-400" data-duty-bar style="width: {{ clock.duty_pct|stringformat:'.1f' }}%"></div>
+      </div>
+      <p class="mt-1.5 text-xs text-gold-200" data-duty-left>{{ clock.duty_left }}</p>
+    </div>
+  </div>
+</section>

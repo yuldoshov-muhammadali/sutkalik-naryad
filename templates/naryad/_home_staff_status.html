@@ -1,0 +1,82 @@
+{% load i18n %}{% if banner %}{# Ertangi ro‘yxat muddati (14-bosqich, CLAUDE.md 60-band) #}
+<div class="mb-4 flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-lg sm:flex-row sm:items-center sm:justify-between
+  {% if banner.level == 'red' %}border-red-200 bg-red-50 text-red-900{% elif banner.level == 'yellow' %}border-amber-200 bg-amber-50 text-amber-900{% else %}border-green-200 bg-green-50 text-green-900{% endif %}"
+  role="{% if banner.level == 'green' %}status{% else %}alert{% endif %}" data-testid="approval-banner" data-level="{{ banner.level }}">
+  <p class="text-sm font-semibold">{{ banner.text }}</p>
+  <a href="{{ banner.action_url }}" class="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold shadow-sm
+    {% if banner.level == 'red' %}bg-red-700 text-white hover:bg-red-800{% elif banner.level == 'yellow' %}bg-brand-800 text-white hover:bg-brand-900{% else %}bg-white text-green-900 ring-1 ring-green-300 hover:bg-green-100{% endif %}">{{ banner.action_label }}</a>
+</div>
+{% endif %}<section class="rounded-2xl bg-white/85 p-4 shadow-lg ring-1 ring-slate-200 backdrop-blur" aria-labelledby="week-title">
+  <h2 id="week-title" class="text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "2-kurs haftasi" %}</h2>
+  {% if data.week %}
+  <p class="mt-1 text-sm text-slate-700">
+    {% blocktranslate with start=data.week.start_date|date:"d.m.Y" end=data.week.end_at|date:"d.m.Y" %}{{ start }} (yakshanba 18:00) – {{ end }} (yakshanba 18:00){% endblocktranslate %}
+    {% if data.week_state == "upcoming" %}<span class="ml-1 rounded bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-800">{% translate "kelgusi hafta" %}</span>
+    {% elif data.week_state == "past" %}<span class="ml-1 rounded bg-slate-200 px-1.5 py-0.5 text-xs font-medium text-slate-700">{% translate "o‘tgan hafta" %}</span>
+    {% else %}<span class="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-800">{% translate "joriy hafta" %}</span>{% endif %}
+  </p>
+  {% else %}
+  <p class="mt-1 text-sm text-slate-700">{% translate "Hali birorta ham 2-kurs haftasi ochilmagan." %}</p>
+  {% endif %}
+</section>
+
+{% for notice in data.notices %}
+<div class="mt-4 rounded-lg border border-amber-200 bg-amber-50/95 px-4 py-3 text-sm text-amber-900">{{ notice }}</div>
+{% endfor %}
+
+<section class="mt-4 rounded-2xl bg-white/85 p-4 shadow-lg ring-1 ring-slate-200 backdrop-blur" aria-labelledby="next-step">
+  <h2 id="next-step" class="text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Keyingi qadam" %}</h2>
+  <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+    {% for step in data.steps %}
+      {% if step.enabled %}
+      <a href="{{ step.url }}" class="rounded-lg px-4 py-2.5 text-center text-sm font-semibold shadow-sm {% if step.primary %}bg-brand-800 text-white hover:bg-brand-900{% else %}bg-white text-brand-900 ring-1 ring-brand-800 hover:bg-brand-50{% endif %}">{{ step.label }}</a>
+      {% else %}
+      <span class="flex flex-col rounded-lg bg-slate-100 px-4 py-2 text-center text-sm font-semibold text-slate-400 ring-1 ring-slate-200 cursor-not-allowed" aria-disabled="true">
+        {{ step.label }}
+        {% if step.hint %}<span class="text-xs font-normal">{{ step.hint }}</span>{% endif %}
+      </span>
+      {% endif %}
+    {% empty %}
+      <p class="text-sm text-slate-600">{% translate "Hozircha bajariladigan ish yo‘q." %}</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% if fairness %}
+<section class="mt-4 rounded-2xl bg-white/85 p-4 shadow-lg ring-1 ring-slate-200 backdrop-blur" aria-labelledby="fairness-title" data-testid="home-fairness">
+  <div class="flex items-center justify-between gap-2">
+    <h2 id="fairness-title" class="text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Adolat (butun tarix)" %}</h2>
+    <a href="{% url 'stats' %}" class="text-sm font-medium text-brand-800 hover:underline">{% translate "Statistika" %} →</a>
+  </div>
+  <ul class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+    {% for f in fairness %}
+    <li><a href="{% url 'stats' %}{% if f.pool != 'qizlar' %}?guruh={{ f.pool }}{% endif %}" class="flex flex-col gap-1 rounded-lg bg-slate-50 px-3 py-2 ring-1 ring-slate-200 hover:bg-slate-100" data-pool="{{ f.pool }}">
+      <span class="text-sm font-medium">{% if f.pool == 'qizlar' %}{% translate "Qizlar" %}{% else %}{{ f.pool }}{% endif %}</span>
+      {% include "naryad/stats/_badge.html" %}
+    </a></li>
+    {% endfor %}
+  </ul>
+  <p class="mt-2 text-xs text-slate-500">{% translate "Yashil — farq ≤ 1, sariq — 2, qizil — ≥ 3 (guruh ichida, jami naryadlar bo‘yicha)." %}</p>
+</section>
+{% endif %}
+
+{% if data.days %}
+<section class="mt-4" aria-labelledby="week-days">
+  <h2 id="week-days" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Haftaning 7 sutkasi" %}</h2>
+  <ol class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    {% for day in data.days %}
+    <li><a href="{% url 'day_detail' day.date|date:'Y-m-d' %}" class="flex items-center justify-between gap-3 rounded-xl bg-white/85 px-4 py-3 shadow-sm ring-1 backdrop-blur hover:bg-slate-50 {% if day.is_current %}ring-2 ring-brand-700{% else %}ring-slate-200{% endif %}">
+      <div class="min-w-0">
+        <p class="text-xs text-slate-500">{% blocktranslate with n=forloop.counter %}{{ n }}-sutka{% endblocktranslate %} · {{ day.weekday }}{% if day.is_current %} · <span class="font-semibold text-brand-800">{% translate "hozir" %}</span>{% endif %}</p>
+        <p class="font-medium">{{ day.title }}</p>
+        {% if day.warnings %}<p class="text-xs text-amber-700">{% blocktranslate count n=day.warnings %}{{ n }} ta ogohlantirish{% plural %}{{ n }} ta ogohlantirish{% endblocktranslate %}</p>{% endif %}
+      </div>
+      <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold
+        {% if day.status == 'approved' %}bg-green-100 text-green-800
+        {% elif day.status == 'draft' %}bg-amber-100 text-amber-800
+        {% else %}bg-slate-100 text-slate-600{% endif %}">{{ day.status_label }}</span>
+    </a></li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}

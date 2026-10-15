@@ -1,26 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Sutka {{ date|date:"d.m.Y" }}{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktranslate with d=date|date:"d.m.Y" %}Sutka {{ d }}{% endblocktranslate %}{% endblock %}
 {% block content %}
-<nav class="crumbs mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500" aria-label="Yo‘l">
-  <span>{% if can.week_view %}<a href="{% url 'week_list' %}" class="hover:underline">Haftalar</a>{% else %}<a href="{% url 'approved_days' %}" class="hover:underline">Tasdiqlangan naryadlar</a>{% endif %} / {{ date|date:"d.m.Y" }}</span>
+<nav class="crumbs mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}">
+  <span>{% if can.week_view %}<a href="{% url 'week_list' %}" class="hover:underline">{% translate "Haftalar" %}</a>{% else %}<a href="{% url 'approved_days' %}" class="hover:underline">{% translate "Tasdiqlangan naryadlar" %}</a>{% endif %} / {{ date|date:"d.m.Y" }}</span>
   <span class="flex gap-1">
-    <a href="{% url 'day_detail' prev_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="Oldingi sutka">← {{ prev_date|date:"d.m" }}</a>
-    <a href="{% url 'day_detail' next_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="Keyingi sutka">{{ next_date|date:"d.m" }} →</a>
+    <a href="{% url 'day_detail' prev_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="{% translate "Oldingi sutka" %}">← {{ prev_date|date:"d.m" }}</a>
+    <a href="{% url 'day_detail' next_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="{% translate "Keyingi sutka" %}">{{ next_date|date:"d.m" }} →</a>
   </span>
 </nav>
 
 <div class="flex flex-wrap items-start justify-between gap-3">
   <div>
-    <h1 class="text-lg font-semibold sm:text-2xl">{{ date|date:"Y" }}-yil {{ title }}</h1>
-    <p class="text-sm text-slate-600">{{ weekday }}, 18:00 → ertasi 18:00 · sutkalik naryadlar ro‘yxati</p>
+    <h1 class="text-lg font-semibold sm:text-2xl">{% blocktranslate with year=date|date:"Y" %}{{ year }}-yil {{ title }}{% endblocktranslate %}</h1>
+    <p class="text-sm text-slate-600">{% blocktranslate %}{{ weekday }}, 18:00 → ertasi 18:00 · sutkalik naryadlar ro‘yxati{% endblocktranslate %}</p>
   </div>
   {% include "naryad/days/_status.html" with status=duty_day.status|default:"none" %}
 </div>
 
 {% if issues %}
 <div class="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900" role="alert">
-  <p class="font-semibold">Diqqat — tasdiqlashdan oldin tuzating:</p>
+  <p class="font-semibold">{% translate "Diqqat — tasdiqlashdan oldin tuzating:" %}</p>
   <ul class="mt-1 list-disc space-y-1 pl-5">{% for i in issues %}<li>{{ i.text }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% if notes %}
+<div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" role="status" data-testid="day-notes">
+  <ul class="list-disc space-y-1 pl-5">{% for n in notes %}<li>{{ n }}</li>{% endfor %}</ul>
 </div>
 {% endif %}
 
@@ -28,57 +34,57 @@
 {% if can.day_view_draft %}
 <div class="mt-4 flex flex-wrap items-center gap-2">
   {% if not duty_day %}
-    {% if has_log %}<a href="{% url 'day_log' date|date:'Y-m-d' %}" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">Jurnal</a>{% endif %}
+    {% if has_log %}<a href="{% url 'day_log' date|date:'Y-m-d' %}" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">{% translate "Jurnal" %}</a>{% endif %}
     {% if generation_blocker %}
       <p class="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ generation_blocker }}
-        {% if "boshlang‘ich" in generation_blocker and can.settings_manage %}<a class="font-semibold underline" href="{% url 'admin:naryad_setting_change' 1 %}">Sozlamalar</a>{% endif %}</p>
+        {% if blocker_needs_settings and can.settings_manage %}<a class="font-semibold underline" href="{% url 'admin:naryad_setting_change' 1 %}">{% translate "Sozlamalar" %}</a>{% endif %}</p>
     {% elif can.day_generate %}
       <form method="post" action="{% url 'day_generate' date|date:'Y-m-d' %}">{% csrf_token %}<input type="hidden" name="version" value="0">
-        <button type="submit" class="rounded-lg bg-green-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900">Tuzish</button></form>
-      <p class="text-sm text-slate-600">Ro‘yxatni dastur tarix asosida avtomatik tuzadi (qoralama).</p>
+        <button type="submit" class="rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900">{% translate "Tuzish" %}</button></form>
+      <p class="text-sm text-slate-600">{% translate "Ro‘yxatni dastur tarix asosida avtomatik tuzadi (qoralama)." %}</p>
     {% endif %}
   {% elif not duty_day.is_approved %}
     {% if can.day_approve %}
     <form method="post" action="{% url 'day_approve' date|date:'Y-m-d' %}">{% csrf_token %}<input type="hidden" name="version" value="{{ duty_day.version }}">
-      <button type="submit" {% if issues %}disabled title="Avval ogohlantirishlarni tuzating"{% endif %}
-              class="rounded-lg bg-green-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900 disabled:cursor-not-allowed disabled:bg-slate-300">Tasdiqlash</button></form>
+      <button type="submit" {% if issues %}disabled title="{% translate "Avval ogohlantirishlarni tuzating" %}"{% endif %}
+              class="rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900 disabled:cursor-not-allowed disabled:bg-slate-300">{% translate "Tasdiqlash" %}</button></form>
     {% endif %}
     {% if can.day_generate %}
-    <form method="post" action="{% url 'day_generate' date|date:'Y-m-d' %}" data-confirm="Qoralama qayta tuziladi — qo‘lda kiritilgan o‘zgarishlar o‘chadi. Davom etasizmi?">
+    <form method="post" action="{% url 'day_generate' date|date:'Y-m-d' %}" data-confirm="{% translate "Qoralama qayta tuziladi — qo‘lda kiritilgan o‘zgarishlar o‘chadi. Davom etasizmi?" %}">
       {% csrf_token %}<input type="hidden" name="version" value="{{ duty_day.version }}">
-      <button type="submit" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-green-900 ring-1 ring-green-800 hover:bg-green-50">Qayta tuzish</button></form>
+      <button type="submit" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-brand-900 ring-1 ring-brand-800 hover:bg-brand-50">{% translate "Qayta tuzish" %}</button></form>
     {% endif %}
-    <a href="{% url 'day_log' date|date:'Y-m-d' %}" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">Jurnal</a>
+    <a href="{% url 'day_log' date|date:'Y-m-d' %}" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">{% translate "Jurnal" %}</a>
     {% if can.day_generate %}
     <details class="w-full sm:w-auto">
-      <summary class="cursor-pointer list-none rounded-lg px-4 py-2.5 text-sm font-semibold text-red-700 ring-1 ring-red-300 hover:bg-red-50">Qoralamani o‘chirish…</summary>
+      <summary class="cursor-pointer list-none rounded-lg px-4 py-2.5 text-sm font-semibold text-red-700 ring-1 ring-red-300 hover:bg-red-50">{% translate "Qoralamani o‘chirish…" %}</summary>
       {% if delete_blocker %}
       <p class="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">{{ delete_blocker }}</p>
       {% else %}
       <form method="post" action="{% url 'day_delete' date|date:'Y-m-d' %}" class="mt-2 space-y-2 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:w-96">
         {% csrf_token %}<input type="hidden" name="version" value="{{ duty_day.version }}">
-        <p class="text-sm text-slate-600">Qoralama butunlay o‘chiriladi (jurnal saqlanadi). Shundan keyin oldingi sutkaning tasdig‘ini bekor qilish mumkin bo‘ladi.</p>
-        <label class="block text-sm font-medium">Sabab (majburiy)
+        <p class="text-sm text-slate-600">{% translate "Qoralama butunlay o‘chiriladi (jurnal saqlanadi). Shundan keyin oldingi sutkaning tasdig‘ini bekor qilish mumkin bo‘ladi." %}</p>
+        <label class="block text-sm font-medium">{% translate "Sabab (majburiy)" %}
           <input type="text" name="reason" required maxlength="300" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base"></label>
-        <button type="submit" class="w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">Qoralamani o‘chirish</button>
+        <button type="submit" class="w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">{% translate "Qoralamani o‘chirish" %}</button>
       </form>
       {% endif %}
     </details>
     {% endif %}
   {% else %}
-    <p class="text-sm text-slate-600">Tasdiqlagan: {{ duty_day.approved_by.get_full_name|default:duty_day.approved_by.username|default:"—" }}, {{ duty_day.approved_at|date:"d.m.Y H:i" }}</p>
-    <a href="{% url 'day_log' date|date:'Y-m-d' %}" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">Jurnal</a>
+    <p class="text-sm text-slate-600">{% if duty_day.approved_by %}{% blocktranslate with name=duty_day.approved_by.get_full_name|default:duty_day.approved_by.username at=duty_day.approved_at|date:"d.m.Y H:i" %}Tasdiqlagan: {{ name }}, {{ at }}{% endblocktranslate %}{% else %}{% blocktranslate with name="—" at=duty_day.approved_at|date:"d.m.Y H:i" %}Tasdiqlagan: {{ name }}, {{ at }}{% endblocktranslate %}{% endif %}</p>
+    <a href="{% url 'day_log' date|date:'Y-m-d' %}" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">{% translate "Jurnal" %}</a>
     {% if can.day_reopen %}
     <details class="w-full sm:w-auto">
-      <summary class="cursor-pointer list-none rounded-lg px-4 py-2 text-sm font-semibold text-red-700 ring-1 ring-red-300 hover:bg-red-50">Tasdiqni bekor qilish…</summary>
+      <summary class="cursor-pointer list-none rounded-lg px-4 py-2 text-sm font-semibold text-red-700 ring-1 ring-red-300 hover:bg-red-50">{% translate "Tasdiqni bekor qilish…" %}</summary>
       {% if reopen_blocker %}
       <p class="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">{{ reopen_blocker }}</p>
       {% else %}
       <form method="post" action="{% url 'day_reopen' date|date:'Y-m-d' %}" class="mt-2 space-y-2 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:w-96">
         {% csrf_token %}<input type="hidden" name="version" value="{{ duty_day.version }}">
-        <label class="block text-sm font-medium">Sabab (majburiy)
+        <label class="block text-sm font-medium">{% translate "Sabab (majburiy)" %}
           <input type="text" name="reason" required maxlength="300" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base"></label>
-        <button type="submit" class="w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">Tasdiqni bekor qilish</button>
+        <button type="submit" class="w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">{% translate "Tasdiqni bekor qilish" %}</button>
       </form>
       {% endif %}
     </details>
@@ -89,9 +95,9 @@
 
 {% if duty_day and can.pdf_export %}
 <div class="mt-3 flex flex-wrap gap-2">
-  <a href="{% url 'day_pdf' date|date:'Y-m-d' %}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50">⬇ PDF yuklab olish</a>
-  <a href="{% url 'day_print' date|date:'Y-m-d' %}" target="_blank" rel="noopener" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50">🖨 Chop etish</a>
-  {% if not duty_day.is_approved %}<span class="self-center text-xs text-slate-500">Qoralama PDF’ida “QORALAMA” yozuvi bo‘ladi.</span>{% endif %}
+  <a href="{% url 'day_pdf' date|date:'Y-m-d' %}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50">⬇ {% translate "PDF yuklab olish" %}</a>
+  <a href="{% url 'day_print' date|date:'Y-m-d' %}" target="_blank" rel="noopener" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50">🖨 {% translate "Chop etish" %}</a>
+  {% if not duty_day.is_approved %}<span class="self-center text-xs text-slate-500">{% translate "Qoralama PDF’ida “QORALAMA” yozuvi bo‘ladi." %}</span>{% endif %}
 </div>
 {% endif %}
 
@@ -99,30 +105,30 @@
 {% if duty_day %}
 <div class="mt-5 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
   <div class="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6rem_8rem] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium text-slate-500 md:grid">
-    <span>Lavozim</span><span>F.I.Sh.</span><span>Guruh</span><span></span>
+    <span>{% translate "Lavozim" %}</span><span>{% translate "F.I.Sh." %}</span><span>{% translate "Guruh" %}</span><span></span>
   </div>
   {% for section in sections %}
-  <section class="border-b border-slate-100 last:border-0" aria-label="{{ section.post.section_title }}">
+  <section class="border-b border-slate-100 last:border-0" aria-label="{% translate section.post.section_title %}">
     <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50/70 px-4 py-2">
-      <h2 class="text-sm font-bold">{{ section.post.section_title }}
-        {% if section.group_code %}<span class="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-xs font-semibold text-green-800">{{ section.group_code }} guruhi</span>
-        {% elif section.post.gender == 'F' %}<span class="ml-1 rounded bg-pink-100 px-1.5 py-0.5 text-xs font-semibold text-pink-800">qizlar navbati</span>{% endif %}
+      <h2 class="text-sm font-bold">{% translate section.post.section_title %}
+        {% if section.group_code %}<span class="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-xs font-semibold text-green-800">{% blocktranslate with code=section.group_code %}{{ code }} guruhi{% endblocktranslate %}</span>
+        {% elif section.post.gender == 'F' %}<span class="ml-1 rounded bg-pink-100 px-1.5 py-0.5 text-xs font-semibold text-pink-800">{% translate "qizlar navbati" %}</span>{% endif %}
       </h2>
       {% if editable and section.can_swap %}
       <button type="button" hx-get="{% url 'day_swap' date|date:'Y-m-d' section.post.pk %}" hx-target="#modal"
-              class="rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">Lavozimlarni almashtirish</button>
+              class="rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-white">{% translate "Lavozimlarni almashtirish" %}</button>
       {% endif %}
     </div>
     <ul>
       {% for row in section.rows %}
-      <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-2.5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6rem_8rem] {% if not row.assignment %}bg-red-50{% endif %}">
-        <span class="col-span-2 text-xs text-slate-500 md:col-span-1 md:text-sm md:text-slate-800">{% if row.slot.show_label %}{{ row.slot.print_label }}{% else %}<span class="md:invisible">{{ row.slot.print_label }}</span>{% endif %}</span>
-        <span class="min-w-0 break-words font-medium">{% if row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="qo‘lda">✎</span>{% endif %}{% else %}<span class="text-red-700">— bo‘sh —</span>{% endif %}</span>
+      <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-2.5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6rem_8rem] {% if not row.assignment %}bg-red-50{% elif row.is_penalty %}bg-gold-50{% endif %}"{% if row.is_penalty %} data-testid="penalty-row"{% endif %}>
+        <span class="col-span-2 text-xs text-slate-500 md:col-span-1 md:text-sm md:text-slate-800">{% if row.slot.show_label %}{% translate row.slot.print_label %}{% else %}<span class="md:invisible">{% translate row.slot.print_label %}</span>{% endif %}</span>
+        <span class="min-w-0 break-words font-medium">{% if row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="{% translate "qo‘lda" %}">✎</span>{% endif %}{% if row.is_penalty %} <span class="whitespace-nowrap rounded bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-brand-950" title="{% translate "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Zalyot" %}</span>{% endif %}{% else %}<span class="text-red-700">{% translate "— bo‘sh —" %}</span>{% endif %}</span>
         <span class="text-sm text-slate-600 md:order-none">{% if row.assignment %}{{ row.assignment.group.code }}{% endif %}</span>
         <span class="col-span-2 md:col-span-1 md:text-right">
           {% if editable %}
           <button type="button" hx-get="{% url 'day_replace' date|date:'Y-m-d' row.slot.pk %}" hx-target="#modal"
-                  class="rounded-lg px-2.5 py-1 text-xs font-semibold {% if row.assignment %}text-green-900 ring-1 ring-green-800 hover:bg-green-50{% else %}bg-red-700 text-white hover:bg-red-800{% endif %}">{% if row.assignment %}Almashtirish{% else %}Kursant qo‘yish{% endif %}</button>
+                  class="rounded-lg px-2.5 py-1 text-xs font-semibold {% if row.assignment %}text-brand-900 ring-1 ring-brand-800 hover:bg-brand-50{% else %}bg-red-700 text-white hover:bg-red-800{% endif %}">{% if row.assignment %}{% translate "Almashtirish" %}{% else %}{% translate "Kursant qo‘yish" %}{% endif %}</button>
           {% endif %}
         </span>
       </li>
@@ -132,7 +138,7 @@
   {% endfor %}
 </div>
 {% elif not can.day_view_draft %}
-<p class="mt-5 text-sm text-slate-600">Bu sutka hali tasdiqlanmagan.</p>
+<p class="mt-5 text-sm text-slate-600">{% translate "Bu sutka hali tasdiqlanmagan." %}</p>
 {% endif %}
 
 <div id="modal"></div>

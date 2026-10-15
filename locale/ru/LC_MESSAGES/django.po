@@ -1,0 +1,2959 @@
+# Sutkalik naryad platformasi — ruscha tarjima (msgid: o‘zbekcha matn). Atamalar: docs/atamalar.md
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: sutkalik-naryad 1.4.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 06:53+0500\n"
+"PO-Revision-Date: 2026-10-14 12:00+0500\n"
+"Last-Translator: Sutkalik naryad jamoasi\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+msgid "Kursant"
+msgstr "Курсант"
+
+msgid "Sabab"
+msgstr "Причина"
+
+msgid "Birinchi sutka"
+msgstr "Первые сутки"
+
+msgid "Oxirgi sutka (ichida)"
+msgstr "Последние сутки (включительно)"
+
+msgid "Izoh"
+msgstr "Примечание"
+
+msgid "— kursantni tanlang —"
+msgstr "— выберите курсанта —"
+
+msgid "Oxirgi sutka birinchisidan oldin bo‘lishi mumkin emas."
+msgstr "Последние сутки не могут быть раньше первых."
+
+#, python-format
+msgid ""
+"%(name)s uchun bu sanalarga allaqachon yozuv bor: %(reason)s "
+"%(start)s–%(end)s. O‘sha yozuvning tugash sanasini o‘zgartiring."
+msgstr ""
+"Для %(name)s на эти даты уже есть запись: %(reason)s %(start)s–%(end)s. "
+"Измените дату окончания этой записи."
+
+msgid "Yangi tugash sanasi"
+msgstr "Новая дата окончания"
+
+msgid "Tugash sanasi boshlanish sanasidan oldin bo‘lishi mumkin emas."
+msgstr "Дата окончания не может быть раньше даты начала."
+
+msgid "Bu sanalarda shu kursantning boshqa yozuvi bor."
+msgstr "На эти даты у этого курсанта уже есть другая запись."
+
+msgid "Naryad platformasi"
+msgstr "Платформа нарядов"
+
+msgid "o‘g‘il"
+msgstr "юноши"
+
+msgid "qiz"
+msgstr "девушки"
+
+msgid "Faollik"
+msgstr "Активность"
+
+msgid "Naryaddan ozod"
+msgstr "Освобождён от наряда"
+
+msgid ""
+"Kursant kartochkasidagi “Naryaddan ozod qilish” / “Naryadga qaytarish” "
+"orqali o‘zgartiriladi."
+msgstr ""
+"Изменяется через “Освободить от наряда” / “Вернуть в наряд” в карточке "
+"курсанта."
+
+msgid "Tizim"
+msgstr "Система"
+
+msgid "F.I.Sh."
+msgstr "ФИО"
+
+msgid "o‘rinlar"
+msgstr "места"
+
+msgid "sutkalar"
+msgstr "сутки"
+
+msgid "tasdiqlangan"
+msgstr "утверждено"
+
+msgid "ogohlantirish"
+msgstr "предупреждение"
+
+#, python-format
+msgid ""
+"Boshlang‘ich taqsimotda 6 ta joyning har biri bir martadan bo‘lishi kerak "
+"(hozir %(n)d ta)."
+msgid_plural ""
+"Boshlang‘ich taqsimotda 6 ta joyning har biri bir martadan bo‘lishi kerak "
+"(hozir %(n)d ta)."
+msgstr[0] ""
+"В начальном распределении каждый из 6 постов должен встречаться ровно один "
+"раз (сейчас %(n)d)."
+msgstr[1] ""
+"В начальном распределении каждый из 6 постов должен встречаться ровно один "
+"раз (сейчас %(n)d)."
+msgstr[2] ""
+"В начальном распределении каждый из 6 постов должен встречаться ровно один "
+"раз (сейчас %(n)d)."
+msgstr[3] ""
+"В начальном распределении каждый из 6 постов должен встречаться ровно один "
+"раз (сейчас %(n)d)."
+
+msgid ""
+"Boshlang‘ich guruh → joy taqsimoti (faqat bazada tasdiqlangan tarix "
+"bo‘lmaganda, birinchi sutka uchun ishlatiladi)"
+msgstr ""
+"Начальное распределение группа → пост (используется для первых суток, только"
+" если в базе нет утверждённой истории)"
+
+msgid "hozir bloklangan"
+msgstr "сейчас заблокирован"
+
+msgid "Sutkalik naryad — boshqaruv paneli"
+msgstr "Суточный наряд — панель управления"
+
+msgid "Sutkalik naryad"
+msgstr "Суточный наряд"
+
+msgid "2-kurs sutkalik naryadlari"
+msgstr "Суточные наряды 2-го курса"
+
+#, python-format
+msgid ""
+"Juda ko‘p noto‘g‘ri urinish (%(failures)s marta). Bu login %(minutes)s "
+"daqiqaga bloklandi — taxminan %(left)s daqiqadan keyin qayta urinib ko‘ring."
+msgid_plural ""
+"Juda ko‘p noto‘g‘ri urinish (%(failures)s marta). Bu login %(minutes)s "
+"daqiqaga bloklandi — taxminan %(left)s daqiqadan keyin qayta urinib ko‘ring."
+msgstr[0] ""
+"Слишком много неудачных попыток (%(failures)s раз). Этот логин заблокирован "
+"на %(minutes)s мин — попробуйте снова примерно через %(left)s минуту."
+msgstr[1] ""
+"Слишком много неудачных попыток (%(failures)s раз). Этот логин заблокирован "
+"на %(minutes)s мин — попробуйте снова примерно через %(left)s минуты."
+msgstr[2] ""
+"Слишком много неудачных попыток (%(failures)s раз). Этот логин заблокирован "
+"на %(minutes)s мин — попробуйте снова примерно через %(left)s минут."
+msgstr[3] ""
+"Слишком много неудачных попыток (%(failures)s раз). Этот логин заблокирован "
+"на %(minutes)s мин — попробуйте снова примерно через %(left)s минут."
+
+msgid ""
+"Login yoki parol noto‘g‘ri. Ikkalasida ham katta-kichik harf farqlanadi."
+msgstr "Неверный логин или пароль. В обоих учитывается регистр букв."
+
+msgid "Bu akkaunt faol emas."
+msgstr "Эта учётная запись неактивна."
+
+msgid "Login"
+msgstr "Логин"
+
+msgid "Parol"
+msgstr "Пароль"
+
+msgid "Login yoki parol noto‘g‘ri yoki boshqaruv paneliga kirish huquqi yo‘q."
+msgstr "Неверный логин или пароль либо нет доступа к панели управления."
+
+msgid ""
+"Xavfsizlik uchun avval vaqtinchalik parolni o‘zingizning parolingizga "
+"almashtiring."
+msgstr "В целях безопасности сначала замените временный пароль на свой."
+
+msgid "Fayl .xlsx (Excel) formatida emas."
+msgstr "Файл не в формате .xlsx (Excel)."
+
+msgid "Faylni o‘qib bo‘lmadi — .xlsx (Excel) formatida ekanini tekshiring."
+msgstr ""
+"Не удалось прочитать файл — убедитесь, что он в формате .xlsx (Excel)."
+
+msgid "Fayl ichidagi ma’lumot juda katta."
+msgstr "Слишком большой объём данных в файле."
+
+msgid "Fayl juda katta (2 MB dan oshmasin)."
+msgstr "Файл слишком большой (не более 2 МБ)."
+
+#, python-format
+msgid "Qatorlar juda ko‘p; ko‘pi bilan %(max)s ta."
+msgstr "Слишком много строк; не более %(max)s."
+
+msgid "Fayl bo‘sh."
+msgstr "Файл пуст."
+
+#, python-format
+msgid ""
+"Sarlavha qatorida ustunlar yetishmaydi: %(missing)s. Kerakli: %(required)s."
+msgstr ""
+"В строке заголовков не хватает столбцов: %(missing)s. Требуются: "
+"%(required)s."
+
+#, python-format
+msgid "Qatorlar juda ko‘p (%(count)s); ko‘pi bilan %(max)s ta."
+msgstr "Слишком много строк (%(count)s); не более %(max)s."
+
+msgid "familiya bo‘sh"
+msgstr "фамилия не заполнена"
+
+msgid "ism bo‘sh"
+msgstr "имя не заполнено"
+
+#, python-format
+msgid "guruh topilmadi: «%(group)s»"
+msgstr "группа не найдена: «%(group)s»"
+
+msgid "guruh bo‘sh"
+msgstr "группа не заполнена"
+
+#, python-format
+msgid "jins noto‘g‘ri: «%(gender)s» (o‘g‘il yoki qiz)"
+msgstr "неверный пол: «%(gender)s» (ожидается «male» или «female»)"
+
+#, python-format
+msgid "fayl ichida takrorlangan (%(line)s-qator bilan bir xil)"
+msgstr "повтор в файле (совпадает со строкой %(line)s)"
+
+#, python-format
+msgid "%(line)s-qator: %(problem)s"
+msgstr "Строка %(line)s: %(problem)s"
+
+#, python-format
+msgid "Guruh: %(old)s → %(new)s"
+msgstr "Группа: %(old)s → %(new)s"
+
+#, python-format
+msgid "Otasining ismi: %(old)s → %(new)s"
+msgstr "Отчество: %(old)s → %(new)s"
+
+#, python-format
+msgid ""
+"%(line)s-qator: «%(name)s» bir nechta guruhda bor — qaysi biri ekanini "
+"aniqlab bo‘lmaydi"
+msgstr ""
+"Строка %(line)s: «%(name)s» есть в нескольких группах — невозможно "
+"определить, в какой именно"
+
+#, python-format
+msgid "%(line)s-qator: bazadagi “%(name)s” faylda ikkinchi marta uchradi"
+msgstr "Строка %(line)s: “%(name)s” из базы встречается в файле второй раз"
+
+#, python-format
+msgid "Jinsi: %(old)s → %(new)s"
+msgstr "Пол: %(old)s → %(new)s"
+
+msgid "Xatoli qatorlar bor — import tasdiqlanmaydi."
+msgstr "Есть строки с ошибками — импорт не будет подтверждён."
+
+msgid "Familiya"
+msgstr "Фамилия"
+
+msgid "Ism"
+msgstr "Имя"
+
+msgid "Otasining ismi"
+msgstr "Отчество"
+
+msgid "Guruh"
+msgstr "Группа"
+
+msgid "Jinsi"
+msgstr "Пол"
+
+msgid "Qisqa ism"
+msgstr "Краткое имя"
+
+msgid "Chetlatilgan"
+msgstr "Отчислен"
+
+msgid "Akademik ta’til"
+msgstr "Академический отпуск"
+
+msgid "Boshqa kursga o‘tgan"
+msgstr "Переведён на другой курс"
+
+msgid "Boshqa (izohda yozing)"
+msgstr "Другое (укажите в примечании)"
+
+msgid ""
+"Tushundim: tarix o‘chmaydi, o‘zgarish faqat keyingi naryadlarga ta’sir "
+"qiladi"
+msgstr ""
+"Понятно: история не удаляется, изменение влияет только на следующие наряды"
+
+msgid ""
+"Bo‘sh qoldirilsa avtomatik: familiya + ism bosh harfi (Sh, Ch, G‘, O‘ "
+"saqlanadi)."
+msgstr ""
+"Если оставить пустым — автоматически: фамилия + первая буква имени (Sh, Ch, "
+"G‘, O‘ сохраняются)."
+
+msgid "Masalan: Bahodir o‘g‘li, Oybek qizi, Davronovich."
+msgstr "Например: Bahodir o‘g‘li, Oybek qizi, Davronovich."
+
+msgid "— guruhni tanlang —"
+msgstr "— выберите группу —"
+
+#, python-format
+msgid ""
+"%(group)s guruhida “%(name)s” allaqachon bor — bir xil F.I.Sh. ikki marta "
+"kiritilmaydi."
+msgstr ""
+"В группе %(group)s уже есть “%(name)s” — одинаковое ФИО нельзя ввести "
+"дважды."
+
+msgid "guruhi va jinsi"
+msgstr "группу и пол"
+
+msgid "guruhi"
+msgstr "группу"
+
+msgid "jinsi"
+msgstr "пол"
+
+#, python-format
+msgid ""
+"Bu kursantning naryad tarixi bor, siz %(fields)sni o‘zgartiryapsiz. Tarix "
+"o‘chmaydi (eski naryadlar o‘sha paytdagi guruh bilan qoladi), o‘zgarish "
+"faqat keyingi naryadlarga ta’sir qiladi. Davom etish uchun belgini qo‘ying."
+msgstr ""
+"У этого курсанта есть история нарядов, а вы меняете %(fields)s. История не "
+"удалится (прежние наряды останутся с группой на тот момент), изменение "
+"повлияет только на последующие наряды. Чтобы продолжить, поставьте отметку."
+
+msgid "masalan: buyruq raqami"
+msgstr "например: номер приказа"
+
+msgid "“Boshqa” sabab uchun izoh majburiy."
+msgstr "Для причины “Другое” комментарий обязателен."
+
+msgid "Lavozimi"
+msgstr "Должность"
+
+msgid "masalan: BI-225 guruh komandiri"
+msgstr "например: командир группы BI-225"
+
+msgid "masalan: buyruq raqami va sanasi"
+msgstr "например: номер и дата приказа"
+
+msgid "masalan: lavozimdan bo‘shadi (buyruq)"
+msgstr "например: освобождён от должности (приказ)"
+
+#, python-format
+msgid ""
+"%(name)s faol zalyotchik (%(count)s ta jazo naryadi) — avval zalyot "
+"bajarilishi yoki bekor qilinishi kerak, keyin naryaddan ozod qilinadi."
+msgstr ""
+"%(name)s — действующий залётчик (нарядов вне очереди: %(count)s): сначала "
+"взыскание должно быть отработано или отменено, затем можно освободить от "
+"наряда."
+
+msgid "Bosh sahifa"
+msgstr "Главная"
+
+msgid "Haftalar"
+msgstr "Недели"
+
+msgid "Sababli holatlar"
+msgstr "Уважительные причины"
+
+msgid "Zalyotchiklar"
+msgstr "Залётчики"
+
+msgid "Kursantlar"
+msgstr "Курсанты"
+
+msgid "Statistika"
+msgstr "Статистика"
+
+msgid "Mening tarixim"
+msgstr "Моя история"
+
+msgid "Boshqaruv paneli"
+msgstr "Панель управления"
+
+#, python-format
+msgid "Smena almashishiga %(h)s soat %(m)s daqiqa qoldi"
+msgstr "До смены наряда осталось %(h)s ч %(m)s мин"
+
+#, python-format
+msgid "Smena almashishiga %(m)s daqiqa qoldi"
+msgstr "До смены наряда осталось %(m)s мин"
+
+msgid "Tuzilmagan"
+msgstr "Не сформировано"
+
+msgid "Qoralama"
+msgstr "Черновик"
+
+msgid "Tasdiqlangan"
+msgstr "Утверждено"
+
+msgid "2-kurs haftasini ochish"
+msgstr "Открыть неделю 2-го курса"
+
+#, python-format
+msgid "%(day)s qoralamasini ko‘rib chiqish va tasdiqlash"
+msgstr "Проверить и утвердить черновик на %(day)s"
+
+#, python-format
+msgid "%(day)s sutkasi qoralamasini tuzish"
+msgstr "Сформировать черновик суток на %(day)s"
+
+msgid ""
+"Tarix yo‘q va boshlang‘ich guruh → joy taqsimoti kiritilmagan — birinchi "
+"sutkani tuzib bo‘lmaydi."
+msgstr ""
+"Нет истории и не введено начальное распределение группа → пост — первые "
+"сутки сформировать невозможно."
+
+msgid "Boshlang‘ich taqsimotni kiritish"
+msgstr "Ввести начальное распределение"
+
+msgid "Bu haftaning barcha 7 sutkasi tuzilgan."
+msgstr "Все 7 суток этой недели сформированы."
+
+msgid "Keyingi 2-kurs haftasini ochish"
+msgstr "Открыть следующую неделю 2-го курса"
+
+#, python-format
+msgid "Naryadga %(d)s kun %(h)s soat qoldi"
+msgstr "До наряда осталось %(d)s дн. %(h)s ч"
+
+#, python-format
+msgid "Naryadga %(h)s soat %(m)s daqiqa qoldi"
+msgstr "До наряда осталось %(h)s ч %(m)s мин"
+
+#, python-format
+msgid "Naryadga %(m)s daqiqa qoldi"
+msgstr "До наряда осталось %(m)s мин"
+
+#, python-format
+msgid "Hozir naryaddasiz, smena almashishiga %(h)s soat %(m)s daqiqa qoldi"
+msgstr "Сейчас вы в наряде, до смены наряда осталось %(h)s ч %(m)s мин"
+
+#, python-format
+msgid "Hozir naryaddasiz, smena almashishiga %(m)s daqiqa qoldi"
+msgstr "Сейчас вы в наряде, до смены наряда осталось %(m)s мин"
+
+msgid "Kasal"
+msgstr "Болен"
+
+msgid "Ta’til"
+msgstr "Отпуск"
+
+msgid "Sababli"
+msgstr "По уважительной причине"
+
+msgid "Boshqa (izoh majburiy)"
+msgstr "Другое (примечание обязательно)"
+
+msgid "Sabab tanlanmagan."
+msgstr "Причина не выбрана."
+
+#, python-format
+msgid "%(post)s: %(n)s ta o‘rin bo‘sh — almashtirish orqali kursant qo‘ying."
+msgid_plural ""
+"%(post)s: %(n)s ta o‘rin bo‘sh — almashtirish orqali kursant qo‘ying."
+msgstr[0] ""
+"%(post)s: %(n)s место не заполнено — поставьте курсанта через замену."
+msgstr[1] ""
+"%(post)s: %(n)s места не заполнены — поставьте курсанта через замену."
+msgstr[2] ""
+"%(post)s: %(n)s мест не заполнено — поставьте курсанта через замену."
+msgstr[3] ""
+"%(post)s: %(n)s мест не заполнено — поставьте курсанта через замену."
+
+#, python-format
+msgid "%(name)s (%(slot)s) faol emas — almashtiring yoki qayta tuzing."
+msgstr "%(name)s (%(slot)s) неактивен — замените или пересформируйте."
+
+#, python-format
+msgid ""
+"%(name)s (%(slot)s) naryaddan ozod (%(position)s) — almashtiring yoki qayta "
+"tuzing."
+msgstr ""
+"%(name)s (%(slot)s) освобождён от наряда (%(position)s) — замените или "
+"пересформируйте."
+
+#, python-format
+msgid ""
+"%(name)s zalyoti bekor qilingan — jazo o‘rnini almashtiring yoki qayta "
+"tuzing."
+msgstr ""
+"Взыскание %(name)s отменено — замените его на месте наряда вне очереди или "
+"пересформируйте."
+
+#, python-format
+msgid ""
+"%(name)s (%(slot)s) — %(reason)s (%(start)s–%(end)s). Almashtiring yoki "
+"qayta tuzing."
+msgstr ""
+"%(name)s (%(slot)s) — %(reason)s (%(start)s–%(end)s). Замените или "
+"пересформируйте."
+
+#, python-format
+msgid ""
+"Zalyotchik %(name)s bugun guruhi bilan oddiy navbatda turibdi (jazo hisobiga"
+" o‘tmaydi)."
+msgstr ""
+"Залётчик %(name)s сегодня заступает с группой в обычном порядке (в счёт "
+"наряда вне очереди не идёт)."
+
+#, python-format
+msgid ""
+"Zalyotchik %(name)s faol emasligi (yoki naryaddan ozodligi) uchun bugun "
+"qo‘yilmadi."
+msgstr ""
+"Залётчик %(name)s сегодня не поставлен: неактивен (или освобождён от "
+"наряда)."
+
+#, python-format
+msgid "Zalyotchik %(name)s sababli holatda bo‘lgani uchun bugun qo‘yilmadi."
+msgstr ""
+"Залётчик %(name)s сегодня не поставлен: отсутствует по уважительной причине."
+
+#, python-format
+msgid "Zalyotchik %(name)s kecha turgani uchun bugun qo‘yilmadi."
+msgstr "Залётчик %(name)s сегодня не поставлен, так как стоял вчера."
+
+#, python-format
+msgid "Zalyotchik %(name)s: bugun jazo o‘rni qolmadi — keyingi sutkaga qoldi."
+msgstr ""
+"Залётчик %(name)s: сегодня мест для нарядов вне очереди нет — перенесено на "
+"следующие сутки."
+
+msgid "Bu sana ochilgan 2-kurs haftasiga tegishli emas."
+msgstr "Эта дата не относится к открытой неделе 2-го курса."
+
+msgid ""
+"Tarix ham, boshlang‘ich guruh → joy taqsimoti ham yo‘q — birinchi sutkani "
+"tuzib bo‘lmaydi. Sozlamalarda boshlang‘ich taqsimotni kiriting."
+msgstr ""
+"Нет ни истории, ни начального распределения группа → пост — первые сутки "
+"сформировать невозможно. Введите начальное распределение в настройках."
+
+#, python-format
+msgid "naryaddan ozod — %(position)s"
+msgstr "освобождён от наряда — %(position)s"
+
+msgid "Bu kursant allaqachon shu o‘rinda."
+msgstr "Этот курсант уже на этом месте."
+
+#, python-format
+msgid "%(name)s faol emas (%(reason)s)."
+msgstr "%(name)s неактивен (%(reason)s)."
+
+#, python-format
+msgid ""
+"%(name)s naryaddan ozod (%(position)s) — sutkalik naryadga qo‘yilmaydi."
+msgstr ""
+"%(name)s освобождён от наряда (%(position)s) — в суточный наряд не ставится."
+
+msgid "O‘g‘il bolani Qizlar yotoqxonasiga qo‘yib bo‘lmaydi."
+msgstr "Юношу нельзя поставить в женское общежитие."
+
+msgid ""
+"Qizlar faqat Qizlar yotoqxonasida turadi — o‘g‘il bolalar o‘rniga qo‘yib "
+"bo‘lmaydi."
+msgstr ""
+"Девушки несут наряд только в женском общежитии — их нельзя ставить на места "
+"юношей."
+
+#, python-format
+msgid ""
+"%(name)s faol zalyotchik — oddiy navbatda faqat 1-NO‘J yoki 1-Yotoqxonada "
+"(o‘z guruhi bilan) turadi, boshqa joylarga qo‘yilmaydi."
+msgstr ""
+"%(name)s — действующий залётчик: в обычном порядке заступает только на КПП-1"
+" или в общежитие №1 (со своей группой), на другие посты не ставится."
+
+#, python-format
+msgid ""
+"%(post)s bu sutkada %(group)s guruhiga tegishli — boshqa guruhdan "
+"(%(other)s) kursant qo‘yib bo‘lmaydi."
+msgstr ""
+"%(post)s в эти сутки закреплён за группой %(group)s — нельзя ставить "
+"курсанта из другой группы (%(other)s)."
+
+#, python-format
+msgid "%(name)s shu sutkada boshqa o‘rinda turibdi: %(slot)s."
+msgstr "%(name)s в эти сутки уже стоит на другом месте: %(slot)s."
+
+#, python-format
+msgid ""
+"%(name)s kecha (%(day)s) naryadda bo‘lgan — ketma-ket ikki sutka turmaydi."
+msgstr ""
+"%(name)s был в наряде вчера (%(day)s) — двое суток подряд в наряд не "
+"ставится."
+
+#, python-format
+msgid "%(name)s sababli yo‘q: %(reason)s (%(start)s–%(end)s)."
+msgstr ""
+"%(name)s отсутствует по уважительной причине: %(reason)s "
+"(%(start)s–%(end)s)."
+
+msgid "Bu sutka hali tuzilmagan yoki o‘chirilgan — sahifani yangilang."
+msgstr "Эти сутки ещё не сформированы или удалены — обновите страницу."
+
+msgid ""
+"Sutka tasdiqlangan — o‘zgartirib bo‘lmaydi. Kerak bo‘lsa, admin tasdiqni "
+"bekor qiladi."
+msgstr ""
+"Сутки утверждены — изменить нельзя. При необходимости администратор отменит "
+"утверждение."
+
+msgid "Ikki xil qatorni tanlang."
+msgstr "Выберите две разные строки."
+
+msgid "Ikkala qatorda ham kursant bo‘lishi kerak."
+msgstr "В обеих строках должен быть курсант."
+
+msgid "O‘zaro almashtirish faqat bitta joy ichida mumkin."
+msgstr "Поменять местами можно только в пределах одного поста."
+
+msgid "Ikkala qatorda lavozim bir xil — almashtirishning ma’nosi yo‘q."
+msgstr "В обеих строках одинаковая должность — менять местами нет смысла."
+
+msgid ""
+"Jazo naryadidagi zalyotchik faqat posbon bo‘ladi — uning lavozimini "
+"almashtirib bo‘lmaydi."
+msgstr ""
+"Залётчик в наряде вне очереди может быть только дневальным — его должность "
+"менять нельзя."
+
+#, python-format
+msgid "Tasdiqlab bo‘lmaydi: %(issues)s"
+msgstr "Невозможно утвердить: %(issues)s"
+
+#, python-format
+msgid ""
+"Keyingi sutka (%(day)s) allaqachon tuzilgan — avval uni bekor qilish kerak."
+msgstr ""
+"Следующие сутки (%(day)s) уже сформированы — сначала их нужно отменить."
+
+msgid "Sutka tasdiqlanmagan."
+msgstr "Сутки не утверждены."
+
+msgid "Tasdiqni bekor qilish sababi majburiy."
+msgstr "Причина отмены утверждения обязательна."
+
+msgid "Tasdiqlangan sutkani o‘chirib bo‘lmaydi — avval tasdiqni bekor qiling."
+msgstr "Утверждённые сутки удалить нельзя — сначала отмените утверждение."
+
+#, python-format
+msgid ""
+"Faqat eng oxirgi qoralamani o‘chirish mumkin — keyin %(day)s sutkasi bor."
+msgstr ""
+"Удалить можно только самый последний черновик — после него есть сутки "
+"%(day)s."
+
+msgid "Qoralamani o‘chirish sababi majburiy."
+msgstr "Причина удаления черновика обязательна."
+
+msgid "faol emas"
+msgstr "неактивен"
+
+msgid "sababli yo‘q"
+msgstr "отсутствует по уважительной причине"
+
+msgid "kecha naryadda bo‘lgan"
+msgstr "был в наряде вчера"
+
+msgid "bugun boshqa o‘ringa qo‘yilgan"
+msgstr "сегодня поставлен на другое место"
+
+msgid "faol zalyotchik — oddiy navbatda faqat 1-NO‘J yoki 1-Yotoqxonada"
+msgstr ""
+"действующий залётчик — в обычном порядке только КПП-1 или общежитие №1"
+
+msgid "Markaz bo‘yicha"
+msgstr "По центру"
+
+msgid "Markaz bo‘yicha navbatchi yordamchisi"
+msgstr "Помощник дежурного по центру"
+
+msgid "1-NO‘J bo‘yicha"
+msgstr "КПП-1"
+
+msgid "1-NO‘J bo‘yicha navbatchi"
+msgstr "Дежурный по КПП-1"
+
+msgid "1-NO‘J bo‘yicha navbatchi yordamchisi"
+msgstr "Помощник дежурного по КПП-1"
+
+msgid "1-NO‘J bo‘yicha posbon"
+msgstr "Дневальный по КПП-1"
+
+msgid "2-NO‘J bo‘yicha"
+msgstr "КПП-2"
+
+msgid "2-NO‘J bo‘yicha navbatchi"
+msgstr "Дежурный по КПП-2"
+
+msgid "2-NO‘J bo‘yicha posbon"
+msgstr "Дневальный по КПП-2"
+
+msgid "1-Yotoqxona bo‘yicha"
+msgstr "По общежитию курсантов №1"
+
+msgid "Kurs bo‘yicha navbatchi"
+msgstr "Дежурный по курсу"
+
+msgid "Kurs bo‘yicha posbon"
+msgstr "Дневальный по курсу"
+
+msgid "O‘quv binosi bo‘yicha"
+msgstr "По учебному корпусу"
+
+msgid "O‘quv binosi bo‘yicha navbatchi"
+msgstr "Дежурный по учебному корпусу"
+
+msgid "O‘quv binosi bo‘yicha posbon"
+msgstr "Дневальный по учебному корпусу"
+
+msgid "Institut bo‘yicha patrul"
+msgstr "Патруль по институту"
+
+msgid "Qizlar yotoqxonasi bo‘yicha"
+msgstr "По женскому общежитию"
+
+msgid "Qizlar yotoqxonasi bo‘yicha navbatchi"
+msgstr "Дежурный по женскому общежитию"
+
+msgid "Qizlar yotoqxonasi bo‘yicha posbon"
+msgstr "Дневальный по женскому общежитию"
+
+msgid "Yurisprudensiya"
+msgstr "Юриспруденция"
+
+msgid "Bojxona ishi"
+msgstr "Таможенное дело"
+
+msgid "O‘g‘il"
+msgstr "Юноши"
+
+msgid "Qiz"
+msgstr "Девушки"
+
+msgid "Navbatchi"
+msgstr "Дежурный"
+
+msgid "Navbatchi yordamchisi"
+msgstr "Помощник дежурного"
+
+msgid "Posbon"
+msgstr "Дневальный"
+
+msgid "Admin (kurs boshlig‘i)"
+msgstr "Администратор (начальник курса)"
+
+msgid "Kursant (faqat ko‘rish)"
+msgstr "Курсант (только просмотр)"
+
+msgid "rol"
+msgstr "роль"
+
+msgid "kursant"
+msgstr "курсант"
+
+msgid "interfeys tili"
+msgstr "язык интерфейса"
+
+msgid "parolni almashtirishi shart"
+msgstr "обязан сменить пароль"
+
+msgid ""
+"Belgilansa, foydalanuvchi keyingi kirishda parolini almashtirmaguncha boshqa"
+" sahifalarga o‘ta olmaydi."
+msgstr ""
+"Если отмечено, пользователь при следующем входе не сможет перейти на другие "
+"страницы, пока не сменит пароль."
+
+msgid "foydalanuvchi"
+msgstr "пользователь"
+
+msgid "foydalanuvchilar"
+msgstr "пользователи"
+
+msgid "Kursant roli uchun kursant tanlanishi shart."
+msgstr "Для роли «Курсант» необходимо выбрать курсанта."
+
+msgid "O‘zbek"
+msgstr "Узбекский"
+
+msgid "Rus"
+msgstr "Русский"
+
+msgid "guruh kodi"
+msgstr "код группы"
+
+msgid "Masalan: BI-525"
+msgstr "Например: BI-525"
+
+msgid "ta’lim yo‘nalishi"
+msgstr "направление обучения"
+
+msgid "ta’lim tili"
+msgstr "язык обучения"
+
+msgid "tartib raqami"
+msgstr "порядковый номер"
+
+msgid "faol"
+msgstr "активен"
+
+msgid "guruh"
+msgstr "группа"
+
+msgid "guruhlar"
+msgstr "группы"
+
+msgid "familiya"
+msgstr "фамилия"
+
+msgid "ism"
+msgstr "имя"
+
+msgid "otasining ismi"
+msgstr "отчество"
+
+msgid "ro‘yxatdagi raqami"
+msgstr "номер в списке"
+
+msgid "qisqa ism (PDF)"
+msgstr "краткое имя (PDF)"
+
+msgid ""
+"Bo‘sh qoldirilsa avtomatik: Familiya + ism bosh harfi (Shavkatov Sh, "
+"G‘ayratov G‘)."
+msgstr ""
+"Если оставить пустым — автоматически: фамилия + первая буква имени "
+"(Shavkatov Sh, G‘ayratov G‘)."
+
+msgid "faolsizlantirilgan vaqti"
+msgstr "время деактивации"
+
+msgid "faolsizlantirish sababi"
+msgstr "причина деактивации"
+
+msgid "naryaddan ozod"
+msgstr "освобождён от наряда"
+
+msgid "lavozimi"
+msgstr "должность"
+
+msgid "Masalan: Kurs starshinasi, BI-225 guruh komandiri."
+msgstr "Например: старшина курса, командир группы BI-225."
+
+msgid "yaratilgan"
+msgstr "создано"
+
+msgid "o‘zgartirilgan"
+msgstr "изменено"
+
+msgid "kursantlar"
+msgstr "курсанты"
+
+msgid "Faolsizlantirish sababi ko‘rsatilishi shart."
+msgstr "Необходимо указать причину деактивации."
+
+msgid "kod"
+msgstr "код"
+
+msgid "nomi"
+msgstr "название"
+
+msgid "PDF bo‘lim sarlavhasi"
+msgstr "заголовок раздела в PDF"
+
+msgid "kim turadi"
+msgstr "кто несёт наряд"
+
+msgid "PDF tartibi"
+msgstr "порядок в PDF"
+
+msgid "aylanish zanjiridagi o‘rni"
+msgstr "место в цепочке ротации"
+
+msgid "Qizlar joyida bo‘sh."
+msgstr "Для поста девушек не заполняется."
+
+msgid "navbatchilik joyi"
+msgstr "пост наряда"
+
+msgid "navbatchilik joylari"
+msgstr "посты наряда"
+
+msgid "joy"
+msgstr "пост"
+
+msgid "joy ichidagi tartibi"
+msgstr "порядок внутри поста"
+
+msgid "lavozim"
+msgstr "должность"
+
+msgid "PDF’dagi qator yozuvi"
+msgstr "текст строки в PDF"
+
+msgid "PDF’da yozuv ko‘rsatilsin"
+msgstr "показывать текст в PDF"
+
+msgid "o‘rin (lavozim)"
+msgstr "место (должность)"
+
+msgid "o‘rinlar (lavozimlar)"
+msgstr "места (должности)"
+
+msgid "boshlanish sanasi (yakshanba)"
+msgstr "дата начала (воскресенье)"
+
+msgid "Hafta shu yakshanba soat 18:00 da boshlanadi."
+msgstr "Неделя начинается в это воскресенье в 18:00."
+
+msgid "izoh"
+msgstr "примечание"
+
+msgid "kim ochdi"
+msgstr "кто открыл"
+
+msgid "2-kurs haftasi"
+msgstr "Неделя 2-го курса"
+
+msgid "2-kurs haftalari"
+msgstr "Недели 2-го курса"
+
+msgid ""
+"Hafta yakshanba kuni (soat 18:00 da) boshlanishi kerak — tanlangan sana "
+"yakshanba emas."
+msgstr ""
+"Неделя должна начинаться в воскресенье (в 18:00) — выбранная дата не "
+"воскресенье."
+
+#, python-format
+msgid "Bu hafta boshqa hafta bilan ustma-ust tushadi: %(week)s."
+msgstr "Эта неделя пересекается с другой неделей: %(week)s."
+
+msgid "hafta"
+msgstr "неделя"
+
+msgid "sutka sanasi"
+msgstr "дата суток"
+
+msgid "Sutka shu sanada 18:00 da boshlanadi."
+msgstr "Сутки начинаются в эту дату в 18:00."
+
+msgid "holati"
+msgstr "статус"
+
+msgid "ogohlantirishlar"
+msgstr "предупреждения"
+
+msgid "kim tuzdi"
+msgstr "кто сформировал"
+
+msgid "tuzilgan vaqti"
+msgstr "время формирования"
+
+msgid "kim tasdiqladi"
+msgstr "кто утвердил"
+
+msgid "tasdiqlangan vaqti"
+msgstr "время утверждения"
+
+msgid "versiya"
+msgstr "версия"
+
+msgid "Har o‘zgarishda oshadi — bir vaqtda tahrirlashdan himoya."
+msgstr ""
+"Увеличивается при каждом изменении — защита от одновременного "
+"редактирования."
+
+msgid "sutka"
+msgstr "сутки"
+
+#, python-format
+msgid ""
+"Sutka sanasi tanlangan hafta ichida bo‘lishi kerak (%(start)s – %(end)s)."
+msgstr ""
+"Дата суток должна быть в пределах выбранной недели (%(start)s – %(end)s)."
+
+msgid "Tasdiqlangan sutkada tasdiqlash vaqti bo‘lishi shart."
+msgstr "У утверждённых суток должно быть указано время утверждения."
+
+msgid "guruh → joy taqsimoti"
+msgstr "распределение группа → пост"
+
+msgid "guruh → joy taqsimotlari"
+msgstr "распределения группа → пост"
+
+msgid "Guruhlarga faqat o‘g‘il bolalar joylari taqsimlanadi."
+msgstr "Между группами распределяются только посты юношей."
+
+msgid "Avtomatik"
+msgstr "Автоматически"
+
+msgid "Qo‘lda"
+msgstr "Вручную"
+
+msgid "Oddiy"
+msgstr "Обычный"
+
+msgid "Navbatdan tashqari (jazo)"
+msgstr "Вне очереди (взыскание)"
+
+msgid "o‘rin"
+msgstr "место"
+
+msgid "guruh (tayinlash paytida)"
+msgstr "группа (на момент назначения)"
+
+msgid "Kursant keyin guruhini almashtirsa ham tarix to‘g‘ri qoladi."
+msgstr "История остаётся верной, даже если курсант позже сменит группу."
+
+msgid "manba"
+msgstr "источник"
+
+msgid "naryad turi"
+msgstr "тип наряда"
+
+msgid "zalyot"
+msgstr "взыскание"
+
+msgid "tayinlash"
+msgstr "назначение"
+
+msgid "tayinlashlar"
+msgstr "назначения"
+
+msgid "Kursant jinsi bu joyga mos emas."
+msgstr "Пол курсанта не соответствует этому посту."
+
+#, python-format
+msgid "Bu sutkada %(post)s joyi %(group)s guruhiga tegishli."
+msgstr "В эти сутки пост %(post)s закреплён за группой %(group)s."
+
+msgid "e’lon qilingan vaqti"
+msgstr "время объявления"
+
+msgid "e’lon qilingan naryad"
+msgstr "объявленный наряд"
+
+msgid "e’lon qilingan naryadlar"
+msgstr "объявленные наряды"
+
+msgid "Boshqa"
+msgstr "Другое"
+
+msgid "birinchi sutka"
+msgstr "первые сутки"
+
+msgid "oxirgi sutka (ichida)"
+msgstr "последние сутки (включительно)"
+
+msgid "sabab"
+msgstr "причина"
+
+msgid "kim kiritdi"
+msgstr "кто внёс"
+
+msgid "sababli yo‘qlik"
+msgstr "отсутствие по уважительной причине"
+
+msgid "sababli yo‘qliklar"
+msgstr "отсутствия по уважительной причине"
+
+msgid "Ichki tartib-qoidalarni buzish"
+msgstr "Нарушение внутреннего распорядка"
+
+msgid "Naryadda uxlab qolish"
+msgstr "Сон на посту"
+
+msgid "Faol"
+msgstr "Активен"
+
+msgid "Bajarildi"
+msgstr "Выполнено"
+
+msgid "Bekor qilindi"
+msgstr "Отменено"
+
+msgid "sabab turi"
+msgstr "тип причины"
+
+msgid "buyruq/tanbeh sanasi"
+msgstr "дата приказа/взыскания"
+
+msgid "jazo naryadlari soni (jami)"
+msgstr "число нарядов вне очереди (всего)"
+
+msgid "kiritilgan vaqti"
+msgstr "время внесения"
+
+msgid "yakunlangan vaqti"
+msgstr "время завершения"
+
+msgid "bekor qilish sababi"
+msgstr "причина отмены"
+
+msgid "zalyotlar (navbatdan tashqari naryadlar)"
+msgstr "взыскания (наряды вне очереди)"
+
+msgid "Qoralama tuzildi"
+msgstr "Черновик сформирован"
+
+msgid "O‘tgan tarix kiritildi"
+msgstr "Внесена прошлая история"
+
+msgid "Almashtirildi"
+msgstr "Замена выполнена"
+
+msgid "O‘rin almashtirildi"
+msgstr "Должности поменяны местами"
+
+msgid "Tasdiqlandi"
+msgstr "Утверждено"
+
+msgid "Qayta ochildi"
+msgstr "Открыто заново"
+
+msgid "Qoralama o‘chirildi"
+msgstr "Черновик удалён"
+
+msgid "Kursant qo‘shildi"
+msgstr "Курсант добавлен"
+
+msgid "Kursant ma’lumoti o‘zgartirildi"
+msgstr "Данные курсанта изменены"
+
+msgid "Kursant faolsizlantirildi"
+msgstr "Курсант деактивирован"
+
+msgid "Kursant qayta faollashtirildi"
+msgstr "Курсант снова активирован"
+
+msgid "Kursant Excel’dan import qilindi"
+msgstr "Курсант импортирован из Excel"
+
+msgid "Naryaddan ozod qilindi"
+msgstr "Освобождён от наряда"
+
+msgid "Naryadga qaytarildi"
+msgstr "Возвращён в наряд"
+
+msgid "Sababli holat kiritildi"
+msgstr "Уважительная причина внесена"
+
+msgid "Sababli holat o‘zgartirildi"
+msgstr "Уважительная причина изменена"
+
+msgid "Sababli holat o‘chirildi"
+msgstr "Уважительная причина удалена"
+
+msgid "Zalyot kiritildi"
+msgstr "Взыскание внесено"
+
+msgid "Zalyot bekor qilindi"
+msgstr "Взыскание отменено"
+
+msgid "Zalyot bajarildi"
+msgstr "Взыскание отработано"
+
+msgid "Zalyot qayta faollashdi"
+msgstr "Взыскание снова действует"
+
+msgid "Sutka o‘chirilsa ham jurnal saqlanadi (8-bosqich)."
+msgstr "Журнал сохраняется, даже если сутки удалены (этап 8)."
+
+msgid "nima o‘zgardi"
+msgstr "что изменилось"
+
+msgid "amal"
+msgstr "действие"
+
+msgid "kim olindi"
+msgstr "кто снят"
+
+msgid "kim qo‘yildi"
+msgstr "кто поставлен"
+
+msgid ""
+"kasal / tatil / sababli / boshqa (qo‘lda tuzatishlar statistikasi uchun)"
+msgstr ""
+"kasal / tatil / sababli / boshqa — болен / отпуск / по уважительной причине "
+"/ другое (для статистики ручных исправлений)"
+
+msgid "kim"
+msgstr "кто"
+
+msgid "Bo‘sh bo‘lsa — tizim."
+msgstr "Если пусто — система."
+
+msgid "qachon"
+msgstr "когда"
+
+msgid "jurnal yozuvi"
+msgstr "запись журнала"
+
+msgid "o‘zgarishlar jurnali"
+msgstr "журнал изменений"
+
+msgid "Bu amal uchun sabab majburiy."
+msgstr "Для этого действия причина обязательна."
+
+msgid "qabul qiluvchi lavozimi"
+msgstr "должность адресата"
+
+msgid "PDF’ning o‘ng yuqori burchagi; qatorlar Enter bilan ajratiladi."
+msgstr "Правый верхний угол PDF; строки разделяются клавишей Enter."
+
+msgid "qabul qiluvchi ismi (jo‘nalish kelishigida)"
+msgstr "имя адресата (в дательном падеже)"
+
+msgid "imzo: lavozim"
+msgstr "подпись: должность"
+
+msgid "imzo: unvon"
+msgstr "подпись: звание"
+
+msgid "imzo: ism"
+msgstr "подпись: имя"
+
+msgid "kurs raqami"
+msgstr "номер курса"
+
+msgid "tasdiqlash muddati (soat)"
+msgstr "срок утверждения (часы)"
+
+msgid ""
+"Sutka boshlanishidan (18:00) necha soat oldin tasdiqlangan bo‘lishi kerak. "
+"24 — bir kun oldin, 18:00 gacha."
+msgstr ""
+"За сколько часов до начала суток (18:00) они должны быть утверждены. 24 — за"
+" день, до 18:00."
+
+msgid "bir joyga zalyotchiklar (sutkada)"
+msgstr "залётчиков на один пост (за сутки)"
+
+msgid ""
+"1-NO‘J va 1-Yotoqxonada bir sutkada ko‘pi bilan nechta zalyotchik posbon "
+"bo‘ladi (1 yoki 2)."
+msgstr ""
+"Сколько залётчиков максимум за сутки могут быть дневальными на КПП-1 и в "
+"общежитии №1 (1 или 2)."
+
+msgid "kim o‘zgartirdi"
+msgstr "кто изменил"
+
+msgid "sozlamalar"
+msgstr "настройки"
+
+msgid "Sozlamalar"
+msgstr "Настройки"
+
+msgid "Sozlamalarni o‘chirib bo‘lmaydi."
+msgstr "Настройки нельзя удалить."
+
+msgid "eslatma (o‘zbekcha)"
+msgstr "памятка (на узбекском)"
+
+msgid "eslatma (ruscha)"
+msgstr "памятка (на русском)"
+
+msgid "eslatma (inglizcha)"
+msgstr "памятка (на английском)"
+
+msgid "tayyorgarlik eslatmasi"
+msgstr "памятка для подготовки"
+
+msgid "tayyorgarlik eslatmalari (kursant o‘z naryadi kartochkasida ko‘radi)"
+msgstr "памятки для подготовки (курсант видит в карточке своего наряда)"
+
+msgid "boshlang‘ich taqsimot"
+msgstr "начальное распределение"
+
+msgid "boshlang‘ich taqsimot (birinchi sutka uchun)"
+msgstr "начальное распределение (для первых суток)"
+
+msgid "Faqat o‘g‘il bolalar joylari taqsimlanadi."
+msgstr "Распределяются только посты юношей."
+
+msgid "kalit (login)"
+msgstr "ключ (логин)"
+
+msgid "ketma-ket xatolar"
+msgstr "неудачных попыток подряд"
+
+msgid "oxirgi xato"
+msgstr "последняя неудачная попытка"
+
+msgid "blok tugash vaqti"
+msgstr "окончание блокировки"
+
+msgid "login cheklovi"
+msgstr "ограничение входа"
+
+msgid "login cheklovlari"
+msgstr "ограничения входа"
+
+#, python-format
+msgid "%(key)s: %(n)s xato"
+msgid_plural "%(key)s: %(n)s xato"
+msgstr[0] "%(key)s: %(n)s ошибка"
+msgstr[1] "%(key)s: %(n)s ошибки"
+msgstr[2] "%(key)s: %(n)s ошибок"
+msgstr[3] "%(key)s: %(n)s ошибок"
+
+msgid ""
+"Zalyotchik faqat o‘g‘il kursant bo‘ladi (jazo o‘rinlari — 1-NO‘J va "
+"1-Yotoqxona o‘g‘illar joyi)."
+msgstr ""
+"Залётчиком может быть только юноша (места нарядов вне очереди — КПП-1 и "
+"общежитие №1, мужские посты)."
+
+#, python-format
+msgid "%(name)s faol emas — zalyotchik qilib bo‘lmaydi."
+msgstr "%(name)s неактивен — нельзя назначить залётчиком."
+
+#, python-format
+msgid ""
+"%(name)s naryaddan ozod (%(position)s) — avval ozodlikni olib tashlang."
+msgstr ""
+"%(name)s освобождён от наряда (%(position)s) — сначала снимите освобождение."
+
+msgid "Izoh majburiy."
+msgstr "Комментарий обязателен."
+
+msgid "Sabab turi tanlanmagan."
+msgstr "Тип причины не выбран."
+
+msgid "Jazo naryadlari soni 1 dan 10 gacha bo‘lishi kerak."
+msgstr "Число нарядов вне очереди должно быть от 1 до 10."
+
+msgid "Zalyot faol emas — bekor qilib bo‘lmaydi."
+msgstr "Взыскание не действует — отменить нельзя."
+
+msgid "Bekor qilish sababi majburiy."
+msgstr "Причина отмены обязательна."
+
+msgid "Sabab turi"
+msgstr "Тип причины"
+
+msgid "Buyruq/tanbeh sanasi"
+msgstr "Дата приказа/взыскания"
+
+msgid "Jazo naryadlari soni"
+msgstr "Число нарядов вне очереди"
+
+msgid "Bekor qilish sababi"
+msgstr "Причина отмены"
+
+msgid "Bosh sahifa (rolga qarab)"
+msgstr "Главная (в зависимости от роли)"
+
+msgid "O‘z parolini almashtirish"
+msgstr "Сменить свой пароль"
+
+msgid "Tasdiqlangan sutkalarni ko‘rish"
+msgstr "Просмотр утверждённых суток"
+
+msgid "O‘z kartochkasi va naryad tarixini ko‘rish"
+msgstr "Просмотр своей карточки и истории нарядов"
+
+msgid "2-kurs haftalari va sutkalar holatini ko‘rish"
+msgstr "Просмотр недель 2-го курса и статуса суток"
+
+msgid "Qoralama sutkalarni ko‘rish"
+msgstr "Просмотр черновиков суток"
+
+msgid "Sutka qoralamasini tuzish (ro‘yxatni dastur avtomatik tuzadi)"
+msgstr ""
+"Формирование черновика суток (список формируется программой автоматически)"
+
+msgid "Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi)"
+msgstr ""
+"Ручное исправление черновика (причина обязательна, записывается в журнал)"
+
+msgid "Sutkani tasdiqlash"
+msgstr "Утверждение суток"
+
+msgid "Tasdiqlangan sutkani qayta ochish (sabab majburiy)"
+msgstr "Повторное открытие утверждённых суток (причина обязательна)"
+
+msgid "Sababli yo‘qliklarni (kasal, ta’til) kiritish"
+msgstr "Внесение отсутствий по уважительной причине (болезнь, отпуск)"
+
+msgid ""
+"Zalyotchiklar: navbatdan tashqari jazo naryadini kiritish va bekor qilish"
+msgstr "Залётчики: внесение и отмена нарядов вне очереди"
+
+msgid "Har qanday kursant kartochkasi, tarixi va statistika"
+msgstr "Карточка, история и статистика любого курсанта"
+
+msgid "PDF yuklab olish va chop etish"
+msgstr "Скачивание и печать PDF"
+
+msgid "Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv)"
+msgstr "Просмотр списка курсантов (фильтр, поиск)"
+
+msgid ""
+"Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar"
+msgstr ""
+"Добавление, редактирование, деактивация курсантов, импорт из Excel, учётные "
+"записи"
+
+msgid "Sozlamalar va boshlang‘ich taqsimot"
+msgstr "Настройки и начальное распределение"
+
+msgid "Django boshqaruv paneli (/admin/)"
+msgstr "Панель администрирования Django (/admin/)"
+
+#, python-format
+msgid "Bu sahifa uchun ruxsat yo‘q (%(action)s)."
+msgstr "Нет доступа к этой странице (%(action)s)."
+
+#, python-format
+msgid "%(h)s soat %(m)s daqiqa"
+msgstr "%(h)s ч %(m)s мин"
+
+#, python-format
+msgid "%(h)s soat"
+msgstr "%(h)s ч"
+
+#, python-format
+msgid "%(m)s daqiqa"
+msgstr "%(m)s мин"
+
+#, python-format
+msgid "Muddat: bugun %(time)s gacha, %(left)s qoldi."
+msgstr "Срок: сегодня до %(time)s, осталось %(left)s."
+
+#, python-format
+msgid "Muddat: ertaga %(time)s gacha, %(left)s qoldi."
+msgstr "Срок: завтра до %(time)s, осталось %(left)s."
+
+#, python-format
+msgid "Muddat: %(date)s %(time)s gacha, %(left)s qoldi."
+msgstr "Срок: до %(date)s %(time)s, осталось %(left)s."
+
+msgid "Ochish"
+msgstr "Открыть"
+
+msgid "Tuzish"
+msgstr "Сформировать"
+
+#, python-format
+msgid ""
+"Bugungi sutka (%(day)s) hali tasdiqlanmagan. Muddat o‘tdi, kursantlar hali "
+"bilmaydi."
+msgstr ""
+"Сегодняшние сутки (%(day)s) ещё не утверждены. Срок истёк, курсанты ещё не "
+"знают."
+
+#, python-format
+msgid "Ertangi ro‘yxat (%(day)s) tayyor, kursantlarga ko‘rinmoqda."
+msgstr "Завтрашний список (%(day)s) готов и виден курсантам."
+
+#, python-format
+msgid "Ertangi sutka (%(day)s) hali tasdiqlanmagan."
+msgstr "Завтрашние сутки (%(day)s) ещё не утверждены."
+
+#, python-format
+msgid ""
+"Ertangi sutka (%(day)s) hali tasdiqlanmagan. Muddat o‘tdi, kursantlar hali "
+"bilmaydi."
+msgstr ""
+"Завтрашние сутки (%(day)s) ещё не утверждены. Срок истёк, курсанты ещё не "
+"знают."
+
+msgid ""
+"Bu sutkani boshqa foydalanuvchi hozirgina o‘zgartirdi — sahifani yangilang "
+"va qayta urinib ko‘ring."
+msgstr ""
+"Эти сутки только что изменил другой пользователь — обновите страницу и "
+"попробуйте снова."
+
+#, python-format
+msgid ""
+"%(day)s sutkasi ochilgan 2-kurs haftasiga tegishli emas. Avval admin "
+"%(start)s (yakshanba) dan boshlanadigan haftani ochishi kerak."
+msgstr ""
+"Сутки %(day)s не относятся к открытой неделе 2-го курса. Сначала "
+"администратор должен открыть неделю, начинающуюся с %(start)s (воскресенье)."
+
+#, python-format
+msgid ""
+"%(day)s sutkasi allaqachon tasdiqlangan. O‘zgartirish uchun admin uni qayta "
+"ochishi kerak."
+msgstr ""
+"Сутки %(day)s уже утверждены. Чтобы внести изменения, администратор должен "
+"открыть их заново."
+
+#, python-format
+msgid ""
+"Avval %(day)s sutkasi qoralamasini tasdiqlang (sutkalar ketma-ket tuziladi)."
+msgstr ""
+"Сначала утвердите черновик суток %(day)s (сутки формируются по порядку)."
+
+#, python-format
+msgid ""
+"%(day)s sutkasi allaqachon tasdiqlangan — undan oldingi sanaga qoralama "
+"tuzib bo‘lmaydi."
+msgstr ""
+"Сутки %(day)s уже утверждены — сформировать черновик на более раннюю дату "
+"нельзя."
+
+#, python-format
+msgid "Haftaning oldingi sutkalari tuzilmagan/tasdiqlanmagan: %(days)s."
+msgstr "Предыдущие сутки недели не сформированы/не утверждены: %(days)s."
+
+msgid ""
+"Tarix bo‘sh: birinchi sutka uchun admin guruhlarning qaysi joydan "
+"boshlashini kiritishi kerak (Sozlamalar → Boshlang‘ich taqsimot: 6 guruh × 6"
+" joy, har biri bir marta) yoki o‘tgan sutkalarni import_history buyrug‘i "
+"bilan kiritishi kerak."
+msgstr ""
+"История пуста: для первых суток администратор должен указать, с какого поста"
+" начинает каждая группа (Настройки → Начальное распределение: 6 групп × 6 "
+"постов, каждый по одному разу), или загрузить прошедшие сутки командой "
+"import_history."
+
+msgid "Yordamchi"
+msgstr "Помощник"
+
+msgid "Markaz"
+msgstr "Центр"
+
+msgid "1-NO‘J"
+msgstr "КПП-1"
+
+msgid "2-NO‘J"
+msgstr "КПП-2"
+
+msgid "1-Yotoqxona"
+msgstr "Общежитие №1"
+
+msgid "O‘quv binosi"
+msgstr "Учебный корпус"
+
+msgid "Patrul"
+msgstr "Патруль"
+
+#, python-format
+msgid "2-kurs haftasi: %(start)s – %(end)s"
+msgstr "Неделя 2-го курса: %(start)s – %(end)s"
+
+msgid "boshidan"
+msgstr "с начала"
+
+msgid "hozirgacha"
+msgstr "по настоящее время"
+
+msgid "Butun tarix"
+msgstr "Вся история"
+
+msgid "Adolatli (farq ≤ 1)"
+msgstr "Справедливо (разница ≤ 1)"
+
+msgid "Diqqat (farq = 2)"
+msgstr "Внимание (разница = 2)"
+
+msgid "Adolatsiz (farq ≥ 3)"
+msgstr "Несправедливо (разница ≥ 3)"
+
+msgid "Ma’lumot yo‘q"
+msgstr "Нет данных"
+
+msgid "Qizlar (13)"
+msgstr "Девушки (13)"
+
+msgid "tizim"
+msgstr "система"
+
+msgid "qizlar"
+msgstr "девушки"
+
+#, python-format
+msgid "%(group)s guruhi"
+msgstr "Группа %(group)s"
+
+msgid "Parolingiz almashtirildi."
+msgstr "Ваш пароль изменён."
+
+#, python-format
+msgid "Kursant qo‘shildi: %(name)s (%(group)s)."
+msgstr "Курсант добавлен: %(name)s (%(group)s)."
+
+#, python-format
+msgid "Saqlandi: %(changes)s."
+msgstr "Сохранено: %(changes)s."
+
+msgid "Hech narsa o‘zgarmadi."
+msgstr "Ничего не изменилось."
+
+msgid "Kursant allaqachon faol emas."
+msgstr "Курсант уже неактивен."
+
+#, python-format
+msgid "%(name)s faolsizlantirildi. Tarixi saqlanadi, generatorga tushmaydi."
+msgstr "%(name)s деактивирован. История сохраняется, в генератор не попадает."
+
+#, python-format
+msgid "Faolsizlantirilmadi: %(errors)s"
+msgstr "Не деактивирован: %(errors)s"
+
+msgid "Kursant allaqachon faol."
+msgstr "Курсант уже активен."
+
+#, python-format
+msgid "%(name)s qayta faollashtirildi."
+msgstr "%(name)s снова активирован."
+
+msgid ""
+"Faol bo‘lmagan kursantni naryaddan ozod qilib bo‘lmaydi — u baribir naryadga"
+" tushmaydi."
+msgstr ""
+"Неактивного курсанта нельзя освободить от наряда — он и так не попадает в "
+"наряд."
+
+#, python-format
+msgid "%(name)s naryaddan ozod qilindi (%(position)s). Tarixi saqlanadi."
+msgstr "%(name)s освобождён от наряда (%(position)s). История сохраняется."
+
+#, python-format
+msgid ""
+"%(date)s qoralamasida turibdi — almashtiring yoki qayta tuzing (tasdiqlab "
+"bo‘lmaydi)."
+msgstr ""
+"Стоит в черновике на %(date)s — замените или пересформируйте (утвердить "
+"нельзя)."
+
+#, python-format
+msgid "Ozod qilinmadi: %(errors)s"
+msgstr "Не освобождён: %(errors)s"
+
+msgid "Kursant naryaddan ozod emas."
+msgstr "Курсант не освобождён от наряда."
+
+#, python-format
+msgid ""
+"%(name)s naryadga qaytarildi. Algoritm uni haftalik va jami hisob bo‘yicha "
+"avtomatik oldinga qo‘yadi."
+msgstr ""
+"%(name)s возвращён в наряд. Алгоритм автоматически выдвинет его вперёд по "
+"недельному и общему учёту."
+
+#, python-format
+msgid "Qaytarilmadi: %(errors)s"
+msgstr "Не возвращён: %(errors)s"
+
+msgid "Kursant faqat o‘zining kartochkasini ko‘radi."
+msgstr "Курсант видит только свою карточку."
+
+msgid "Akkauntingiz kursantga bog‘lanmagan."
+msgstr "Ваша учётная запись не привязана к курсанту."
+
+msgid "Faqat .xlsx (Excel) fayl yuklang."
+msgstr "Загружайте только файл .xlsx (Excel)."
+
+msgid "Oldindan ko‘rish topilmadi — faylni qayta yuklang."
+msgstr "Предварительный просмотр не найден — загрузите файл заново."
+
+msgid ""
+"Xatoli qatorlar bor — import tasdiqlanmadi. Faylni tuzatib, qayta yuklang."
+msgstr ""
+"Есть строки с ошибками — импорт не подтверждён. Исправьте файл и загрузите "
+"заново."
+
+#, python-format
+msgid "Import bajarildi: %(created)s, %(updated)s, %(unchanged)s."
+msgstr "Импорт выполнен: %(created)s, %(updated)s, %(unchanged)s."
+
+#, python-format
+msgid "%(n)s ta yangi"
+msgid_plural "%(n)s ta yangi"
+msgstr[0] "%(n)s новый"
+msgstr[1] "%(n)s новых"
+msgstr[2] "%(n)s новых"
+msgstr[3] "%(n)s новых"
+
+#, python-format
+msgid "%(n)s ta yangilandi"
+msgid_plural "%(n)s ta yangilandi"
+msgstr[0] "%(n)s обновлён"
+msgstr[1] "%(n)s обновлено"
+msgstr[2] "%(n)s обновлено"
+msgstr[3] "%(n)s обновлено"
+
+#, python-format
+msgid "%(n)s ta o‘zgarmadi"
+msgid_plural "%(n)s ta o‘zgarmadi"
+msgstr[0] "%(n)s без изменений"
+msgstr[1] "%(n)s без изменений"
+msgstr[2] "%(n)s без изменений"
+msgstr[3] "%(n)s без изменений"
+
+msgid "Import bekor qilindi."
+msgstr "Импорт отменён."
+
+msgid "Sanani tanlang."
+msgstr "Выберите дату."
+
+msgid ""
+"Tanlangan sana yakshanba emas — hafta faqat yakshanba 18:00 da boshlanadi."
+msgstr ""
+"Выбранная дата не воскресенье — неделя начинается только в воскресенье в "
+"18:00."
+
+#, python-format
+msgid "%(n)s-sutka"
+msgstr "%(n)s-е сутки"
+
+msgid "Sana noto‘g‘ri."
+msgstr "Неверная дата."
+
+#, python-format
+msgid "Hafta ochilmadi: %(error)s"
+msgstr "Неделя не открыта: %(error)s"
+
+#, python-format
+msgid "2-kurs haftasi ochildi: %(week)s."
+msgstr "Неделя 2-го курса открыта: %(week)s."
+
+#, python-format
+msgid "%(day)s ochilgan 2-kurs haftasiga tegishli emas."
+msgstr "%(day)s не относится к открытой неделе 2-го курса."
+
+#, python-format
+msgid "%(start)s kunidan %(end)s kuniga"
+msgstr "с %(start)s на %(end)s"
+
+msgid "Qoralama qayta tuzildi (avvalgisi almashtirildi)."
+msgstr "Черновик пересформирован (предыдущий заменён)."
+
+msgid "Qoralama tuzildi."
+msgstr "Черновик сформирован."
+
+msgid "Kursantni tanlang."
+msgstr "Выберите курсанта."
+
+#, python-format
+msgid "%(slot)s: almashtirildi."
+msgstr "%(slot)s: замена выполнена."
+
+#, python-format
+msgid "%(post)s: lavozimlar almashtirildi."
+msgstr "%(post)s: должности поменяны местами."
+
+#, python-format
+msgid "%(day)s sutkasi tasdiqlandi. Endi uni kursantlar ham ko‘radi."
+msgstr "Сутки %(day)s утверждены. Теперь их видят и курсанты."
+
+#, python-format
+msgid "%(day)s sutkasining tasdig‘i bekor qilindi — qoralama holatida."
+msgstr "Утверждение суток %(day)s отменено — они в статусе черновика."
+
+#, python-format
+msgid "%(day)s qoralamasi o‘chirildi (jurnalda saqlandi)."
+msgstr "Черновик на %(day)s удалён (сохранён в журнале)."
+
+#, python-format
+msgid "Kiritildi: %(name)s — %(reason)s %(start)s–%(end)s."
+msgstr "Внесено: %(name)s — %(reason)s %(start)s–%(end)s."
+
+#, python-format
+msgid "%(name)s: tugash sanasi %(day)s ga o‘zgartirildi."
+msgstr "%(name)s: дата окончания изменена на %(day)s."
+
+msgid "Yozuv o‘chirildi."
+msgstr "Запись удалена."
+
+#, python-format
+msgid "%(name)s: zalyot kiritildi — jami %(count)s ta jazo naryadi."
+msgstr "%(name)s: взыскание внесено — всего нарядов вне очереди: %(count)s."
+
+#, python-format
+msgid "%(name)s: zalyot bekor qilindi."
+msgstr "%(name)s: взыскание отменено."
+
+msgid "Ruxsat yo‘q"
+msgstr "Нет доступа"
+
+msgid "Ruxsat yo‘q: bu sahifa sizning rolingiz uchun yopiq"
+msgstr "Нет доступа: эта страница закрыта для вашей роли"
+
+msgid "Bosh sahifaga"
+msgstr "На главную"
+
+msgid "Sahifa topilmadi"
+msgstr "Страница не найдена"
+
+msgid ""
+"Manzil noto‘g‘ri yozilgan yoki bu ma’lumot hali mavjud emas (masalan, sutka "
+"hali tuzilmagan yoki tasdiqlanmagan)."
+msgstr ""
+"Адрес указан неверно или эти данные ещё не существуют (например, сутки ещё "
+"не сформированы или не утверждены)."
+
+msgid "Serverda xatolik"
+msgstr "Ошибка сервера"
+
+msgid "2-kurs"
+msgstr "2-й курс"
+
+msgid "Serverda xatolik yuz berdi"
+msgstr "На сервере произошла ошибка"
+
+msgid ""
+"Xatolik jurnalga yozildi. Bir necha daqiqadan keyin qayta urinib ko‘ring; "
+"takrorlansa, kurs boshlig‘iga xabar bering."
+msgstr ""
+"Ошибка записана в журнал. Попробуйте снова через несколько минут; если "
+"ошибка повторится, сообщите начальнику курса."
+
+msgid "Platformaga qaytish"
+msgstr "Вернуться на платформу"
+
+msgid "Davlat bojxona xizmati emblemasi"
+msgstr "Эмблема Государственной таможенной службы"
+
+msgid "Bojxona instituti"
+msgstr "Таможенный институт"
+
+msgid "Menyu"
+msgstr "Меню"
+
+msgid "Akkauntingiz kursantga bog‘lanmagan. Kurs boshlig‘iga murojaat qiling."
+msgstr ""
+"Ваша учётная запись не привязана к курсанту. Обратитесь к начальнику курса."
+
+msgid "Naryadingiz bekor qilindi"
+msgstr "Ваш наряд отменён"
+
+#, python-format
+msgid "%(d)s sutkasi"
+msgstr "Сутки %(d)s"
+
+msgid "Mening navbatdagi naryadim"
+msgstr "Мой ближайший наряд"
+
+msgid "Navbatdan tashqari naryad"
+msgstr "Наряд вне очереди"
+
+msgid "Tayyorgarlik eslatmasi"
+msgstr "Памятка для подготовки"
+
+msgid "Yaqin kunlarda tasdiqlangan naryadingiz yo‘q"
+msgstr "В ближайшие дни у вас нет утверждённых нарядов"
+
+#, python-format
+msgid "Jazo naryadlari: %(total)s tadan %(served)s tasi o‘tildi"
+msgid_plural "Jazo naryadlari: %(total)s tadan %(served)s tasi o‘tildi"
+msgstr[0] "Наряды вне очереди: отработано %(served)s из %(total)s"
+msgstr[1] "Наряды вне очереди: отработано %(served)s из %(total)s"
+msgstr[2] "Наряды вне очереди: отработано %(served)s из %(total)s"
+msgstr[3] "Наряды вне очереди: отработано %(served)s из %(total)s"
+
+msgid "Shu haftada"
+msgstr "На этой неделе"
+
+msgid "Jami naryadlar"
+msgstr "Всего нарядов"
+
+#, python-format
+msgid "%(start)s (yakshanba 18:00) – %(end)s (yakshanba 18:00)"
+msgstr "%(start)s (воскресенье, 18:00) – %(end)s (воскресенье, 18:00)"
+
+msgid "kelgusi hafta"
+msgstr "следующая неделя"
+
+msgid "o‘tgan hafta"
+msgstr "прошлая неделя"
+
+msgid "joriy hafta"
+msgstr "текущая неделя"
+
+msgid "Hali birorta ham 2-kurs haftasi ochilmagan."
+msgstr "Ещё не открыто ни одной недели 2-го курса."
+
+msgid "Keyingi qadam"
+msgstr "Следующий шаг"
+
+msgid "Hozircha bajariladigan ish yo‘q."
+msgstr "Пока нет задач."
+
+msgid "Adolat (butun tarix)"
+msgstr "Справедливость (вся история)"
+
+msgid "Qizlar"
+msgstr "Девушки"
+
+msgid ""
+"Yashil — farq ≤ 1, sariq — 2, qizil — ≥ 3 (guruh ichida, jami naryadlar "
+"bo‘yicha)."
+msgstr ""
+"Зелёный — разница ≤ 1, жёлтый — 2, красный — ≥ 3 (внутри группы, по общему "
+"числу нарядов)."
+
+msgid "Haftaning 7 sutkasi"
+msgstr "7 суток недели"
+
+msgid "hozir"
+msgstr "сейчас"
+
+#, python-format
+msgid "%(n)s ta ogohlantirish"
+msgid_plural "%(n)s ta ogohlantirish"
+msgstr[0] "%(n)s предупреждение"
+msgstr[1] "%(n)s предупреждения"
+msgstr[2] "%(n)s предупреждений"
+msgstr[3] "%(n)s предупреждений"
+
+#, python-format
+msgid "%(n)s ta kursant"
+msgid_plural "%(n)s ta kursant"
+msgstr[0] "%(n)s курсант"
+msgstr[1] "%(n)s курсанта"
+msgstr[2] "%(n)s курсантов"
+msgstr[3] "%(n)s курсантов"
+
+msgid "(filtr bo‘yicha)"
+msgstr "(по фильтру)"
+
+#, python-format
+msgid "%(n)s ta"
+msgid_plural "%(n)s ta"
+msgstr[0] "%(n)s чел."
+msgstr[1] "%(n)s чел."
+msgstr[2] "%(n)s чел."
+msgstr[3] "%(n)s чел."
+
+msgid "Holat"
+msgstr "Статус"
+
+msgid "Naryadlar"
+msgstr "Наряды"
+
+msgid "ozod"
+msgstr "освобождён"
+
+msgid "naryad"
+msgstr "наряды"
+
+msgid "Hech narsa topilmadi."
+msgstr "Ничего не найдено."
+
+msgid "Yo‘l"
+msgstr "Навигация"
+
+msgid "Faol emas"
+msgstr "Неактивен"
+
+#, python-format
+msgid ""
+"<b>Naryaddan ozod — %(position)s.</b> Sutkalik naryadga qo‘yilmaydi va "
+"adolat hisobiga kirmaydi; avvalgi naryadlari tarixda saqlanadi."
+msgstr ""
+"<b>Освобождён от наряда — %(position)s.</b> В суточный наряд не ставится и в"
+" показатель справедливости не учитывается; прежние наряды сохраняются в "
+"истории."
+
+#, python-format
+msgid ""
+"Faolsizlantirilgan: %(d)s — %(reason)s. Generatorga tushmaydi, tarixi "
+"saqlanadi."
+msgstr ""
+"Деактивирован: %(d)s — %(reason)s. В генератор не попадает, история "
+"сохраняется."
+
+msgid "Tahrirlash"
+msgstr "Редактировать"
+
+msgid "Faolsizlantirish…"
+msgstr "Деактивировать…"
+
+msgid ""
+"Kursant o‘chirilmaydi: tarixi va statistikasi saqlanadi, lekin generatorga "
+"tushmaydi va tizimga kira olmaydi."
+msgstr ""
+"Курсант не удаляется: история и статистика сохраняются, но он не попадает в "
+"генератор и не может войти в систему."
+
+msgid ""
+"Kursant o‘chirilmaydi: tarixi va statistikasi saqlanadi, lekin generatorga "
+"tushmaydi."
+msgstr ""
+"Курсант не удаляется: история и статистика сохраняются, но он не попадает в "
+"генератор."
+
+msgid "Faolsizlantirish"
+msgstr "Деактивировать"
+
+msgid "Naryadga qaytarish…"
+msgstr "Вернуть в наряд…"
+
+msgid ""
+"Lavozimdan bo‘shagan bo‘lsa, kursant yana naryadga tushadi. Algoritm uni "
+"haftalik va jami hisob bo‘yicha o‘zi oldinga qo‘yadi."
+msgstr ""
+"Если курсант освобождён от должности, он снова будет заступать в наряд. "
+"Алгоритм сам поставит его в приоритет по недельному и общему счёту."
+
+msgid "Naryadga qaytarish"
+msgstr "Вернуть в наряд"
+
+msgid "Naryaddan ozod qilish…"
+msgstr "Освободить от наряда…"
+
+msgid ""
+"Komandirlar va kurs lavozimlari: kursant faol qoladi (tizimga kiradi), faqat"
+" sutkalik naryadga qo‘yilmaydi."
+msgstr ""
+"Командиры и курсовые должности: курсант остаётся активным (входит в "
+"систему), но не ставится в суточный наряд."
+
+msgid "Naryaddan ozod qilish"
+msgstr "Освободить от наряда"
+
+msgid "Qayta faollashtirish"
+msgstr "Активировать снова"
+
+msgid "Jami naryadlar (tasdiqlangan)"
+msgstr "Всего нарядов (утверждённых)"
+
+#, python-format
+msgid "+ %(n)s ta navbatdan tashqari (jazo) naryadi"
+msgid_plural "+ %(n)s ta navbatdan tashqari (jazo) naryadi"
+msgstr[0] "+ %(n)s наряд вне очереди"
+msgstr[1] "+ %(n)s наряда вне очереди"
+msgstr[2] "+ %(n)s нарядов вне очереди"
+msgstr[3] "+ %(n)s нарядов вне очереди"
+
+msgid "Joylar bo‘yicha"
+msgstr "По постам"
+
+msgid "Lavozimlar bo‘yicha"
+msgstr "По должностям"
+
+#, python-format
+msgid ""
+"Guruh o‘rtachasi bilan solishtirish (%(pool)s, %(n)s kursant, butun tarix)"
+msgid_plural ""
+"Guruh o‘rtachasi bilan solishtirish (%(pool)s, %(n)s kursant, butun tarix)"
+msgstr[0] ""
+"Сравнение со средним по группе (%(pool)s, %(n)s курсант, вся история)"
+msgstr[1] ""
+"Сравнение со средним по группе (%(pool)s, %(n)s курсанта, вся история)"
+msgstr[2] ""
+"Сравнение со средним по группе (%(pool)s, %(n)s курсантов, вся история)"
+msgstr[3] ""
+"Сравнение со средним по группе (%(pool)s, %(n)s курсантов, вся история)"
+
+msgid "Kursantda"
+msgstr "У курсанта"
+
+msgid "Menda"
+msgstr "У меня"
+
+msgid "Guruh o‘rtachasi"
+msgstr "Среднее по группе"
+
+msgid "Farq"
+msgstr "Разница"
+
+msgid ""
+"Naryaddan ozod — o‘rtacha faqat naryadga chiqadiganlar bo‘yicha; bu kursant "
+"adolat hisobiga kirmaydi."
+msgstr ""
+"Освобождён от наряда — среднее считается только по заступающим в наряд; этот"
+" курсант не входит в расчёт справедливости."
+
+msgid "O‘rtachadan ko‘proq — keyingi sutkalarda algoritm kamroq tanlaydi."
+msgstr "Больше среднего — в следующие сутки алгоритм будет выбирать реже."
+
+msgid ""
+"O‘rtachadan kamroq — keyingi sutkalarda algoritm birinchi navbatda tanlaydi."
+msgstr ""
+"Меньше среднего — в следующие сутки алгоритм выберет в первую очередь."
+
+msgid "O‘rtacha atrofida (±1) — adolatli."
+msgstr "Около среднего (±1) — справедливо."
+
+msgid "Zalyot tarixi"
+msgstr "История взысканий"
+
+#, python-format
+msgid "tanbeh %(d)s"
+msgstr "взыскание %(d)s"
+
+msgid "Zalyot yo‘q."
+msgstr "Взысканий нет."
+
+msgid "Naryad tarixi"
+msgstr "История нарядов"
+
+#, python-format
+msgid "o‘sha paytda %(code)s"
+msgstr "в то время %(code)s"
+
+msgid "Hali tasdiqlangan naryad yo‘q."
+msgstr "Утверждённых нарядов пока нет."
+
+msgid "O‘zgarishlar jurnali"
+msgstr "Журнал изменений"
+
+msgid "Yozuv yo‘q."
+msgstr "Записей нет."
+
+msgid "Akkaunt"
+msgstr "Учётная запись"
+
+msgid "(bloklangan)"
+msgstr "(заблокирован)"
+
+msgid "Kursant qo‘shish"
+msgstr "Добавить курсанта"
+
+#, python-format
+msgid "%(name)s — tahrirlash"
+msgstr "%(name)s — редактирование"
+
+msgid "Yangi kursant"
+msgstr "Новый курсант"
+
+msgid "Kursant ma’lumotlarini tahrirlash"
+msgstr "Редактирование данных курсанта"
+
+msgid ""
+"Bu kursantning naryad tarixi bor. Guruh yoki jins o‘zgartirilsa, tarix "
+"o‘chmaydi — o‘zgarish faqat keyingi naryadlarga ta’sir qiladi va jurnalga "
+"yoziladi."
+msgstr ""
+"У этого курсанта есть история нарядов. При изменении группы или пола история"
+" не удаляется — изменение влияет только на следующие наряды и записывается в"
+" журнал."
+
+msgid "(PDF uchun)"
+msgstr "(для PDF)"
+
+msgid "Bekor qilish"
+msgstr "Отмена"
+
+msgid "Saqlash"
+msgstr "Сохранить"
+
+msgid "Kursantlarni import qilish"
+msgstr "Импорт курсантов"
+
+msgid "Excel import"
+msgstr "Импорт из Excel"
+
+msgid "Excel’dan import"
+msgstr "Импорт из Excel"
+
+msgid ""
+"Ustunlar: <strong>familiya, ism, otasining ismi, guruh, jins</strong>. Avval"
+" oldindan ko‘rish chiqadi — bazaga faqat “Tasdiqlash” bosilgandan keyin "
+"yoziladi."
+msgstr ""
+"Столбцы: <strong>фамилия, имя, отчество, группа, пол</strong>. Сначала "
+"показывается предпросмотр — в базу данные записываются только после нажатия "
+"“Утвердить”."
+
+msgid "Shablonni yuklab olish (.xlsx)"
+msgstr "Скачать шаблон (.xlsx)"
+
+msgid "Fayl (.xlsx, 2 MB gacha)"
+msgstr "Файл (.xlsx, до 2 МБ)"
+
+msgid "Oldindan ko‘rish"
+msgstr "Предпросмотр"
+
+msgid "Fayl"
+msgstr "Файл"
+
+#, python-format
+msgid "%(n)s ta qator"
+msgid_plural "%(n)s ta qator"
+msgstr[0] "%(n)s строка"
+msgstr[1] "%(n)s строки"
+msgstr[2] "%(n)s строк"
+msgstr[3] "%(n)s строк"
+
+msgid "Yangi"
+msgstr "Новые"
+
+msgid "Yangilanadi"
+msgstr "Будут обновлены"
+
+msgid "O‘zgarmaydi"
+msgstr "Без изменений"
+
+msgid "Xato"
+msgstr "Ошибка"
+
+msgid "Xatolar — import tasdiqlanmaydi"
+msgstr "Ошибки — импорт не будет утверждён"
+
+msgid ""
+"Bitta ham xatoli qator bo‘lsa, butun import to‘xtatiladi. Faylni tuzatib, "
+"qayta yuklang."
+msgstr ""
+"Если есть хотя бы одна строка с ошибкой, весь импорт останавливается. "
+"Исправьте файл и загрузите снова."
+
+msgid "Yangi kursantlar"
+msgstr "Новые курсанты"
+
+#, python-format
+msgid "%(line)s-qator"
+msgstr "Строка %(line)s"
+
+msgid ""
+"Naryad tarixi bor: tarix o‘chmaydi, o‘zgarish faqat keyingi naryadlarga "
+"ta’sir qiladi."
+msgstr ""
+"Есть история нарядов: история не удаляется, изменение влияет только на "
+"следующие наряды."
+
+#, python-format
+msgid "Bazada bor, faylda yo‘q (%(n)s) — o‘chirilmaydi"
+msgstr "Есть в базе, нет в файле (%(n)s) — не удаляются"
+
+msgid ""
+"Bu kursantlarga tegilmaydi. Kerak bo‘lsa, kartochkasidan faolsizlantiring."
+msgstr ""
+"Эти курсанты не затрагиваются. При необходимости деактивируйте их в карточке"
+" курсанта."
+
+msgid "Tasdiqlash va bazaga yozish"
+msgstr "Утвердить и записать в базу"
+
+msgid "Kursantlar bazasi"
+msgstr "База курсантов"
+
+msgid "+ Kursant qo‘shish"
+msgstr "+ Добавить курсанта"
+
+msgid "Guruhlar bo‘yicha (faol kursantlar)"
+msgstr "По группам (активные курсанты)"
+
+msgid "Kutilgan"
+msgstr "Ожидается"
+
+msgid "Faol o‘g‘il bolalar, naryaddan ozodlarsiz"
+msgstr "Активные юноши, без освобождённых от наряда"
+
+msgid "Naryadga chiqadi"
+msgstr "Заступают в наряд"
+
+#, python-format
+msgid "(%(n)s ozod)"
+msgid_plural "(%(n)s ozod)"
+msgstr[0] "(%(n)s освобождён)"
+msgstr[1] "(%(n)s освобождены)"
+msgstr[2] "(%(n)s освобождены)"
+msgstr[3] "(%(n)s освобождены)"
+
+msgid "Jami"
+msgstr "Всего"
+
+msgid "Familiya bo‘yicha qidirish"
+msgstr "Поиск по фамилии"
+
+msgid "Familiya bo‘yicha qidirish…"
+msgstr "Поиск по фамилии…"
+
+msgid "Hamma guruh"
+msgstr "Все группы"
+
+msgid "Hammasi"
+msgstr "Все"
+
+msgid "Barcha holatlar"
+msgstr "Все статусы"
+
+msgid "Qidirish"
+msgstr "Найти"
+
+msgid "Tugash sanasi"
+msgstr "Дата окончания"
+
+msgid "Tugashni o‘zgartirish"
+msgstr "Изменить окончание"
+
+msgid "Yozuv o‘chirilsinmi?"
+msgstr "Удалить запись?"
+
+msgid "O‘chirish"
+msgstr "Удалить"
+
+msgid "Yo‘q."
+msgstr "Нет."
+
+msgid "Sabab (majburiy)"
+msgstr "Причина (обязательно)"
+
+msgid "— tanlang —"
+msgstr "— выберите —"
+
+msgid "masalan: tibbiy ma’lumotnoma"
+msgstr "например: медицинская справка"
+
+msgid "Almashtirish"
+msgstr "Замена"
+
+msgid "Bo‘sh o‘ringa kursant"
+msgstr "Курсант на свободное место"
+
+#, python-format
+msgid "hozir: <b>%(name)s</b>"
+msgstr "сейчас: <b>%(name)s</b>"
+
+msgid "Yopish"
+msgstr "Закрыть"
+
+msgid ""
+"Jazo o‘rni: faqat boshqa faol zalyotchik (jazo naryadi bo‘lib qoladi) yoki "
+"shu joy guruhi kursanti (oddiy naryad) qo‘yiladi."
+msgstr ""
+"Место наряда вне очереди: можно поставить только другого действующего "
+"залётчика (останется нарядом вне очереди) или курсанта группы этого поста "
+"(обычный наряд)."
+
+msgid ""
+"Nomzodlar algoritm kaliti bo‘yicha saralangan: avval shu haftada kam turgan,"
+" keyin jami kam, shu joyda kam, uzoq dam olgan. Eng munosibi — birinchi."
+msgstr ""
+"Кандидаты отсортированы по ключу алгоритма: сначала те, кто меньше стоял на "
+"этой неделе, затем меньше всего, меньше на этом посту, дольше отдыхал. Самый"
+" подходящий — первый."
+
+msgid "eng munosib"
+msgstr "самый подходящий"
+
+msgid "zalyotchik"
+msgstr "залётчик"
+
+#, python-format
+msgid ""
+"haftada: %(week)s · jami: %(total)s · shu joyda: %(post)s · oxirgi: %(last)s"
+msgstr ""
+"за неделю: %(week)s · всего: %(total)s · на этом посту: %(post)s · "
+"последний: %(last)s"
+
+msgid "Nomzod yo‘q."
+msgstr "Кандидатов нет."
+
+msgid ""
+"“Kasal” yoki “Ta’til” tanlansa, almashtirilgan kursantga shu sutka uchun "
+"sababli holat avtomatik yoziladi."
+msgstr ""
+"Если выбрано “Болен” или “Отпуск”, заменённому курсанту на эти сутки "
+"автоматически записывается уважительная причина."
+
+msgid "Orqaga"
+msgstr "Назад"
+
+msgid "Lavozimlarni almashtirish"
+msgstr "Поменять должности"
+
+msgid "ikki qatordagi kursantlar o‘rin almashadi."
+msgstr "курсанты из двух строк меняются местами."
+
+msgid "1-qator"
+msgstr "Строка 1"
+
+msgid "2-qator"
+msgstr "Строка 2"
+
+msgid ""
+"Kasal, ta’til, sababli yoki boshqa sabab bilan band kursantlar generatorga "
+"tushmaydi. Sanalar — sutka boshlanish sanalari (ikkala chegara ham ichida)."
+msgstr ""
+"Курсанты, занятые по болезни, отпуску, уважительной или другой причине, не "
+"попадают в генератор. Даты — даты начала суток (обе границы включительно)."
+
+msgid "Yangi yozuv"
+msgstr "Новая запись"
+
+msgid "Kiritish"
+msgstr "Внести"
+
+#, python-format
+msgid "Hozir band (%(n)s)"
+msgstr "Сейчас заняты (%(n)s)"
+
+#, python-format
+msgid "Kelgusida (%(n)s)"
+msgstr "Предстоящие (%(n)s)"
+
+#, python-format
+msgid "Tugaganlar (oxirgi %(n)s ta)"
+msgid_plural "Tugaganlar (oxirgi %(n)s ta)"
+msgstr[0] "Завершённые (последняя %(n)s)"
+msgstr[1] "Завершённые (последние %(n)s)"
+msgstr[2] "Завершённые (последние %(n)s)"
+msgstr[3] "Завершённые (последние %(n)s)"
+
+msgid "Tasdiqlangan naryadlar"
+msgstr "Утверждённые наряды"
+
+msgid "Hali tasdiqlangan sutka yo‘q."
+msgstr "Утверждённых суток пока нет."
+
+#, python-format
+msgid "Sutka %(d)s"
+msgstr "Сутки %(d)s"
+
+msgid "Oldingi sutka"
+msgstr "Предыдущие сутки"
+
+msgid "Keyingi sutka"
+msgstr "Следующие сутки"
+
+#, python-format
+msgid "%(year)s-yil %(title)s"
+msgstr "%(title)s %(year)s г."
+
+#, python-format
+msgid "%(weekday)s, 18:00 → ertasi 18:00 · sutkalik naryadlar ro‘yxati"
+msgstr "%(weekday)s, 18:00 → следующий день 18:00 · список суточного наряда"
+
+msgid "Diqqat — tasdiqlashdan oldin tuzating:"
+msgstr "Внимание — исправьте перед утверждением:"
+
+msgid "Jurnal"
+msgstr "Журнал"
+
+msgid "Ro‘yxatni dastur tarix asosida avtomatik tuzadi (qoralama)."
+msgstr ""
+"Список формируется программой автоматически на основе истории (черновик)."
+
+msgid "Avval ogohlantirishlarni tuzating"
+msgstr "Сначала исправьте предупреждения"
+
+msgid "Tasdiqlash"
+msgstr "Утвердить"
+
+msgid ""
+"Qoralama qayta tuziladi — qo‘lda kiritilgan o‘zgarishlar o‘chadi. Davom "
+"etasizmi?"
+msgstr ""
+"Черновик будет пересформирован — изменения, внесённые вручную, будут "
+"удалены. Продолжить?"
+
+msgid "Qayta tuzish"
+msgstr "Пересформировать"
+
+msgid "Qoralamani o‘chirish…"
+msgstr "Удалить черновик…"
+
+msgid ""
+"Qoralama butunlay o‘chiriladi (jurnal saqlanadi). Shundan keyin oldingi "
+"sutkaning tasdig‘ini bekor qilish mumkin bo‘ladi."
+msgstr ""
+"Черновик будет полностью удалён (журнал сохранится). После этого можно будет"
+" отменить утверждение предыдущих суток."
+
+msgid "Qoralamani o‘chirish"
+msgstr "Удалить черновик"
+
+#, python-format
+msgid "Tasdiqlagan: %(name)s, %(at)s"
+msgstr "Утвердил: %(name)s, %(at)s"
+
+msgid "Tasdiqni bekor qilish…"
+msgstr "Отменить утверждение…"
+
+msgid "Tasdiqni bekor qilish"
+msgstr "Отменить утверждение"
+
+msgid "PDF yuklab olish"
+msgstr "Скачать PDF"
+
+msgid "Chop etish"
+msgstr "Печать"
+
+msgid "Qoralama PDF’ida “QORALAMA” yozuvi bo‘ladi."
+msgstr "В PDF черновика будет надпись “ЧЕРНОВИК”."
+
+msgid "Lavozim"
+msgstr "Должность"
+
+#, python-format
+msgid "%(code)s guruhi"
+msgstr "Группа %(code)s"
+
+msgid "qizlar navbati"
+msgstr "очередь девушек"
+
+msgid "qo‘lda"
+msgstr "вручную"
+
+msgid "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi"
+msgstr "Наряд вне очереди — в официальном PDF не отображается"
+
+msgid "Zalyot"
+msgstr "Залёт"
+
+msgid "— bo‘sh —"
+msgstr "— свободно —"
+
+msgid "Kursant qo‘yish"
+msgstr "Поставить курсанта"
+
+msgid "Bu sutka hali tasdiqlanmagan."
+msgstr "Эти сутки ещё не утверждены."
+
+#, python-format
+msgid "Jurnal %(d)s"
+msgstr "Журнал %(d)s"
+
+#, python-format
+msgid "%(d)s sutkasi jurnali"
+msgstr "Журнал суток %(d)s"
+
+msgid "Barcha o‘zgarishlar vaqt tartibida."
+msgstr "Все изменения в хронологическом порядке."
+
+msgid "bo‘sh"
+msgstr "свободно"
+
+#, python-format
+msgid "Sabab: %(reason)s"
+msgstr "Причина: %(reason)s"
+
+#, python-format
+msgid "Chop etish — %(d)s"
+msgstr "Печать — %(d)s"
+
+#, python-format
+msgid "%(d)s sutkasi — chop etish oynasi avtomatik ochiladi."
+msgstr "Сутки %(d)s — окно печати откроется автоматически."
+
+msgid "Yana chop etish"
+msgstr "Напечатать ещё раз"
+
+msgid "PDF’ni alohida ochish"
+msgstr "Открыть PDF отдельно"
+
+msgid "Sutka sahifasiga"
+msgstr "На страницу суток"
+
+msgid "Sutkalik naryadlar ro‘yxati (PDF)"
+msgstr "Список суточного наряда (PDF)"
+
+msgid ""
+"Tarix ham, boshlang‘ich guruh → joy taqsimoti ham yo‘q — birinchi sutkani "
+"tuzib bo‘lmaydi."
+msgstr ""
+"Нет ни истории, ни начального распределения “группа → пост” — первые сутки "
+"сформировать невозможно."
+
+msgid "Sozlamalarda boshlang‘ich taqsimotni kiriting"
+msgstr "Введите начальное распределение в настройках"
+
+msgid ""
+"yoki o‘tgan sutkalarni <code>import_history</code> buyrug‘i bilan kiriting."
+msgstr "или внесите прошедшие сутки командой <code>import_history</code>."
+
+msgid "Yangi 2-kurs haftasini ochish"
+msgstr "Открыть новую неделю 2-го курса"
+
+msgid ""
+"Faqat yakshanba sanasini tanlang — hafta shu kuni 18:00 da boshlanadi va 7 "
+"sutka davom etadi."
+msgstr ""
+"Выбирайте только дату воскресенья — неделя начинается в этот день в 18:00 и "
+"длится 7 суток."
+
+msgid "Yakshanba"
+msgstr "Воскресенье"
+
+msgid "Izoh (ixtiyoriy)"
+msgstr "Примечание (необязательно)"
+
+msgid "Haftani ochish"
+msgstr "Открыть неделю"
+
+#, python-format
+msgid "Oldingi haftalar (%(n)s ta)"
+msgid_plural "Oldingi haftalar (%(n)s ta)"
+msgstr[0] "Предыдущие недели (%(n)s)"
+msgstr[1] "Предыдущие недели (%(n)s)"
+msgstr[2] "Предыдущие недели (%(n)s)"
+msgstr[3] "Предыдущие недели (%(n)s)"
+
+msgid "Hafta PDF"
+msgstr "PDF недели"
+
+msgid "Hali birorta ham hafta ochilmagan."
+msgstr "Ещё не открыто ни одной недели."
+
+msgid "Mening naryadlarim"
+msgstr "Мои наряды"
+
+msgid "2-kurs sutkalik naryadi"
+msgstr "Суточный наряд 2-го курса"
+
+msgid "Kurs boshlig‘i paneli"
+msgstr "Панель начальника курса"
+
+#, python-format
+msgid "o‘tildi · qoldi %(n)s"
+msgstr "отработано · осталось %(n)s"
+
+msgid "o‘tildi"
+msgstr "отработано"
+
+msgid "Jazo naryadlari"
+msgstr "Наряды вне очереди"
+
+msgid "qoralamada"
+msgstr "в черновике"
+
+msgid "Bekor qilish…"
+msgstr "Отменить…"
+
+msgid ""
+"Navbatdan tashqari (jazo) naryadi: faol zalyotchik faqat 1-NO‘J yoki "
+"1-Yotoqxonada posbon bo‘lib turadi, shu joy guruhi bitta kam kishi beradi. "
+"Jazo naryadi sutka tasdiqlanganda “o‘tildi” hisoblanadi va adolat hisobiga "
+"kirmaydi."
+msgstr ""
+"Наряд вне очереди: действующий залётчик заступает только дневальным на КПП-1"
+" или в общежитие №1, группа этого поста выставляет на одного человека "
+"меньше. Наряд вне очереди считается отработанным после утверждения суток и "
+"не учитывается в справедливости."
+
+msgid "Zalyot kiritish"
+msgstr "Внести взыскание"
+
+msgid ""
+"Faqat o‘g‘il, faol va naryaddan ozod bo‘lmagan kursant. Faol zalyoti bor "
+"kursantga yangisi qo‘shilsa, soni mavjudiga qo‘shiladi."
+msgstr ""
+"Только юноша, активный и не освобождённый от наряда. Если у курсанта уже "
+"есть действующее взыскание, новое добавляется к нему."
+
+#, python-format
+msgid "Faol (%(n)s)"
+msgstr "Действующие (%(n)s)"
+
+#, python-format
+msgid "Bajarilgan va bekor qilinganlar (%(n)s)"
+msgid_plural "Bajarilgan va bekor qilinganlar (%(n)s)"
+msgstr[0] "Выполненные и отменённые (%(n)s)"
+msgstr[1] "Выполненные и отменённые (%(n)s)"
+msgstr[2] "Выполненные и отменённые (%(n)s)"
+msgstr[3] "Выполненные и отменённые (%(n)s)"
+
+msgid "ma’lumot yo‘q"
+msgstr "нет данных"
+
+#, python-format
+msgid "farq %(diff)s"
+msgstr "разница %(diff)s"
+
+#, python-format
+msgid "Ketma-ket ikki naryadi bir joyga tushgan: %(n)s ta holat"
+msgid_plural "Ketma-ket ikki naryadi bir joyga tushgan: %(n)s ta holat"
+msgstr[0] "Два наряда подряд на одном посту: %(n)s случай"
+msgstr[1] "Два наряда подряд на одном посту: %(n)s случая"
+msgstr[2] "Два наряда подряд на одном посту: %(n)s случаев"
+msgstr[3] "Два наряда подряд на одном посту: %(n)s случаев"
+
+#, python-format
+msgid "%(post)s: %(first)s va %(second)s"
+msgstr "%(post)s: %(first)s и %(second)s"
+
+msgid "Ketma-ket ikki naryadi bir joyga tushgan holat yo‘q."
+msgstr "Случаев двух нарядов подряд на одном посту нет."
+
+msgid "Statistika va adolat"
+msgstr "Статистика и справедливость"
+
+msgid "Faqat tasdiqlangan sutkalar bo‘yicha"
+msgstr "Только по утверждённым суткам"
+
+msgid "Excel’ga yuklab olish"
+msgstr "Скачать в Excel"
+
+msgid "Davr va guruh"
+msgstr "Период и группа"
+
+msgid "Davr"
+msgstr "Период"
+
+msgid "Sanadan sanagacha"
+msgstr "С даты по дату"
+
+msgid "Bitta 2-kurs haftasi"
+msgstr "Одна неделя 2-го курса"
+
+msgid "Dan"
+msgstr "С"
+
+msgid "Gacha"
+msgstr "По"
+
+msgid "Hafta"
+msgstr "Неделя"
+
+msgid "Hafta yo‘q"
+msgstr "Нет недель"
+
+msgid "Guruh (o‘g‘il bolalar jadvali)"
+msgstr "Группа (таблица юношей)"
+
+msgid "Ko‘rsatish"
+msgstr "Показать"
+
+msgid "Adolat ko‘rsatkichi (guruh kesimida)"
+msgstr "Показатель справедливости (по группам)"
+
+msgid ""
+"Jami naryadlar bo‘yicha: yashil — farq (max − min) ≤ 1, sariq — 2, qizil — 3"
+" va undan ko‘p. Faqat naryadga chiqadiganlar hisobga olinadi (faol emaslar "
+"va naryaddan ozodlar — komandirlar, kurs lavozimlari — kirmaydi)."
+msgstr ""
+"По общему числу нарядов: зелёный — разница (max − min) ≤ 1, жёлтый — 2, "
+"красный — 3 и более. Учитываются только заступающие в наряд (неактивные и "
+"освобождённые от наряда — командиры, курсовые должности — не входят)."
+
+msgid "min"
+msgstr "мин"
+
+msgid "max"
+msgstr "макс"
+
+msgid "o‘rtacha"
+msgstr "среднее"
+
+#, python-format
+msgid ""
+"O‘rtachadan ±1 ichida: <span class=\"font-semibold\">%(pct)s%%</span> (%(n)s"
+" kursant)"
+msgid_plural ""
+"O‘rtachadan ±1 ichida: <span class=\"font-semibold\">%(pct)s%%</span> (%(n)s"
+" kursant)"
+msgstr[0] ""
+"В пределах ±1 от среднего: <span class=\"font-semibold\">%(pct)s%%</span> "
+"(%(n)s курсант)"
+msgstr[1] ""
+"В пределах ±1 от среднего: <span class=\"font-semibold\">%(pct)s%%</span> "
+"(%(n)s курсанта)"
+msgstr[2] ""
+"В пределах ±1 от среднего: <span class=\"font-semibold\">%(pct)s%%</span> "
+"(%(n)s курсантов)"
+msgstr[3] ""
+"В пределах ±1 от среднего: <span class=\"font-semibold\">%(pct)s%%</span> "
+"(%(n)s курсантов)"
+
+msgid "Ketma-ket bir joy:"
+msgstr "Один пост подряд:"
+
+msgid "Qizlarda joy bitta"
+msgstr "У девушек один пост"
+
+msgid "Ketma-ket 2 marta navbatchi:"
+msgstr "Дежурный 2 раза подряд:"
+
+msgid "Bu davrda tasdiqlangan naryad yo‘q."
+msgstr "За этот период утверждённых нарядов нет."
+
+#, python-format
+msgid "%(group)s guruhi: kursant × joy"
+msgstr "Группа %(group)s: курсант × пост"
+
+msgid "Oxirgi naryad"
+msgstr "Последний наряд"
+
+msgid "Navbatdan tashqari (jazo) naryadlari — adolat hisobiga kirmaydi"
+msgstr "Наряды вне очереди — не учитываются в справедливости"
+
+msgid "(faol emas)"
+msgstr "(неактивен)"
+
+msgid "(ozod)"
+msgstr "(освобождён)"
+
+msgid ""
+"Rang: ko‘p — to‘q, kam — och (joylar va lavozimlar alohida; “Jami” — eng "
+"kami och, eng ko‘pi to‘q)."
+msgstr ""
+"Цвет: больше — темнее, меньше — светлее (посты и должности отдельно; “Всего”"
+" — минимум светлее, максимум темнее)."
+
+msgid "“Shu haftada” — tanlangan 2-kurs haftasi."
+msgstr "“На этой неделе” — выбранная неделя 2-го курса."
+
+msgid "“Shu haftada” — joriy (oxirgi) 2-kurs haftasi."
+msgstr "“На этой неделе” — текущая (последняя) неделя 2-го курса."
+
+msgid "Guruh tanlanmagan."
+msgstr "Группа не выбрана."
+
+msgid "Qizlar (alohida hovuz)"
+msgstr "Девушки (отдельный пул)"
+
+msgid "Qizlar yo‘q."
+msgstr "Девушек нет."
+
+#, python-format
+msgid "Ketma-ket ikki naryadda navbatchi bo‘lgan: %(n)s ta holat"
+msgid_plural "Ketma-ket ikki naryadda navbatchi bo‘lgan: %(n)s ta holat"
+msgstr[0] "Дежурный в двух нарядах подряд: %(n)s случай"
+msgstr[1] "Дежурный в двух нарядах подряд: %(n)s случая"
+msgstr[2] "Дежурный в двух нарядах подряд: %(n)s случаев"
+msgstr[3] "Дежурный в двух нарядах подряд: %(n)s случаев"
+
+#, python-format
+msgid "%(first)s va %(second)s"
+msgstr "%(first)s и %(second)s"
+
+msgid "Ketma-ket ikki naryadda navbatchi bo‘lgan qiz yo‘q."
+msgstr "Девушек, бывших дежурными в двух нарядах подряд, нет."
+
+msgid "Guruhlar kesimi: guruh × joy (necha sutka bergan)"
+msgstr "По группам: группа × пост (сколько суток выделила)"
+
+msgid "Sutkalar"
+msgstr "Сутки"
+
+msgid "Faol, naryaddan ozodlarsiz"
+msgstr "Активные, без освобождённых от наряда"
+
+msgid "1 o‘g‘ilga o‘rtacha naryad"
+msgstr "Нарядов в среднем на 1 юношу"
+
+msgid ""
+"Aylanish to‘g‘ri ishlasa, har guruh har joyni deyarli teng marta beradi. Joy"
+" guruhga biriktiriladi, shuning uchun <b>kursanti kam guruhda bir o‘g‘ilga "
+"ko‘proq naryad to‘g‘ri keladi</b> — bu qabul qilingan qoida (adolat guruh "
+"ichida o‘lchanadi, CLAUDE.md 4-B.5)."
+msgstr ""
+"Если ротация работает правильно, каждая группа выделяет на каждый пост почти"
+" одинаковое число раз. Пост закрепляется за группой, поэтому <b>в группе с "
+"меньшим числом курсантов на одного юношу приходится больше нарядов</b> — это"
+" принятое правило (справедливость измеряется внутри группы, CLAUDE.md "
+"4-B.5)."
+
+msgid ""
+"O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi "
+"(naryaddan ozod komandirlar va kurs lavozimlari kirmaydi)."
+msgstr ""
+"Среднее делится только на число юношей, заступающих в наряд (освобождённые "
+"от наряда командиры и курсовые должности не учитываются)."
+
+msgid "Qo‘lda tuzatishlar nazorati"
+msgstr "Контроль ручных исправлений"
+
+#, python-format
+msgid ""
+"Tasdiqlangan sutkalardagi almashtirishlar (sutka qayta tuzilganda yo‘qolgan "
+"tuzatishlar sanalmaydi). Jami: <b>%(total)s</b>."
+msgstr ""
+"Замены в утверждённых сутках (исправления, потерянные при пересформировании "
+"суток, не учитываются). Всего: <b>%(total)s</b>."
+
+msgid "Diqqat: qo‘lda qo‘yilishi guruh o‘rtachasidan sezilarli ko‘p"
+msgstr "Внимание: ручных назначений заметно больше среднего по группе"
+
+#, python-format
+msgid "qo‘lda %(n)s marta qo‘yilgan, hovuz o‘rtachasi %(mean)s"
+msgid_plural "qo‘lda %(n)s marta qo‘yilgan, hovuz o‘rtachasi %(mean)s"
+msgstr[0] "вручную назначен %(n)s раз, среднее по пулу %(mean)s"
+msgstr[1] "вручную назначен %(n)s раза, среднее по пулу %(mean)s"
+msgstr[2] "вручную назначен %(n)s раз, среднее по пулу %(mean)s"
+msgstr[3] "вручную назначен %(n)s раз, среднее по пулу %(mean)s"
+
+msgid ""
+"Qoida: kamida 2 marta va hovuz (guruh o‘g‘illari yoki qizlar) o‘rtachasidan "
+"kamida 2 baravar ko‘p."
+msgstr ""
+"Правило: не менее 2 раз и не менее чем в 2 раза больше среднего по пулу "
+"(юноши группы или девушки)."
+
+msgid "Sabablar bo‘yicha"
+msgstr "По причинам"
+
+msgid "Kim tomonidan"
+msgstr "Кем"
+
+msgid "Almashtirish yo‘q."
+msgstr "Замен нет."
+
+msgid "Qo‘lda qo‘yilgan"
+msgstr "Назначен вручную"
+
+msgid "Qo‘lda olingan"
+msgstr "Снят вручную"
+
+msgid "Hovuz o‘rtachasi"
+msgstr "Среднее по пулу"
+
+msgid "(qiz)"
+msgstr "(девушка)"
+
+msgid "Joriy sutka:"
+msgstr "Текущие сутки:"
+
+msgid "Joriy sutka o‘tgan qismi"
+msgstr "Прошедшая часть текущих суток"
+
+msgid "Bojxona instituti binosi"
+msgstr "Здание Таможенного института"
+
+msgid "Chiqish"
+msgstr "Выйти"
+
+msgid "Rejim: avtomatik (tizimga qarab)"
+msgstr "Режим: автоматически (как в системе)"
+
+msgid "Rejim: kunduzgi"
+msgstr "Режим: дневной"
+
+msgid "Rejim: tungi"
+msgstr "Режим: ночной"
+
+msgid "Kunduzgi / tungi rejim"
+msgstr "Дневной / ночной режим"
+
+msgid "Kirish"
+msgstr "Войти"
+
+msgid "2-kurs · sutkalik naryad platformasi"
+msgstr "2-й курс · платформа суточного наряда"
+
+msgid "Tizimga kirish"
+msgstr "Вход в систему"
+
+msgid "Login va parolni kurs boshlig‘idan olasiz."
+msgstr "Логин и пароль выдаёт начальник курса."
+
+msgid "5 marta noto‘g‘ri urinishdan keyin login 15 daqiqaga bloklanadi."
+msgstr "После 5 неверных попыток логин блокируется на 15 минут."
+
+msgid "Parolni almashtirish"
+msgstr "Смена пароля"
+
+msgid ""
+"Sizga vaqtinchalik parol berilgan. Davom etish uchun o‘zingizning "
+"parolingizni o‘rnating."
+msgstr "Вам выдан временный пароль. Чтобы продолжить, установите свой пароль."
+
+msgid "Parolni saqlash"
+msgstr "Сохранить пароль"

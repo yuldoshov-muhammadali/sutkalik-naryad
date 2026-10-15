@@ -94,12 +94,22 @@ def test_admin_role_without_superuser_has_full_access(client):
 
 
 def test_settings_page_saves_initial_rotation(admin_client_uz, db_groups):
-    from naryad.models import InitialRotation, Post, Setting
+    from naryad.models import InitialRotation, Post, PrepNote, Setting
 
     url = reverse("admin:naryad_setting_change", args=[Setting.load().pk])
     assert admin_client_uz.get(url).status_code == 200
     s = Setting.load()
+    notes = list(PrepNote.objects.order_by("post__display_order"))  # sahifa ochilganda har joyga qator yaratiladi
+    assert len(notes) == Post.objects.count()
     data = {
+        "approval_lead_hours": 24,
+        "penalty_per_post": 1,
+        "prep_notes-TOTAL_FORMS": str(len(notes)),
+        "prep_notes-INITIAL_FORMS": str(len(notes)),
+        "prep_notes-MIN_NUM_FORMS": "0",
+        "prep_notes-MAX_NUM_FORMS": "1000",
+        **{f"prep_notes-{i}-id": n.pk for i, n in enumerate(notes)},
+        **{f"prep_notes-{i}-setting": s.pk for i, n in enumerate(notes)},
         "recipient_position": s.recipient_position,
         "recipient_name": s.recipient_name,
         "course_head_position": s.course_head_position,
