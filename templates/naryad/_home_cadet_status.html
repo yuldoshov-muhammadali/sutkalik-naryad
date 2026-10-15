@@ -1,0 +1,53 @@
+{% load i18n %}{# Kursant bosh sahifasi (14-bosqich): faqat o‘zining tasdiqlangan navbatdagi naryadi — CLAUDE.md 60-band #}{% if not data.cadet %}
+  <div class="rounded-lg border border-amber-200 bg-amber-50/95 px-4 py-3 text-sm text-amber-900">{% translate "Akkauntingiz kursantga bog‘lanmagan. Kurs boshlig‘iga murojaat qiling." %}</div>
+{% else %}
+  {% for day in data.cancelled %}
+  <div class="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-900 shadow-sm" role="alert" data-testid="duty-cancelled">
+    <p class="font-semibold">{% translate "Naryadingiz bekor qilindi" %}</p>
+    <p class="text-sm">{% blocktranslate with d=day|date:"d.m.Y" %}{{ d }} sutkasi{% endblocktranslate %}</p>
+  </div>
+  {% endfor %}
+
+  <section class="rounded-2xl bg-white/85 p-5 shadow-lg ring-1 ring-slate-200 backdrop-blur{% if data.card.on_duty %} ring-2 ring-gold-400{% endif %}" aria-labelledby="next-duty" data-testid="my-duty">
+    <h2 id="next-duty" class="text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Mening navbatdagi naryadim" %}</h2>
+    {% with card=data.card %}
+    {% if card %}
+      {% if card.assignment.kind == 'penalty' %}<p class="mt-2 inline-block rounded bg-gold-400 px-2 py-0.5 text-sm font-semibold text-brand-950" data-testid="duty-penalty">{% translate "Navbatdan tashqari naryad" %}</p>{% endif %}
+      <p class="mt-2 text-base font-medium text-slate-700" data-testid="duty-when"><span class="whitespace-nowrap">{{ card.when_start }}</span> → <span class="whitespace-nowrap">{{ card.when_end }}</span></p>
+      <p class="mt-3 text-2xl font-bold leading-tight text-brand-900 sm:text-3xl" data-testid="duty-post">{% translate card.assignment.post_slot.post.name %}</p>
+      <p class="mt-1 text-xl font-semibold text-brand-800" data-testid="duty-role">{{ card.assignment.post_slot.get_role_display }}</p>
+      <p class="mt-1 text-sm text-slate-600">{% translate "Guruh" %}: <span class="font-medium">{{ card.assignment.group.code }}</span></p>
+      <p class="mt-4 rounded-lg {% if card.on_duty %}bg-gold-100 text-gold-900{% else %}bg-brand-50 text-brand-900{% endif %} px-3 py-2 text-base font-semibold"
+         data-countdown data-server-now="{{ data.server_now_ms }}" data-start="{{ card.start_ms }}" data-end="{{ card.end_ms }}"
+         data-t-before-d="{{ data.templates.before_d }}" data-t-before-hm="{{ data.templates.before_hm }}" data-t-before-m="{{ data.templates.before_m }}"
+         data-t-on-hm="{{ data.templates.on_hm }}" data-t-on-m="{{ data.templates.on_m }}" data-testid="duty-countdown">{{ card.countdown }}</p>
+      {% if card.note %}
+      <div class="mt-3 rounded-lg border border-slate-200 px-3 py-2" data-testid="prep-note">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% translate "Tayyorgarlik eslatmasi" %}</p>
+        <p class="mt-0.5 text-sm text-slate-800">{{ card.note }}</p>
+      </div>
+      {% endif %}
+    {% else %}
+      <p class="mt-2 text-base text-slate-600" data-testid="no-duty">{% translate "Yaqin kunlarda tasdiqlangan naryadingiz yo‘q" %}</p>
+    {% endif %}
+    {% endwith %}
+  </section>
+
+  {% if data.penalty %}
+  <div class="mt-4 rounded-xl border border-gold-300 bg-gold-50 px-4 py-3 text-sm text-gold-900" data-testid="penalty-progress">
+    {% blocktranslate count total=data.penalty.count with served=data.penalty.served %}Jazo naryadlari: {{ total }} tadan {{ served }} tasi o‘tildi{% plural %}Jazo naryadlari: {{ total }} tadan {{ served }} tasi o‘tildi{% endblocktranslate %}
+  </div>
+  {% endif %}
+
+  <div class="mt-4 grid grid-cols-2 gap-2">
+    <div class="rounded-xl bg-white/85 p-4 shadow-sm ring-1 ring-slate-200 backdrop-blur">
+      <p class="text-xs text-slate-500">{% translate "Shu haftada" %}</p>
+      <p class="text-2xl font-semibold tabular-nums">{{ data.this_week }}</p>
+    </div>
+    <div class="rounded-xl bg-white/85 p-4 shadow-sm ring-1 ring-slate-200 backdrop-blur">
+      <p class="text-xs text-slate-500">{% translate "Jami naryadlar" %}</p>
+      <p class="text-2xl font-semibold tabular-nums">{{ data.total }}</p>
+    </div>
+  </div>
+  <a href="{% url 'my_card' %}" class="mt-4 flex min-h-[44px] items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-semibold text-brand-900 shadow-sm ring-1 ring-slate-200 hover:bg-brand-50">{% translate "Mening tarixim" %} →</a>
+{% endif %}

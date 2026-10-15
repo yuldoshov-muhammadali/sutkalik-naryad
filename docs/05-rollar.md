@@ -10,7 +10,7 @@ Platformada **ikki rol** bor. Sutkalik naryad ro‘yxatini **dastur o‘zi tuzad
 | Rol | Kim | Qisqacha |
 |---|---|---|
 | **Admin** (`admin`) | Kurs boshlig‘i | Hammasi: haftani ochish, “qoralama tuzish” tugmasi (ro‘yxatni dastur tuzadi), sabab bilan qo‘lda tuzatish, sutkani tasdiqlash va qayta ochish, kursantlar bazasi, sozlamalar, boshqaruv paneli. Superuser ham admin hisoblanadi. |
-| **Kursant** (`cadet`) | Har bir kursant | Faqat tasdiqlangan sutkalar (PDF’ini yuklab olishi ham mumkin) va o‘zining naryad tarixi. Qoralamalarni ko‘rmaydi. |
+| **Kursant** (`cadet`) | Har bir kursant | Faqat **o‘zining** naryadlari: bosh sahifada navbatdagi tasdiqlangan naryadi (sana, joy, lavozim, hisoblagich) va “Mening tarixim”. Boshqa kursantlarning ro‘yxatini, sutka sahifalari va PDF’ni ko‘rmaydi (14-bosqich, CLAUDE.md 60-band). Qoralamalarni ko‘rmaydi. |
 
 ## Ruxsatlar jadvali
 
@@ -18,7 +18,7 @@ Platformada **ikki rol** bor. Sutkalik naryad ro‘yxatini **dastur o‘zi tuzad
 |---|---|---|---|
 | Bosh sahifa (rolga qarab) | `home.view` | ✅ | ✅ |
 | O‘z parolini almashtirish | `account.password_change` | ✅ | ✅ |
-| Tasdiqlangan sutkalarni ko‘rish | `day.view_approved` | ✅ | ✅ |
+| Tasdiqlangan sutkalarni ko‘rish | `day.view_approved` | ✅ | — |
 | O‘z kartochkasi va naryad tarixini ko‘rish | `history.own` | — | ✅ |
 | 2-kurs haftalari va sutkalar holatini ko‘rish | `week.view` | ✅ | — |
 | 2-kurs haftasini ochish | `week.open` | ✅ | — |
@@ -28,8 +28,9 @@ Platformada **ikki rol** bor. Sutkalik naryad ro‘yxatini **dastur o‘zi tuzad
 | Sutkani tasdiqlash | `day.approve` | ✅ | — |
 | Tasdiqlangan sutkani qayta ochish (sabab majburiy) | `day.reopen` | ✅ | — |
 | Sababli yo‘qliklarni (kasal, ta’til) kiritish | `absence.manage` | ✅ | — |
+| Zalyotchiklar: navbatdan tashqari jazo naryadini kiritish va bekor qilish | `penalty.manage` | ✅ | — |
 | Har qanday kursant kartochkasi, tarixi va statistika | `history.all` | ✅ | — |
-| PDF yuklab olish va chop etish (kursant — faqat tasdiqlangan sutkalar) | `pdf.export` | ✅ | ✅ |
+| PDF yuklab olish va chop etish | `pdf.export` | ✅ | — |
 | Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv) | `cadets.view` | ✅ | — |
 | Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar | `cadets.manage` | ✅ | — |
 | Sozlamalar va boshlang‘ich taqsimot | `settings.manage` | ✅ | — |

@@ -6,21 +6,36 @@ from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.utils.translation import gettext as _
 
 from . import permissions as perms, stats
+from .readiness import approval_banner
 from .auth import LoginForm
-from .dashboard import cadet_dashboard, fmt_day, staff_dashboard
+from .dashboard import cadet_dashboard, clock_context, fmt_day, staff_dashboard
 
 
 @perms.role_required("home.view")
 def home(request):
+    template, context = home_context(request)
+    context["clock"] = clock_context()
+    return render(request, template, context)
+
+
+@perms.role_required("home.view")
+def home_status(request):
+    """Bosh sahifa holat kartochkalari — HTMX har 60 soniyada shu manzildan yangilaydi (12-bosqich)."""
+    template, context = home_context(request)
+    return render(request, template.replace("home_", "_home_").replace(".html", "_status.html"), context)
+
+
+def home_context(request) -> tuple[str, dict]:
     role = perms.user_role(request.user)
     if role == perms.CADET:
-        data = cadet_dashboard(request.user)
-        return render(request, "naryad/home_cadet.html", {"data": data, "fmt_day": fmt_day})
+        return "naryad/home_cadet.html", {"data": cadet_dashboard(request.user), "fmt_day": fmt_day}
     data = staff_dashboard(request.user)
     fairness = stats.fairness_all(stats.Period()) if perms.can(request.user, "history.all") else []
-    return render(request, "naryad/home_staff.html", {"data": data, "fairness": fairness})
+    banner = approval_banner() if perms.can(request.user, "day.approve") else None
+    return "naryad/home_staff.html", {"data": data, "fairness": fairness, "banner": banner}
 
 
 class LoginView(auth_views.LoginView):
@@ -41,7 +56,7 @@ class PasswordChangeView(perms.RoleRequiredMixin, auth_views.PasswordChangeView)
     def form_valid(self, form):
         form.user.must_change_password = False
         response = super().form_valid(form)
-        messages.success(self.request, "Parolingiz almashtirildi.")
+        messages.success(self.request, _("Parolingiz almashtirildi."))
         return response
 
 

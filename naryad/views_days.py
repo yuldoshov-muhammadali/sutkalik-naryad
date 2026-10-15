@@ -9,12 +9,15 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.translation import gettext as _
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_POST
 
 from . import absences as absence_service
-from . import days, permissions as perms, services
-from .dashboard import WEEKDAYS, current_duty_date, fmt_day
+from . import days, i18n, services
+from . import permissions as perms
+from .dashboard import current_duty_date, fmt_day
 from .models import Absence, ChangeLog, DutyDay, DutyWeek, PostSlot
 
 
@@ -48,7 +51,7 @@ def week_rows(week: DutyWeek):
     return [
         {
             "date": d,
-            "weekday": WEEKDAYS[d.weekday()],
+            "weekday": i18n.weekday(d),
             "title": f"{fmt_day(d)} 18:00 → {fmt_day(d + dt.timedelta(days=1))} 18:00",
             "status": by_date[d].status if d in by_date else "none",
             "is_current": d == today,
@@ -84,12 +87,20 @@ def week_preview(request):
     try:
         start = dt.date.fromisoformat(request.GET.get("start_date", ""))
     except ValueError:
-        return HttpResponse('<p class="text-sm text-slate-500">Sanani tanlang.</p>')
+        return HttpResponse(format_html('<p class="text-sm text-slate-500">{}</p>', _("Sanani tanlang.")))
     if start.isoweekday() != 7:
-        return HttpResponse('<p class="text-sm font-medium text-red-700">Tanlangan sana yakshanba emas — hafta faqat yakshanba 18:00 da boshlanadi.</p>')
+        return HttpResponse(format_html(
+            '<p class="text-sm font-medium text-red-700">{}</p>',
+            _("Tanlangan sana yakshanba emas — hafta faqat yakshanba 18:00 da boshlanadi."),
+        ))
     rows = [
-        f"<li>{i + 1}-sutka · {WEEKDAYS[(start + dt.timedelta(days=i)).weekday()]}: "
-        f"{fmt_day(start + dt.timedelta(days=i))} 18:00 → {fmt_day(start + dt.timedelta(days=i + 1))} 18:00</li>"
+        format_html(
+            "<li>{} · {}: {} 18:00 → {} 18:00</li>",
+            _("%(n)s-sutka") % {"n": i + 1},
+            i18n.weekday(start + dt.timedelta(days=i)),
+            fmt_day(start + dt.timedelta(days=i)),
+            fmt_day(start + dt.timedelta(days=i + 1)),
+        )
         for i in range(7)
     ]
     return HttpResponse('<ol class="space-y-0.5 text-sm text-slate-700">' + "".join(rows) + "</ol>")
@@ -102,11 +113,11 @@ def week_open(request):
         start = dt.date.fromisoformat(request.POST.get("start_date", ""))
         week = days.open_week(start, request.user, request.POST.get("note", "").strip()[:200])
     except ValueError:
-        messages.error(request, "Sana noto‘g‘ri.")
+        messages.error(request, _("Sana noto‘g‘ri."))
     except services.ServiceError as exc:
-        messages.error(request, f"Hafta ochilmadi: {exc}")
+        messages.error(request, _("Hafta ochilmadi: %(error)s") % {"error": exc})
     else:
-        messages.success(request, f"2-kurs haftasi ochildi: {week}.")
+        messages.success(request, _("2-kurs haftasi ochildi: %(week)s.") % {"week": week})
     return redirect("week_list")
 
 
@@ -124,13 +135,13 @@ def day_detail(request, date):
         raise Http404("Bu sutka hali tasdiqlanmagan.")
     week = duty_day.week if duty_day else DutyWeek.objects.filter(start_date=services.week_start(date)).first()
     if week is None and can_draft:
-        messages.warning(request, f"{date:%d.%m.%Y} ochilgan 2-kurs haftasiga tegishli emas.")
+        messages.warning(request, _("%(day)s ochilgan 2-kurs haftasiga tegishli emas.") % {"day": f"{date:%d.%m.%Y}"})
         return redirect("week_list")
 
     context = {
         "date": date,
-        "title": f"{fmt_day(date)} kunidan {fmt_day(date + dt.timedelta(days=1))} kuniga",
-        "weekday": WEEKDAYS[date.weekday()],
+        "title": _("%(start)s kunidan %(end)s kuniga") % {"start": fmt_day(date), "end": fmt_day(date + dt.timedelta(days=1))},
+        "weekday": i18n.weekday(date),
         "duty_day": duty_day,
         "week": week,
         "sections": days.sections(duty_day),
@@ -139,8 +150,15 @@ def day_detail(request, date):
         "editable": duty_day is not None and not duty_day.is_approved and perms.can(request.user, "day.edit"),
     }
     if can_draft:
-        context["issues"] = days.day_issues(duty_day) if duty_day and not duty_day.is_approved else []
+        all_issues = days.day_issues(duty_day) if duty_day and not duty_day.is_approved else []
+        context["issues"] = [i for i in all_issues if i.blocks_approval]
+        # tasdiqlashga to'sqinlik qilmaydigan eslatmalar (zalyotchiklar, 15-bosqich)
+        context["notes"] = [i.text for i in all_issues if not i.blocks_approval] + (
+            days.penalty_notices(duty_day) if duty_day and not duty_day.is_approved else []
+        )
         context["generation_blocker"] = days.generation_blocker(date) if duty_day is None or not duty_day.is_approved else None
+        # Sozlamalar havolasi faqat boshlang'ich taqsimot yo'qligi sababli bo'lsa (matn tilga bog'liq emas)
+        context["blocker_needs_settings"] = context["generation_blocker"] == days.no_rotation_text()
         context["reopen_blocker"] = days.reopen_blocker(duty_day) if duty_day and duty_day.is_approved else None
         context["delete_blocker"] = days.delete_blocker(duty_day) if duty_day and not duty_day.is_approved else None
         context["has_log"] = ChangeLog.objects.filter(day_date=date).exists()
@@ -157,7 +175,7 @@ def day_generate(request, date):
         messages.error(request, str(exc))
     else:
         regenerated = duty_day.version > 1
-        messages.success(request, "Qoralama qayta tuzildi (avvalgisi almashtirildi)." if regenerated else "Qoralama tuzildi.")
+        messages.success(request, _("Qoralama qayta tuzildi (avvalgisi almashtirildi).") if regenerated else _("Qoralama tuzildi."))
     return redirect(day_url(date))
 
 
@@ -171,7 +189,7 @@ def day_replace(request, date, slot_id):
         try:
             new_cadet = int(request.POST.get("cadet") or 0)
             if not new_cadet:
-                raise services.ServiceError("Kursantni tanlang.")
+                raise services.ServiceError(_("Kursantni tanlang."))
             days.replace_cadet(
                 date, slot.pk, new_cadet, request.POST.get("reason", ""), request.POST.get("note", ""),
                 request.user, request.POST.get("version"),
@@ -180,7 +198,7 @@ def day_replace(request, date, slot_id):
             error = str(exc)
             duty_day.refresh_from_db()
         else:
-            messages.success(request, f"{slot.print_label}: almashtirildi.")
+            messages.success(request, _("%(slot)s: almashtirildi.") % {"slot": _(slot.print_label)})
             return htmx_redirect(request, day_url(date))
     current = duty_day.assignments.filter(post_slot=slot).select_related("cadet").first()
     context = {
@@ -215,7 +233,7 @@ def day_swap(request, date, post_id):
             error = str(exc)
             duty_day.refresh_from_db()
         else:
-            messages.success(request, f"{section.post.name}: lavozimlar almashtirildi.")
+            messages.success(request, _("%(post)s: lavozimlar almashtirildi.") % {"post": _(section.post.name)})
             return htmx_redirect(request, day_url(date))
     context = {
         "duty_day": duty_day, "section": section, "reasons": days.CHANGE_REASONS, "error": error,
@@ -234,7 +252,7 @@ def day_approve(request, date):
     except services.ServiceError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, f"{date:%d.%m.%Y} sutkasi tasdiqlandi. Endi uni kursantlar ham ko‘radi.")
+        messages.success(request, _("%(day)s sutkasi tasdiqlandi. Endi uni kursantlar ham ko‘radi.") % {"day": f"{date:%d.%m.%Y}"})
     return redirect(day_url(date))
 
 
@@ -247,7 +265,7 @@ def day_reopen(request, date):
     except services.ServiceError as exc:
         messages.error(request, str(exc))
     else:
-        messages.warning(request, f"{date:%d.%m.%Y} sutkasining tasdig‘i bekor qilindi — qoralama holatida.")
+        messages.warning(request, _("%(day)s sutkasining tasdig‘i bekor qilindi — qoralama holatida.") % {"day": f"{date:%d.%m.%Y}"})
     return redirect(day_url(date))
 
 
@@ -260,7 +278,7 @@ def day_delete(request, date):
     except services.ServiceError as exc:
         messages.error(request, str(exc))
     else:
-        messages.warning(request, f"{date:%d.%m.%Y} qoralamasi o‘chirildi (jurnalda saqlandi).")
+        messages.warning(request, _("%(day)s qoralamasi o‘chirildi (jurnalda saqlandi).") % {"day": f"{date:%d.%m.%Y}"})
     return redirect(day_url(date))
 
 
@@ -281,7 +299,7 @@ def day_log(request, date):
 @perms.role_required("day.view_approved")
 def approved_days(request):
     qs = DutyDay.objects.filter(status=DutyDay.Status.APPROVED).order_by("-date")[:60]
-    rows = [{"day": d, "title": f"{fmt_day(d.date)} → {fmt_day(d.date + dt.timedelta(days=1))}", "weekday": WEEKDAYS[d.date.weekday()]} for d in qs]
+    rows = [{"day": d, "title": f"{fmt_day(d.date)} → {fmt_day(d.date + dt.timedelta(days=1))}", "weekday": i18n.weekday(d.date)} for d in qs]
     return render(request, "naryad/days/approved.html", {"rows": rows})
 
 
@@ -296,8 +314,10 @@ def absence_list(request):
     form = absence_service.AbsenceForm(request.POST or None, initial={"start_date": today, "end_date": today})
     if request.method == "POST" and form.is_valid():
         absence = absence_service.add(form, request.user)
-        messages.success(request, f"Kiritildi: {absence.cadet.short_name} — {absence.get_reason_type_display().lower()} "
-                                  f"{absence.start_date:%d.%m}–{absence.end_date:%d.%m}.")
+        messages.success(request, _("Kiritildi: %(name)s — %(reason)s %(start)s–%(end)s.") % {
+            "name": absence.cadet.short_name, "reason": absence.get_reason_type_display().lower(),
+            "start": f"{absence.start_date:%d.%m}", "end": f"{absence.end_date:%d.%m}",
+        })
         return redirect("absence_list")
     qs = Absence.objects.select_related("cadet__group", "created_by")
     active = qs.filter(start_date__lte=today, end_date__gte=today).order_by("end_date")
@@ -315,7 +335,9 @@ def absence_end(request, pk):
     form = absence_service.EndDateForm(absence, request.POST)
     if form.is_valid():
         absence_service.change_end(absence, form.cleaned_data["end_date"], request.user)
-        messages.success(request, f"{absence.cadet.short_name}: tugash sanasi {absence.end_date:%d.%m.%Y} ga o‘zgartirildi.")
+        messages.success(request, _("%(name)s: tugash sanasi %(day)s ga o‘zgartirildi.") % {
+            "name": absence.cadet.short_name, "day": f"{absence.end_date:%d.%m.%Y}",
+        })
     else:
         messages.error(request, "; ".join(e for errs in form.errors.values() for e in errs))
     return redirect("absence_list")
@@ -328,7 +350,7 @@ def absence_delete(request, pk):
     if not absence_service.can_delete(absence):
         raise PermissionDenied("Boshlangan (tarixi bor) yozuv o‘chirilmaydi — tugash sanasini o‘zgartiring.")
     absence_service.delete(absence, request.user)
-    messages.success(request, "Yozuv o‘chirildi.")
+    messages.success(request, _("Yozuv o‘chirildi."))
     return redirect("absence_list")
 
 

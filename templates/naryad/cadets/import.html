@@ -1,78 +1,79 @@
 {% extends "base.html" %}
-{% block title %}Kursantlarni import qilish{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Kursantlarni import qilish" %}{% endblock %}
 {% block content %}
-<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="Yo‘l"><a href="{% url 'cadet_list' %}" class="hover:underline">Kursantlar</a> / Excel import</nav>
-<h1 class="text-xl font-semibold sm:text-2xl">Excel’dan import</h1>
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}"><a href="{% url 'cadet_list' %}" class="hover:underline">{% translate "Kursantlar" %}</a> / {% translate "Excel import" %}</nav>
+<h1 class="text-xl font-semibold sm:text-2xl">{% translate "Excel’dan import" %}</h1>
 
 {% if not preview %}
 <div class="mt-4 max-w-xl rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-  <p class="text-sm text-slate-700">Ustunlar: <strong>familiya, ism, otasining ismi, guruh, jins</strong>. Avval oldindan ko‘rish chiqadi — bazaga faqat “Tasdiqlash” bosilgandan keyin yoziladi.</p>
-  <a href="{% url 'cadet_import_template' %}" class="mt-3 inline-block rounded-lg px-3 py-2 text-sm font-semibold text-green-900 ring-1 ring-green-800 hover:bg-green-50">Shablonni yuklab olish (.xlsx)</a>
+  <p class="text-sm text-slate-700">{% blocktranslate %}Ustunlar: <strong>familiya, ism, otasining ismi, guruh, jins</strong>. Avval oldindan ko‘rish chiqadi — bazaga faqat “Tasdiqlash” bosilgandan keyin yoziladi.{% endblocktranslate %}</p>
+  <a href="{% url 'cadet_import_template' %}" class="mt-3 inline-block rounded-lg px-3 py-2 text-sm font-semibold text-brand-900 ring-1 ring-brand-800 hover:bg-brand-50">{% translate "Shablonni yuklab olish (.xlsx)" %}</a>
   <form method="post" enctype="multipart/form-data" class="mt-4 space-y-3">
     {% csrf_token %}
-    <label class="block text-sm font-medium text-slate-700">Fayl (.xlsx, 2 MB gacha)
+    <label class="block text-sm font-medium text-slate-700">{% translate "Fayl (.xlsx, 2 MB gacha)" %}
       <input type="file" name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required
              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white text-sm file:mr-3 file:rounded-l-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2.5 file:font-semibold">
     </label>
-    <button type="submit" class="rounded-lg bg-green-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900">Oldindan ko‘rish</button>
+    <button type="submit" class="rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900">{% translate "Oldindan ko‘rish" %}</button>
   </form>
 </div>
 {% else %}
-<p class="mt-1 text-sm text-slate-600">Fayl: {{ filename }} · {{ preview.rows|length }} ta qator</p>
+<p class="mt-1 text-sm text-slate-600">{% translate "Fayl" %}: {{ filename }} · {% blocktranslate count n=preview.rows|length %}{{ n }} ta qator{% plural %}{{ n }} ta qator{% endblocktranslate %}</p>
 
 <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">Yangi</p><p class="text-2xl font-semibold text-green-800">{{ preview.new|length }}</p></div>
-  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">Yangilanadi</p><p class="text-2xl font-semibold text-sky-800">{{ preview.updated|length }}</p></div>
-  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">O‘zgarmaydi</p><p class="text-2xl font-semibold text-slate-700">{{ preview.unchanged|length }}</p></div>
-  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">Xato</p><p class="text-2xl font-semibold {% if preview.errors %}text-red-700{% else %}text-slate-700{% endif %}">{{ preview.errors|length }}</p></div>
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "Yangi" %}</p><p class="text-2xl font-semibold text-brand-800">{{ preview.new|length }}</p></div>
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "Yangilanadi" %}</p><p class="text-2xl font-semibold text-sky-800">{{ preview.updated|length }}</p></div>
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "O‘zgarmaydi" %}</p><p class="text-2xl font-semibold text-slate-700">{{ preview.unchanged|length }}</p></div>
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "Xato" %}</p><p class="text-2xl font-semibold {% if preview.errors %}text-red-700{% else %}text-slate-700{% endif %}">{{ preview.errors|length }}</p></div>
 </div>
 
 {% if preview.errors %}
 <section class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4" role="alert">
-  <h2 class="font-semibold text-red-900">Xatolar — import tasdiqlanmaydi</h2>
-  <p class="text-sm text-red-800">Bitta ham xatoli qator bo‘lsa, butun import to‘xtatiladi. Faylni tuzatib, qayta yuklang.</p>
+  <h2 class="font-semibold text-red-900">{% translate "Xatolar — import tasdiqlanmaydi" %}</h2>
+  <p class="text-sm text-red-800">{% translate "Bitta ham xatoli qator bo‘lsa, butun import to‘xtatiladi. Faylni tuzatib, qayta yuklang." %}</p>
   <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-900">{% for e in preview.errors %}<li>{{ e }}</li>{% endfor %}</ul>
 </section>
 {% endif %}
 
 {% if preview.new %}
 <details class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" open>
-  <summary class="cursor-pointer font-semibold">Yangi kursantlar ({{ preview.new|length }})</summary>
-  <ul class="mt-2 divide-y divide-slate-100 text-sm">{% for r in preview.new %}<li class="py-1.5">{{ r.line }}-qator: <strong>{{ r.last_name }} {{ r.first_name }}</strong> {{ r.patronymic }} · {{ r.group }} · {{ r.gender_label }}</li>{% endfor %}</ul>
+  <summary class="cursor-pointer font-semibold">{% translate "Yangi kursantlar" %} ({{ preview.new|length }})</summary>
+  <ul class="mt-2 divide-y divide-slate-100 text-sm">{% for r in preview.new %}<li class="py-1.5">{% blocktranslate with line=r.line %}{{ line }}-qator{% endblocktranslate %}: <strong>{{ r.last_name }} {{ r.first_name }}</strong> {{ r.patronymic }} · {{ r.group }} · {{ r.gender_label }}</li>{% endfor %}</ul>
 </details>
 {% endif %}
 
 {% if preview.updated %}
 <details class="mt-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" open>
-  <summary class="cursor-pointer font-semibold">Yangilanadi ({{ preview.updated|length }})</summary>
+  <summary class="cursor-pointer font-semibold">{% translate "Yangilanadi" %} ({{ preview.updated|length }})</summary>
   <ul class="mt-2 divide-y divide-slate-100 text-sm">{% for r in preview.updated %}
-    <li class="py-1.5">{{ r.line }}-qator: <strong>{{ r.last_name }} {{ r.first_name }}</strong> — {{ r.changes|join:"; " }}
-      {% if r.history_warning %}<span class="mt-1 block rounded bg-amber-50 px-2 py-1 text-amber-900">Naryad tarixi bor: tarix o‘chmaydi, o‘zgarish faqat keyingi naryadlarga ta’sir qiladi.</span>{% endif %}</li>
+    <li class="py-1.5">{% blocktranslate with line=r.line %}{{ line }}-qator{% endblocktranslate %}: <strong>{{ r.last_name }} {{ r.first_name }}</strong> — {{ r.changes_display|join:"; " }}
+      {% if r.history_warning %}<span class="mt-1 block rounded bg-amber-50 px-2 py-1 text-amber-900">{% translate "Naryad tarixi bor: tarix o‘chmaydi, o‘zgarish faqat keyingi naryadlarga ta’sir qiladi." %}</span>{% endif %}</li>
   {% endfor %}</ul>
 </details>
 {% endif %}
 
 {% if preview.unchanged %}
 <details class="mt-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-  <summary class="cursor-pointer font-semibold">O‘zgarmaydi ({{ preview.unchanged|length }})</summary>
+  <summary class="cursor-pointer font-semibold">{% translate "O‘zgarmaydi" %} ({{ preview.unchanged|length }})</summary>
   <ul class="mt-2 columns-1 text-sm sm:columns-2">{% for r in preview.unchanged %}<li>{{ r.last_name }} {{ r.first_name }} · {{ r.group }}</li>{% endfor %}</ul>
 </details>
 {% endif %}
 
 {% if preview.missing %}
 <details class="mt-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-  <summary class="cursor-pointer font-semibold">Bazada bor, faylda yo‘q ({{ preview.missing|length }}) — o‘chirilmaydi</summary>
-  <p class="mt-1 text-sm text-slate-600">Bu kursantlarga tegilmaydi. Kerak bo‘lsa, kartochkasidan faolsizlantiring.</p>
-  <ul class="mt-2 columns-1 text-sm sm:columns-2">{% for m in preview.missing %}<li><a class="text-green-900 hover:underline" href="{% url 'cadet_detail' m.id %}">{{ m.name }}</a> · {{ m.group }}</li>{% endfor %}</ul>
+  <summary class="cursor-pointer font-semibold">{% blocktranslate with n=preview.missing|length %}Bazada bor, faylda yo‘q ({{ n }}) — o‘chirilmaydi{% endblocktranslate %}</summary>
+  <p class="mt-1 text-sm text-slate-600">{% translate "Bu kursantlarga tegilmaydi. Kerak bo‘lsa, kartochkasidan faolsizlantiring." %}</p>
+  <ul class="mt-2 columns-1 text-sm sm:columns-2">{% for m in preview.missing %}<li><a class="text-brand-900 hover:underline" href="{% url 'cadet_detail' m.id %}">{{ m.name }}</a> · {{ m.group }}</li>{% endfor %}</ul>
 </details>
 {% endif %}
 
 <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="cancel">
-    <button type="submit" class="w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50">Bekor qilish</button></form>
+    <button type="submit" class="w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50">{% translate "Bekor qilish" %}</button></form>
   {% if preview.ok %}
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="confirm">
-    <button type="submit" class="w-full rounded-lg bg-green-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900">Tasdiqlash va bazaga yozish</button></form>
+    <button type="submit" class="w-full rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900">{% translate "Tasdiqlash va bazaga yozish" %}</button></form>
   {% endif %}
 </div>
 {% endif %}

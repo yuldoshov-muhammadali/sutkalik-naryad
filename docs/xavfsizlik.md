@@ -29,7 +29,7 @@ Bu hujjat platformada nima himoyalangani, qanday tekshirilgani va qolgan xavflar
 - **Birinchi kirishda parolni almashtirish majburiy** (`must_change_password`).
 - **Parol talablari:** Django’ning 4 ta validatori (uzunlik ≥ 8, oddiy parollar, faqat raqam, login/ismga o‘xshash).
 - **Admin panel (`/admin/`)** — faqat admin roli va superuser.
-- **Kursant boshqa kursantni ko‘ra olmaydi** — URL’ni qo‘lda yozsa ham. Kursant kartochkasi (`/kursantlar/<id>/`) faqat o‘ziniki bo‘lsa ochiladi (aks holda 403). Qoralama sutka, uning PDF’i va chop etish sahifasi kursantga 404. Statistika sahifasi va Excel eksport — faqat admin.
+- **Kursant boshqa kursantni ko‘ra olmaydi** — URL’ni qo‘lda yozsa ham. Kursant kartochkasi (`/kursantlar/<id>/`) faqat o‘ziniki bo‘lsa ochiladi (aks holda 403). 1.5.0 dan kursant boshqa kursantlarning ro‘yxatini umuman ko‘rmaydi: sutka sahifalari (tasdiqlangan ham, qoralama ham), tasdiqlangan naryadlar ro‘yxati, sutka va hafta PDF’i, chop etish sahifasi — 403. Kursant faqat bosh sahifadagi o‘z naryadini va o‘z kartochkasini ko‘radi. Statistika sahifasi va Excel eksport — faqat admin.
 
 ### Ruxsatlar auditi (avtomatik test)
 

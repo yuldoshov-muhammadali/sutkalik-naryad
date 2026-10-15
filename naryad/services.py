@@ -17,6 +17,7 @@ from collections.abc import Iterable, Mapping
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from naryad.engine import generate_day
 from naryad.engine import models as em
@@ -32,21 +33,23 @@ from .models import (
     DutyWeek,
     GroupPostAssignment,
     InitialRotation,
+    Penalty,
     Post,
     PostSlot,
+    Setting,
     StudyGroup,
 )
 
 
 class ServiceError(Exception):
-    """Foydalanuvchiga ko'rsatiladigan xato (o'zbekcha matn bilan)."""
+    """Foydalanuvchiga ko'rsatiladigan xato (joriy tildagi matn bilan; msgid — o'zbekcha)."""
 
 
 class StaleError(ServiceError):
     """Sutkani boshqa foydalanuvchi shu orada o'zgartirgan (versiya mos emas)."""
 
     def __init__(self, message: str = ""):
-        super().__init__(message or "Bu sutkani boshqa foydalanuvchi hozirgina o‘zgartirdi — sahifani yangilang va qayta urinib ko‘ring.")
+        super().__init__(message or _("Bu sutkani boshqa foydalanuvchi hozirgina o‘zgartirdi — sahifani yangilang va qayta urinib ko‘ring."))
 
 
 def check_version(duty_day: DutyDay | None, expected_version: int | None) -> None:
@@ -98,6 +101,7 @@ def approved_history(before: dt.date | None = None) -> list[em.Record]:
             role=a.post_slot.role,
             group=a.group.code,
             position=a.post_slot.position,
+            kind=a.kind,
         )
         for a in qs.order_by("duty_day__date", "post_slot__post__display_order", "post_slot__position")
     ]
@@ -127,8 +131,10 @@ def find_week(day: dt.date, *, lock: bool = False) -> DutyWeek:
     week = qs.filter(start_date=week_start(day)).first()
     if week is None:
         raise ServiceError(
-            f"{day:%d.%m.%Y} sutkasi ochilgan 2-kurs haftasiga tegishli emas. "
-            f"Avval admin {week_start(day):%d.%m.%Y} (yakshanba) dan boshlanadigan haftani ochishi kerak."
+            _(
+                "%(day)s sutkasi ochilgan 2-kurs haftasiga tegishli emas. "
+                "Avval admin %(start)s (yakshanba) dan boshlanadigan haftani ochishi kerak."
+            ) % {"day": f"{day:%d.%m.%Y}", "start": f"{week_start(day):%d.%m.%Y}"}
         )
     return week
 
@@ -137,15 +143,21 @@ def check_can_generate(day: dt.date, week: DutyWeek) -> DutyDay | None:
     """Sutkama-sutka qoidasi. Mavjud qoralamani (qayta tuzish uchun) qaytaradi."""
     existing = DutyDay.objects.filter(date=day).first()
     if existing is not None and existing.is_approved:
-        raise ServiceError(f"{day:%d.%m.%Y} sutkasi allaqachon tasdiqlangan. O‘zgartirish uchun admin uni qayta ochishi kerak.")
+        raise ServiceError(
+            _("%(day)s sutkasi allaqachon tasdiqlangan. O‘zgartirish uchun admin uni qayta ochishi kerak.") % {"day": f"{day:%d.%m.%Y}"}
+        )
 
     other_draft = DutyDay.objects.filter(status=DutyDay.Status.DRAFT).exclude(date=day).order_by("date").first()
     if other_draft is not None:
-        raise ServiceError(f"Avval {other_draft.date:%d.%m.%Y} sutkasi qoralamasini tasdiqlang (sutkalar ketma-ket tuziladi).")
+        raise ServiceError(
+            _("Avval %(day)s sutkasi qoralamasini tasdiqlang (sutkalar ketma-ket tuziladi).") % {"day": f"{other_draft.date:%d.%m.%Y}"}
+        )
 
     later = DutyDay.objects.filter(status=DutyDay.Status.APPROVED, date__gt=day).order_by("date").first()
     if later is not None:
-        raise ServiceError(f"{later.date:%d.%m.%Y} sutkasi allaqachon tasdiqlangan — undan oldingi sanaga qoralama tuzib bo‘lmaydi.")
+        raise ServiceError(
+            _("%(day)s sutkasi allaqachon tasdiqlangan — undan oldingi sanaga qoralama tuzib bo‘lmaydi.") % {"day": f"{later.date:%d.%m.%Y}"}
+        )
 
     # Haftada sutkalar oraliq qoldirmay ketma-ket tuziladi. Platformagacha bo'lgan
     # (bazada yozuvi yo'q) sutkalar to'siq emas — CLAUDE.md 10-bo'lim, 14-band.
@@ -155,7 +167,7 @@ def check_can_generate(day: dt.date, week: DutyWeek) -> DutyDay | None:
     if last_in_week is not None and last_in_week != day - dt.timedelta(days=1):
         missing = [last_in_week + dt.timedelta(days=i) for i in range(1, (day - last_in_week).days)]
         raise ServiceError(
-            "Haftaning oldingi sutkalari tuzilmagan/tasdiqlanmagan: " + ", ".join(f"{d:%d.%m}" for d in missing) + "."
+            _("Haftaning oldingi sutkalari tuzilmagan/tasdiqlanmagan: %(days)s.") % {"days": ", ".join(f"{d:%d.%m}" for d in missing)}
         )
     return existing
 
@@ -178,6 +190,12 @@ def save_day_result(
     slots = {(s.post.code, s.position): s for s in PostSlot.objects.select_related("post")}
     groups = {g.code: g for g in StudyGroup.objects.all()}
     cadets = Cadet.objects.in_bulk([a.cadet_id for a in result.filled])
+    penalty_ids = {
+        p.cadet_id: p.pk
+        for p in Penalty.objects.filter(
+            status=Penalty.Status.ACTIVE, cadet_id__in=[a.cadet_id for a in result.filled if a.kind == em.KIND_PENALTY]
+        )
+    }
 
     duty_day = existing or DutyDay(week=week, date=result.day)
     duty_day.week = week
@@ -206,6 +224,8 @@ def save_day_result(
             cadet=cadets[a.cadet_id],
             group=groups[a.group],
             source=Assignment.Source.AUTO,
+            kind=a.kind,
+            penalty_id=penalty_ids[a.cadet_id] if a.kind == em.KIND_PENALTY else None,
         )
         for a in result.filled
     )
@@ -238,16 +258,23 @@ def generate_draft(
         rotation = InitialRotation.as_mapping()
     if rotation is None and not any(r.post in ROTATION_CHAIN for r in history):
         raise ServiceError(
-            "Tarix bo‘sh: birinchi sutka uchun admin guruhlarning qaysi joydan boshlashini kiritishi kerak "
-            "(Sozlamalar → Boshlang‘ich taqsimot: 6 guruh × 6 joy, har biri bir marta) "
-            "yoki o‘tgan sutkalarni import_history buyrug‘i bilan kiritishi kerak."
+            _(
+                "Tarix bo‘sh: birinchi sutka uchun admin guruhlarning qaysi joydan boshlashini kiritishi kerak "
+                "(Sozlamalar → Boshlang‘ich taqsimot: 6 guruh × 6 joy, har biri bir marta) "
+                "yoki o‘tgan sutkalarni import_history buyrug‘i bilan kiritishi kerak."
+            )
         )
+    from .penalties import engine_offenders  # aylana importdan qochish
+
     result = generate_day(
         day,
         engine_cadets(),
         history,
         engine_absences(day) if absences is None else list(absences),
         initial_rotation=rotation,
+        offenders=engine_offenders(day),
+        penalty_per_post=Setting.load().penalty_per_post,
     )
+    # ChangeLog.details — saqlanadigan matn, doim o'zbekcha (tarjima qilinmaydi)
     details = "Qayta tuzildi: avvalgi qoralama almashtirildi." if existing is not None else ""
     return save_day_result(result, week, user=user, existing=existing, details=details)

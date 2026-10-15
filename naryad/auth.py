@@ -13,6 +13,8 @@ from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _lazy
+from django.utils.translation import ngettext
 
 from .models import LoginThrottle
 
@@ -31,10 +33,13 @@ def throttle_key(username: str) -> str:
 
 def blocked_message(throttle: LoginThrottle) -> str:
     left = max(1, int((throttle.blocked_until - timezone.now()).total_seconds() // 60) + 1)
-    return (
-        f"Juda ko‘p noto‘g‘ri urinish ({max_failures()} marta). Bu login {block_minutes()} daqiqaga bloklandi — "
-        f"taxminan {left} daqiqadan keyin qayta urinib ko‘ring."
-    )
+    return ngettext(
+        "Juda ko‘p noto‘g‘ri urinish (%(failures)s marta). Bu login %(minutes)s daqiqaga bloklandi — "
+        "taxminan %(left)s daqiqadan keyin qayta urinib ko‘ring.",
+        "Juda ko‘p noto‘g‘ri urinish (%(failures)s marta). Bu login %(minutes)s daqiqaga bloklandi — "
+        "taxminan %(left)s daqiqadan keyin qayta urinib ko‘ring.",
+        left,
+    ) % {"failures": max_failures(), "minutes": block_minutes(), "left": left}
 
 
 @transaction.atomic
@@ -80,21 +85,21 @@ class ThrottleMixin:
 
 class LoginForm(ThrottleMixin, AuthenticationForm):
     error_messages = {
-        "invalid_login": "Login yoki parol noto‘g‘ri. Ikkalasida ham katta-kichik harf farqlanadi.",
-        "inactive": "Bu akkaunt faol emas.",
+        "invalid_login": _lazy("Login yoki parol noto‘g‘ri. Ikkalasida ham katta-kichik harf farqlanadi."),
+        "inactive": _lazy("Bu akkaunt faol emas."),
     }
 
     def __init__(self, request=None, *args, **kwargs):
         super().__init__(request, *args, **kwargs)
-        self.fields["username"].label = "Login"
+        self.fields["username"].label = _lazy("Login")
         self.fields["username"].widget.attrs.update({"autocapitalize": "none", "autocomplete": "username"})
-        self.fields["password"].label = "Parol"
+        self.fields["password"].label = _lazy("Parol")
 
 
 class AdminLoginForm(ThrottleMixin, AdminAuthenticationForm):
     error_messages = {
         **AdminAuthenticationForm.error_messages,
-        "invalid_login": "Login yoki parol noto‘g‘ri yoki boshqaruv paneliga kirish huquqi yo‘q.",
+        "invalid_login": _lazy("Login yoki parol noto‘g‘ri yoki boshqaruv paneliga kirish huquqi yo‘q."),
     }
 
 
@@ -109,8 +114,8 @@ class ForcePasswordChangeMiddleware:
     def __call__(self, request):
         user = getattr(request, "user", None)
         if user is not None and user.is_authenticated and getattr(user, "must_change_password", False):
-            allowed = {reverse("password_change"), reverse("logout")}
+            allowed = {reverse("password_change"), reverse("logout"), reverse("set_language")}
             if request.path not in allowed and not request.path.startswith(self.ALLOWED_PREFIXES):
-                messages.warning(request, "Xavfsizlik uchun avval vaqtinchalik parolni o‘zingizning parolingizga almashtiring.")
+                messages.warning(request, _lazy("Xavfsizlik uchun avval vaqtinchalik parolni o‘zingizning parolingizga almashtiring."))
                 return redirect("password_change")
         return self.get_response(request)

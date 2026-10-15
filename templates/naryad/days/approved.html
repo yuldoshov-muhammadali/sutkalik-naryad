@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Tasdiqlangan naryadlar{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Tasdiqlangan naryadlar" %}{% endblock %}
 {% block content %}
-<h1 class="text-xl font-semibold sm:text-2xl">Tasdiqlangan naryadlar</h1>
+<h1 class="text-xl font-semibold sm:text-2xl">{% translate "Tasdiqlangan naryadlar" %}</h1>
 <ul class="mt-4 space-y-2">
   {% for r in rows %}
   <li><a href="{% url 'day_detail' r.day.date|date:'Y-m-d' %}" class="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50">
     <span><span class="block text-xs text-slate-500">{{ r.weekday }}</span><span class="font-medium">{{ r.title }}</span></span>
     {% include "naryad/days/_status.html" with status="approved" %}</a></li>
   {% empty %}
-  <li class="rounded-xl bg-white px-4 py-6 text-center text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">Hali tasdiqlangan sutka yo‘q.</li>
+  <li class="rounded-xl bg-white px-4 py-6 text-center text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">{% translate "Hali tasdiqlangan sutka yo‘q." %}</li>
   {% endfor %}
 </ul>
 {% endblock %}

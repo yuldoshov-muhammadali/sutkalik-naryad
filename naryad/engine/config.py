@@ -147,6 +147,11 @@ ROTATION_CHAIN: tuple[str, ...] = tuple(
 MALE_POSTS: tuple[Post, ...] = tuple(POSTS_BY_CODE[c] for c in ROTATION_CHAIN)
 FEMALE_POST: Post = QIZLAR
 
+# Zalyotchiklar (15-bosqich): jazo naryadi faqat shu ikki joyda, posbon o'rnida
+PENALTY_POSTS: tuple[str, ...] = (NOJ1.code, YOTOQ1.code)
+PENALTY_ROLE = ROLE_GUARD
+PENALTY_PER_POST_DEFAULT = 1  # bir sutkada bitta joyga ko'pi bilan (Sozlamalarda o'zgaradi)
+
 TOTAL_SLOTS = sum(p.size for p in POSTS)
 MALE_SLOTS = sum(p.size for p in MALE_POSTS)
 FEMALE_SLOTS = FEMALE_POST.size

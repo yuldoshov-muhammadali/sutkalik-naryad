@@ -37,7 +37,11 @@ def world(db_cadets):
     cadet = User.objects.create_user("kursant", password=PASSWORD, role="cadet", cadet=me)
     absence = Absence.objects.create(cadet=other, start_date=MONDAY, end_date=MONDAY, reason_type="kasal", created_by=admin)
     slot = draft.assignments.select_related("post_slot").first().post_slot
-    return {"admin": admin, "cadet": cadet, "me": me, "other": other, "draft": draft, "slot": slot, "absence": absence}
+    from naryad import penalties
+
+    penalty = penalties.add(other, "tartib", "Kechikib keldi", SUNDAY, 2, admin)
+    return {"admin": admin, "cadet": cadet, "me": me, "other": other, "draft": draft, "slot": slot, "absence": absence,
+            "penalty": penalty}
 
 
 def urls(w) -> dict[str, str]:
@@ -45,6 +49,8 @@ def urls(w) -> dict[str, str]:
     s, m = SUNDAY.isoformat(), MONDAY.isoformat()
     return {
         "home": reverse("home"),
+        "home_status": reverse("home_status"),
+        "set_language": reverse("set_language"),
         "login": reverse("login"),
         "logout": reverse("logout"),
         "password_change": reverse("password_change"),
@@ -80,6 +86,8 @@ def urls(w) -> dict[str, str]:
         "day_print:draft": reverse("day_print", args=[m]),
         "week_pdf": reverse("week_pdf", args=[s]),
         "absence_list": reverse("absence_list"),
+        "penalty_list": reverse("penalty_list"),
+        "penalty_cancel": reverse("penalty_cancel", args=[w["penalty"].pk]),
         "absence_end": reverse("absence_end", args=[w["absence"].pk]),
         "absence_delete": reverse("absence_delete", args=[w["absence"].pk]),
         "stats": reverse("stats"),
@@ -90,23 +98,25 @@ def urls(w) -> dict[str, str]:
 # Kursant uchun kutilgan GET natijasi: 200 — ochiladi, 302 — yo'naltiriladi, 403/404/405 — yopiq.
 CADET_GET = {
     "home": 200,
+    "home_status": 200,  # bosh sahifa holat kartochkalari (HTMX)
     "login": 302,  # kirgan foydalanuvchi bosh sahifaga
     "password_change": 200,
     "cadet_detail:own": 200,
     "my_card": 302,
-    "approved_days": 200,
-    "day_detail:approved": 200,
-    "day_pdf:approved": 200,
-    "day_print:approved": 200,
-    "week_pdf": 200,  # faqat tasdiqlangan sutkalar
-    "day_detail:draft": 404,
-    "day_pdf:draft": 404,
-    "day_print:draft": 404,
+    # 14-bosqich: kursant boshqa kursantlarning ro'yxatini ko'rmaydi — sutka sahifalari va PDF yopiq
+    "approved_days": 403,
+    "day_detail:approved": 403,
+    "day_pdf:approved": 403,
+    "day_print:approved": 403,
+    "week_pdf": 403,
+    "day_detail:draft": 403,
+    "day_pdf:draft": 403,
+    "day_print:draft": 403,
     "logout": 405,  # faqat POST
 }
 PUBLIC = {"login"}
 # Faqat POST qabul qiladigan manzillar: GET so'rovi hamma uchun 405 (ruxsat POST'da tekshiriladi)
-POST_ONLY = {"logout", "cadet_deactivate", "cadet_activate", "cadet_exempt", "cadet_unexempt", "week_open", "day_generate", "day_approve", "day_reopen",
+POST_ONLY = {"logout", "set_language", "penalty_cancel", "cadet_deactivate", "cadet_activate", "cadet_exempt", "cadet_unexempt", "week_open", "day_generate", "day_approve", "day_reopen",
              "day_delete", "absence_end", "absence_delete"}
 
 

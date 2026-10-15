@@ -181,7 +181,7 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
 24. **Rollar va ruxsatlar** (5-bosqich): yagona jadval `naryad/permissions.py` (`docs/05-rollar.md`). Sababli yo‘qliklarni kiritish — admin.
 25. **Kirish xavfsizligi** (5-bosqich): 5 marta noto‘g‘ri urinish → login 15 daqiqaga bloklanadi; kursant akkauntlari vaqtinchalik parol bilan yaratiladi va birinchi kirishda parol majburiy almashtiriladi.
 26. **Tuzuvchi roli olib tashlandi** (5-bosqichdan keyin): ro‘yxatni dastur o‘zi tuzadi, shuning uchun alohida “tuzuvchi (navbatchi kursant)” roli kerak emas. Faqat ikki rol: **admin** (kurs boshlig‘i) — hafta ochish, qoralama tuzish tugmasi, sabab bilan tuzatish, tasdiqlash, hammasi; **kursant** — faqat tasdiqlangan sutkalar va o‘z tarixi. Bazadagi eski `compiler` rolidagi foydalanuvchilar migratsiyada `cadet` ga o‘tkaziladi.
-27. **PDF’ni kursantlar ham yuklab oladi** (5-bosqichdan keyin): tasdiqlangan sutkaning PDF’ini har bir kursant yuklab olishi va chop etishi mumkin; qoralama PDF’i — faqat admin.
+27. **PDF’ni kursantlar ham yuklab oladi** (5-bosqichdan keyin; **14-bosqichda bekor qilindi — 60-band**): tasdiqlangan sutkaning PDF’ini har bir kursant yuklab olishi va chop etishi mumkin; qoralama PDF’i — faqat admin.
 28. **Kursantlar ro‘yxati** (6-bosqich): faqat admin ko‘radi va boshqaradi (tuzuvchi roli yo‘q — 26-band); kursant faqat o‘z kartochkasini ko‘radi (`/mening-tarixim/`). Qidiruv — familiya bo‘yicha.
 29. **Faolsizlantirish** (6-bosqich): sabab majburiy (chetlatilgan, akademik ta’til, boshqa kursga o‘tgan, boshqa — izoh bilan); kursantning akkaunti ham bloklanadi, qayta faollashtirilganda tiklanadi. Hammasi jurnalga yoziladi.
 30. **Guruh yoki jins o‘zgarishi** (6-bosqich): naryad tarixi bor kursantda tasdiqlash belgisi talab qilinadi; tarix o‘chmaydi (eski naryadlar o‘sha paytdagi guruh bilan qoladi), jurnalga yoziladi. Boshqa guruhga o‘tgan kursant yangi guruh ro‘yxatining oxiriga tushadi.
@@ -195,7 +195,7 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
 38. **Qoralamani o‘chirish** (8-bosqich): faqat admin, faqat eng oxirgi qoralama, sabab majburiy, jurnalga yoziladi (jurnal `day_date` orqali saqlanib qoladi). Shu yo‘l bilan oldingi sutkaning tasdig‘ini bekor qilish mumkin bo‘ladi.
 39. **Bo‘sh o‘ringa kursant qo‘yish** — sabab majburiy (o‘zgarmaydi). **“Qayta tuzish”** — ogohlantiruvchi tasdiqlash oynasi bilan (o‘zgarmaydi).
 40. **PDF** (8-bosqich): rasmiy shakl, A4, bitta sahifa, WeasyPrint. Shrift: `fonts/times.ttf` (+ `timesbd.ttf`) bo‘lsa — Times New Roman, bo‘lmasa — Liberation Serif (o‘lchamlari bir xil). Times New Roman fayllari repozitoriyda yo‘q (`.gitignore`). Jadvalda “Lavozim | F.I.Sh. | Guruh” sarlavha qatori bor, Markazdan tashqari har bo‘lim qalin sarlavha qatori bilan boshlanadi. Qoralama PDF’ida har sahifada xira “QORALAMA” yozuvi.
-41. **PDF ruxsatlari va fayl nomlari** (8-bosqich): tasdiqlangan sutka PDF’i — hamma rol; qoralama PDF’i — faqat admin; hafta PDF’ida kursant faqat tasdiqlangan sutkalarni oladi. Nomlar: `naryad_2026-09-18.pdf`, `naryad_hafta_2026-09-13.pdf`.
+41. **PDF ruxsatlari va fayl nomlari** (8-bosqich; ruxsatlar 14-bosqichda o‘zgardi — PDF faqat admin, 60-band): tasdiqlangan sutka PDF’i — hamma rol; qoralama PDF’i — faqat admin; hafta PDF’ida kursant faqat tasdiqlangan sutkalarni oladi. Nomlar: `naryad_2026-09-18.pdf`, `naryad_hafta_2026-09-13.pdf`.
 42. **Markaz qatori** (8-bosqich savoli): bitta qator — “Markaz bo‘yicha navbatchi yordamchisi”, 1 o‘rin. Namunadagi ikkinchi qator xato.
 43. **Imzo joylashuvi**: chapda “Kurs boshlig‘i”, ostida unvon (“mayor”), o‘ngda “X.Turobov” — hozirgi holat qoladi.
 44. **Telefondan chop etish**: chop etish sahifasidagi “PDF’ni alohida ochish” havolasi bilan — hozirgi holat qoladi.
@@ -216,3 +216,75 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
     - Ozoddan qaytgan kursant uchun hisob tenglashtirilmaydi. Algoritm uni haftalik va jami hisob bo‘yicha o‘zi oldinga qo‘yadi (haftasiga ko‘pi bilan bitta ortiqcha naryad), u bir necha haftada guruhga yetib oladi.
     - `load_roster` qayta ishga tushirilsa, ozodlar ro‘yxati `roster.json` holatiga qaytadi va jurnalga yoziladi. Buyruq faqat birinchi o‘rnatishda ishlatiladi.
     - Yangi lavozimga tayinlanganni admin kartochkadan belgilaydi. U ochiq qoralamada bo‘lsa, ogohlantirish chiqadi va admin uni almashtiradi.
+58. **Dizayn (12-bosqich, 1.3.0):** asosiy rang — **to‘q ko‘k** (`brand`, foydalanuvchi qarori: prompt’dagi “yashil qoladi” o‘rniga), aksent — emblemadagi oltin (`gold`); holat ranglari (tasdiqlangan, adolat yashil/sariq/qizil) o‘zgarmaydi. Sarlavhada Davlat bojxona xizmati emblemasi, kirish va bosh sahifada institut binosi rasmi (asl fayllar `assets/`, tayyorlash `scripts/prepare_images.py`). Bosh sahifada jonli soat (server vaqti asosida, Toshkent UTC+5), joriy sutka paneli va har 60 soniyada HTMX yangilanish. Tungi rejim: kunduzgi / tungi / avtomatik, `localStorage`. CSP, algoritm, qoidalar, PDF va admin panel o‘zgarmaydi.
+59. **Uch til (13-bosqich, 1.4.0):** o‘zbekcha (asosiy, lotin), ruscha, inglizcha.
+    - **Tanlash:** sukut bo‘yicha doim o‘zbekcha; brauzerning `Accept-Language` sarlavhasi hisobga olinmaydi.
+    - **Saqlash:** tanlov kirgan foydalanuvchida `User.language` da saqlanadi (boshqa qurilmada ham shu til), kirmaganda `naryad_til` cookie’sida. Kirishda cookie’dagi til foydalanuvchiga o‘tadi, agar u hali til tanlamagan bo‘lsa.
+    - **Manzil va o‘tkazgich:** URL’da til prefiksi yo‘q. O‘tkazgich `UZ | RU | EN` sarlavhada (tungi rejim tugmasi yonida) va kirish sahifasida joylashgan; POST + CSRF bilan ishlaydi va o‘sha sahifaga qaytaradi. Kod: `naryad/i18n.py` (`LanguageMiddleware`, `set_language`).
+    - **Tarjima qilinadi:** shablonlar, model nomlari va tanlovlar, formalar, xabarlar, ogohlantirishlar, menyu, statistika sarlavhalari, 403/404/500, admin panel.
+    - **Bazadagi doimiy nomlar** (joylar, PDF qatorlari, yo‘nalishlar) `naryad/i18n_data.py` da ro‘yxatlangan va ko‘rsatishda tarjima qilinadi.
+    - **msgid:** hozirgi o‘zbekcha matn.
+    - **Sanalar:** “14-oktabr 2026” / “14 октября 2026” / “14 October 2026” (`i18n.long_date`).
+    - **JavaScript matnlari:** serverdan `data-` atributlari orqali keladi, CSP o‘zgarmaydi.
+    - **Tarjima qilinmaydi:** PDF naryad shakli (`translation.override("uz")`), Excel eksport, kursant F.I.Sh., guruh kodlari, admin yozgan sabab/izohlar, jurnalda saqlangan matnlar. Jurnal va sabablar har doim o‘zbekcha saqlanadi.
+    - **Atamalar** `docs/atamalar.md` bo‘yicha; yangi matn shu lug‘atga mos tarjima qilinadi.
+    - **Katalog yangilash:** `manage.py makemessages -l ru -l en --no-obsolete --no-location -i "tests/*" -i "scripts/*" -i "naryad/engine/*" -i "naryad/migrations/*" -i "docs/*" -i "staticfiles/*" -i "assets/*" -i "templates/naryad/pdf/*"`. Loyihaning `makemessages` buyrug‘i `_lazy` taxallusini ham taniydi.
+    - **Kompilyatsiya:** `python scripts/compile_messages.py`.
+    - **Test:** `tests/test_i18n.py` bo‘sh/fuzzy yozuv va qolib ketgan o‘zbekcha so‘zlarni tekshiradi.
+60. **Kursant ko‘rinishi va ertangi ro‘yxat muddati (14-bosqich, 1.5.0):**
+    - **Kursant faqat o‘z naryadini ko‘radi.** Bosh sahifadagi “Mening navbatdagi naryadim” kartochkasida:
+      - sana va vaqt: “15-oktabr, chorshanba 18:00 → 16-oktabr 18:00”;
+      - joy, lavozim va guruh;
+      - jonli hisoblagich: “Naryadga … qoldi”, naryad davomida “Hozir naryaddasiz, smena almashishiga … qoldi”. Matnlar server vaqtidan, JS shablonlari `data-` atributlarida;
+      - tayyorgarlik eslatmasi.
+
+      Naryad bo‘lmasa: “Yaqin kunlarda tasdiqlangan naryadingiz yo‘q”. Kartochka ostida faqat “shu haftada / jami” va “Mening tarixim” havolasi.
+    - **Ko‘rinish chegarasi:** faqat tasdiqlangan sutkalar ko‘rinadi, qoralama hech qachon. `day.view_approved` va `pdf.export` — faqat admin. Kursantga 403 qaytadi:
+      - sutka sahifalari;
+      - “Tasdiqlangan naryadlar” ro‘yxati (menyudan olib tashlandi);
+      - PDF va chop etish;
+      - boshqa kursantlarning kartochkalari.
+
+      Bu 27- va 41-bandlardagi kursant PDF ruxsatini bekor qiladi.
+    - **“Naryadingiz bekor qilindi”:** sutka tasdiqlanganda uning kursantlari `PublishedDuty` ga yoziladi. Tasdiq bekor qilinib kursant ro‘yxatdan chiqarilsa (almashtirilsa yoki qoralama o‘chirilsa), sutka tugaguncha unga sababsiz shu xabar chiqadi. Tasdiq bekor qilingan, lekin kursant hali qoralamada bo‘lsa, xabar yo‘q va naryad ko‘rinmaydi.
+    - **Tayyorgarlik eslatmasi:** `PrepNote` — har joy uchun uch tilda, Sozlamalar sahifasida. Joriy tildagisi bo‘sh bo‘lsa o‘zbekchasi ko‘rsatiladi, hammasi bo‘sh bo‘lsa — hech narsa.
+    - **Muddat:** D sanadagi sutka D kuni 18:00 dan `Setting.approval_lead_hours` soat oldin (standart 24 — D−1 kuni 18:00) tasdiqlangan bo‘lishi kerak. Admin bosh sahifasida ertangi sutka uchun banner (`naryad/readiness.py`):
+      - sariq — muddat hali o‘tmagan, qolgan vaqt bilan, “Tuzish”/“Ochish” tugmasi;
+      - qizil — “Muddat o‘tdi, kursantlar hali bilmaydi”;
+      - yashil — tasdiqlangan.
+
+      Bugun 18:00 da boshlanadigan sutka hali tasdiqlanmagan bo‘lsa, birinchi u uchun qizil banner chiqadi. Banner faqat 2-kurs haftasiga kiradigan sutka uchun ko‘rinadi, hafta boshlanishidan oldingi shanba ham shunga kiradi. Sutkalar ketma-ketligi qoidasi o‘zgarmaydi.
+61. **Zalyotchiklar — navbatdan tashqari jazo naryadi (15-bosqich, 1.6.0):**
+    - **Kim zalyotchik:** ichki tartib-qoidalarni buzgan yoki naryadda uxlab qolib tanbeh olgan kursant.
+      - Admin “Zalyotchiklar” sahifasida kiritadi: kursant, sabab turi (Ichki tartib-qoidalarni buzish / Naryadda uxlab qolish / Boshqa), izoh (majburiy), buyruq/tanbeh sanasi, 1–10 ta jazo naryadi.
+      - Bir kursantda bitta faol zalyot bo‘ladi; yangisi kiritilsa, soni mavjudiga qo‘shiladi va jurnalga alohida yozuv tushadi.
+      - Holat: faol → (hammasi o‘tilgach avtomatik) bajarildi. Admin sabab yozib bekor qilishi mumkin.
+      - Har amal ChangeLog’ga yoziladi: `penalty_add`, `penalty_cancel`, `penalty_done`, `penalty_resume`.
+    - **Standart qoidalar** (o‘zgartirish mumkin):
+      - faqat o‘g‘il kursant;
+      - naryaddan ozod kursant bo‘lmaydi — avval ozodlik olib tashlanadi;
+      - faolsiz kursant ham bo‘lmaydi.
+    - **Naryadga qo‘yish (navbatdan tashqari):**
+      - Faol zalyotchik guruhi qayerda turishidan qat’i nazar FAQAT 1-NO‘J yoki 1-Yotoqxonaga, POSBON o‘rniga qo‘yiladi (posbon o‘rinlari oxiridan). Shu joy guruhi bitta kam beradi.
+      - Bir sutkada bir joyga ko‘pi bilan `Setting.penalty_per_post` ta (standart 1, ko‘pi bilan 2), ya’ni sutkada 2 ta.
+      - Navbat: tanbeh sanasi eskisi; teng bo‘lsa — qolgan jazo naryadi ko‘prog‘i. Joy navbatma-navbat: o‘tgan safar 1-NO‘J bo‘lsa — endi 1-Yotoqxona (iloji bo‘lsa).
+      - Qattiq cheklovlar o‘zgarmaydi: kecha turgan, sababli holatdagi, faolsiz kursant qo‘yilmaydi. Bunday holatda ogohlantirish chiqadi; o‘rin qolmasa, zalyotchik keyingi sutkaga qoladi.
+    - **Oddiy navbat:** faol zalyotchik oddiy navbatda Markaz, 2-NO‘J, O‘quv binosi va Patrulga qo‘yilmaydi. Guruhi 1-NO‘J yoki 1-Yotoqxonaga tushgan kuni oddiy navbat bilan tura oladi — bu oddiy naryad, jazo hisobiga o‘tmaydi.
+    - **Hisob:**
+      - Jazo naryadi faqat sutka TASDIQLANGANDA “o‘tildi” sanaladi; tasdiq bekor qilinsa hisob qaytadi (bajarildi → yana faol).
+      - `Assignment.kind` = normal / penalty, jazo naryadida `Assignment.penalty` bog‘lanadi.
+      - Adolat hisobi faqat ODDIY naryadlarni sanaydi: statistika, nishonlar, saralash kaliti, guruhlar aylanishi, kursant kartochkasidagi sonlar. Jazo naryadi “kecha turgan” cheklovida hisobga olinadi.
+    - **Dvigatel:** `naryad/engine/` Django’siz qoladi. `generate_day(offenders=…, penalty_per_post=…)`: jazo o‘rinlari oddiy to‘ldirishdan OLDIN belgilanadi (`place_offenders`). Zalyotchik bo‘lmasa, natija bayt-bayt avvalgidek — `tests/test_penalties.py` 84 sutkalik etalon xeshni tekshiradi.
+    - **Qo‘lda tuzatish:**
+      - jazo o‘rniga faqat boshqa faol zalyotchik (jazo naryadi bo‘lib qoladi) yoki shu joy guruhi kursanti (oddiy naryad) qo‘yiladi, sabab majburiy;
+      - faol zalyotchikni boshqa joylarga qo‘lda qo‘yib bo‘lmaydi;
+      - jazo o‘rnidagi zalyotchikning lavozimi almashtirilmaydi.
+    - **Ko‘rinish:**
+      - Sutka sahifasida jazo o‘rni “Zalyot” belgisi bilan chiqadi. PDF shakli O‘ZGARMAYDI — zalyotchik oddiy qator.
+      - Kursant bosh sahifasida “Navbatdan tashqari naryad” va “Jazo naryadlari: 3 tadan 1 tasi o‘tildi”. Admin uchun kursant kartochkasida zalyot tarixi.
+      - Statistika va Excel’da “Jazo naryadlari” ustuni, Excel’da “Zalyotchiklar” varag‘i.
+62. **Zalyotchiklar bo‘yicha qarorlar (1.6.0 ochiq savollari, tasdiqlangan; 1.6.1):**
+    - Kursant bosh sahifasidagi “Shu haftada / Jami” faqat oddiy naryadlarni sanaydi. Jazo naryadlari alohida: “Jazo naryadlari: 3 tadan 1 tasi o‘tildi”.
+    - Faol zalyotchik oddiy navbatda boshqa joylarga qo‘yilmagani sabab oddiy naryadlari orqada qolsa, algoritm keyin uni tarix bo‘yicha o‘zi oldinga qo‘yadi. Alohida tenglashtirish yo‘q.
+    - Faol zalyoti bor kursantni naryaddan ozod qilib bo‘lmaydi: avval zalyot bajarilishi yoki bekor qilinishi kerak (`cadets.exempt_blocker`).
+    - Bekor qilingan zalyotning kursanti qoralamada jazo o‘rnida qolsa, sutka TASDIQLANMAYDI. Uni almashtirish yoki sutkani qayta tuzish kerak.

@@ -1,9 +1,11 @@
 from django.urls import path
 
-from . import views, views_cadets, views_days, views_stats
+from . import i18n, views, views_cadets, views_days, views_penalties, views_stats
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("bosh-sahifa/holat/", views.home_status, name="home_status"),
+    path("til/", i18n.set_language, name="set_language"),
     path("kirish/", views.LoginView.as_view(), name="login"),
     path("chiqish/", views.LogoutView.as_view(), name="logout"),
     path("parol/", views.PasswordChangeView.as_view(), name="password_change"),
@@ -39,6 +41,9 @@ urlpatterns = [
     path("sababli/", views_days.absence_list, name="absence_list"),
     path("sababli/<int:pk>/tugatish/", views_days.absence_end, name="absence_end"),
     path("sababli/<int:pk>/ochirish/", views_days.absence_delete, name="absence_delete"),
+    # Zalyotchiklar — navbatdan tashqari jazo naryadi (15-bosqich)
+    path("zalyotchiklar/", views_penalties.penalty_list, name="penalty_list"),
+    path("zalyotchiklar/<int:pk>/bekor-qilish/", views_penalties.penalty_cancel, name="penalty_cancel"),
     # Statistika va adolat (9-bosqich)
     path("statistika/", views_stats.stats_page, name="stats"),
     path("statistika/excel/", views_stats.stats_excel, name="stats_excel"),

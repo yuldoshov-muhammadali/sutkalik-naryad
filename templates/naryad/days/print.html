@@ -1,24 +1,24 @@
-{% load static %}<!doctype html>
-<html lang="uz">
+{% load static i18n %}{% get_current_language as LANGUAGE_CODE %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chop etish — {{ date|date:"d.m.Y" }}</title>
+  <title>{% blocktranslate with d=date|date:"d.m.Y" %}Chop etish — {{ d }}{% endblocktranslate %}</title>
   <style>
     html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; background: #f1f5f9; }
-    .bar { padding: 10px 16px; background: #14532d; color: #fff; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .bar { padding: 10px 16px; background: #142548; color: #fff; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .bar a, .bar button { color: #fff; background: rgba(255,255,255,.15); border: 0; border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer; text-decoration: none; }
     iframe { width: 100%; height: calc(100% - 56px); border: 0; background: #fff; }
   </style>
 </head>
 <body>
   <div class="bar">
-    <span>{{ date|date:"d.m.Y" }} sutkasi — chop etish oynasi avtomatik ochiladi.</span>
-    <button type="button" id="print-again">Yana chop etish</button>
-    <a href="{{ pdf_url }}" target="_blank" rel="noopener">PDF’ni alohida ochish</a>
-    <a href="{% url 'day_detail' date|date:'Y-m-d' %}">← Sutka sahifasiga</a>
+    <span>{% blocktranslate with d=date|date:"d.m.Y" %}{{ d }} sutkasi — chop etish oynasi avtomatik ochiladi.{% endblocktranslate %}</span>
+    <button type="button" id="print-again">{% translate "Yana chop etish" %}</button>
+    <a href="{{ pdf_url }}" target="_blank" rel="noopener">{% translate "PDF’ni alohida ochish" %}</a>
+    <a href="{% url 'day_detail' date|date:'Y-m-d' %}">← {% translate "Sutka sahifasiga" %}</a>
   </div>
-  <iframe id="pdf" src="{{ pdf_url }}" title="Sutkalik naryadlar ro‘yxati (PDF)"></iframe>
+  <iframe id="pdf" src="{{ pdf_url }}" title="{% translate "Sutkalik naryadlar ro‘yxati (PDF)" %}"></iframe>
   <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>

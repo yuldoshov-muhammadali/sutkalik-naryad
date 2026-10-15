@@ -7,7 +7,8 @@
 - Content-Security-Policy buzilishlari va JavaScript xatolari (brauzer konsoli).
 
 Ishga tushirish (server ishlab turganida, simulyatsiya bazasi bilan — scripts/simulate_weeks.py):
-    python scripts/ui_audit.py http://127.0.0.1:8123 natija_papka
+    THEME=dark python scripts/ui_audit.py http://127.0.0.1:8123 natija_papka   # THEME=light (standart) yoki dark
+    LANG_CODE=ru python scripts/ui_audit.py ...   # interfeys tili: uz (standart), ru, en (13-bosqich)
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ DAY_DRAFT = os.environ.get("DAY_DRAFT", "2026-10-13")
 CADET_ID = os.environ.get("CADET_ID", "1")
 
 ADMIN_PAGES = [
-    "/", "/haftalar/", "/sababli/", "/kursantlar/", "/kursantlar/qoshish/", "/kursantlar/import/",
+    "/", "/haftalar/", "/sababli/", "/zalyotchiklar/", "/kursantlar/", "/kursantlar/qoshish/", "/kursantlar/import/",
     f"/kursantlar/{CADET_ID}/", f"/kursantlar/{CADET_ID}/tahrirlash/", f"/sutka/{DAY_DRAFT}/", f"/sutka/{DAY_APPROVED}/",
     f"/sutka/{DAY_APPROVED}/jurnal/", "/sutkalar/", "/statistika/", "/parol/", "/yoq-sahifa/",
     "/admin/", "/admin/naryad/cadet/", "/admin/naryad/setting/1/change/",
@@ -51,6 +52,7 @@ AUDIT_JS = """
       issues.push(`kichik (${Math.round(r.width)}×${Math.round(r.height)}): <${el.tagName.toLowerCase()}> ${text}`);
     }
   }
+  if (document.documentElement.lang === 'en') return issues;  // inglizcha interfeysda bu tekshiruv kerak emas
   const english = /\b(the|Add|Change|Delete|Save|Search|History|Filter|Action|selected|View site|Log out|Welcome|Recent actions|None available|Select|Show all|Clear all|Yes|Documentation|Previous|Next|Today|Now|Choose|Remove|Home)\b/;
   const m = (document.body.innerText || '').match(english);
   if (m) issues.push(`inglizcha matn: "${m[0]}"`);
@@ -59,14 +61,22 @@ AUDIT_JS = """
 """
 
 
+THEME = os.environ.get("THEME", "light")  # light | dark — tungi rejimni ham tekshirish uchun
+LANG_CODE = os.environ.get("LANG_CODE", "uz")  # uz | ru | en
+
+
 def login(browser, user, viewport):
     ctx = browser.new_context(locale="uz-UZ", viewport=viewport, ignore_https_errors=True)
+    ctx.add_init_script(f"try {{ localStorage.setItem('naryad-theme', '{THEME}'); }} catch (e) {{}}")
     page = ctx.new_page()
+    page.goto(BASE + "/kirish/")
+    if LANG_CODE != "uz":
+        page.click(f"[data-testid=language-switch] button[value={LANG_CODE}]")
+        page.wait_for_load_state()
     if user:
-        page.goto(BASE + "/kirish/")
         page.fill("#id_username", user)
         page.fill("#id_password", PASSWORD)
-        page.click("button[type=submit]")
+        page.click("form:has(#id_password) button[type=submit]")
         page.wait_for_load_state()
     return page
 

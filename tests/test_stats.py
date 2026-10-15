@@ -359,7 +359,8 @@ def test_excel_export_has_all_sheets_and_period(admin_client, db_cadets, admin):
     wb = load_workbook(io.BytesIO(response.content))
     assert wb.sheetnames == [
         "Guruh YuP-125", "Guruh BI-225", "Guruh BI-325", "Guruh BI-425", "Guruh BI-525", "Guruh BI-625",
-        "Qizlar", "Adolat", "Ketma-ket bir joy", "Guruhlar kesimi", "Qo‘lda tuzatishlar", "Qo‘lda — kursantlar",
+        "Qizlar", "Adolat", "Ketma-ket bir joy", "Guruhlar kesimi", "Zalyotchiklar", "Qo‘lda tuzatishlar",
+        "Qo‘lda — kursantlar",
     ]
     for ws in wb.worksheets:
         assert ws["A1"].value == "Davr: 2-kurs haftasi: 13.09.2026 – 19.09.2026"

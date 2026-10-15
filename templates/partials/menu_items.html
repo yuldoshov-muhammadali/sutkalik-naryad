@@ -1,12 +1,12 @@
-{% for item in menu %}
+{% load i18n %}{% for item in menu %}
   {% if item.url %}
-  <a href="{{ item.url }}" class="{% if mobile %}flex items-center rounded-lg px-3 py-2{% else %}rounded-lg px-3 py-2 text-green-50{% endif %} text-sm font-medium {% if item.active %}{% if mobile %}bg-green-50 text-green-900{% else %}bg-white/15 text-white{% endif %}{% else %}{% if mobile %}hover:bg-slate-100{% else %}hover:bg-white/10{% endif %}{% endif %}">{{ item.label }}</a>
+  <a href="{{ item.url }}" class="{% if mobile %}flex items-center rounded-lg px-3 py-2{% else %}whitespace-nowrap rounded-lg px-2.5 py-2 text-brand-50{% endif %} text-sm font-medium {% if item.active %}{% if mobile %}bg-brand-50 text-brand-900{% else %}bg-white/15 text-white{% endif %}{% else %}{% if mobile %}hover:bg-slate-100{% else %}hover:bg-white/10{% endif %}{% endif %}">{{ item.label }}</a>
   {% else %}
-  <span class="{% if mobile %}flex justify-between rounded-lg px-3 py-2 text-slate-400{% else %}rounded-lg px-3 py-2 text-green-200/60{% endif %} cursor-not-allowed text-sm" aria-disabled="true" title="{{ item.hint }}">{{ item.label }}{% if mobile %}<span class="text-xs">{{ item.hint }}</span>{% endif %}</span>
+  <span class="{% if mobile %}flex justify-between rounded-lg px-3 py-2 text-slate-400{% else %}rounded-lg px-3 py-2 text-brand-200/60{% endif %} cursor-not-allowed text-sm" aria-disabled="true" title="{{ item.hint }}">{{ item.label }}{% if mobile %}<span class="text-xs">{{ item.hint }}</span>{% endif %}</span>
   {% endif %}
 {% endfor %}
-<a href="{% url 'password_change' %}" class="{% if mobile %}flex items-center rounded-lg px-3 py-2 hover:bg-slate-100{% else %}rounded-lg px-3 py-2 text-green-50 hover:bg-white/10{% endif %} text-sm font-medium">Parol</a>
+<a href="{% url 'password_change' %}" class="{% if mobile %}flex items-center rounded-lg px-3 py-2 hover:bg-slate-100{% else %}whitespace-nowrap rounded-lg px-2.5 py-2 text-brand-50 hover:bg-white/10{% endif %} text-sm font-medium">{% translate "Parol" %}</a>
 <form method="post" action="{% url 'logout' %}" class="{% if mobile %}border-t border-slate-100 pt-1 mt-1{% endif %}">
   {% csrf_token %}
-  <button type="submit" class="{% if mobile %}w-full rounded-lg px-3 py-2 text-left text-red-700 hover:bg-red-50{% else %}rounded-lg px-3 py-2 text-green-50 hover:bg-white/10{% endif %} text-sm font-medium">Chiqish</button>
+  <button type="submit" class="{% if mobile %}w-full rounded-lg px-3 py-2 text-left text-red-700 hover:bg-red-50{% else %}whitespace-nowrap rounded-lg px-2.5 py-2 text-brand-50 hover:bg-white/10{% endif %} text-sm font-medium">{% translate "Chiqish" %}</button>
 </form>

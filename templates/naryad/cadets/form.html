@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}{% if creating %}Kursant qo‘shish{% else %}{{ cadet.short_name }} — tahrirlash{% endif %}{% endblock %}
+{% load i18n %}
+{% block title %}{% if creating %}{% translate "Kursant qo‘shish" %}{% else %}{% blocktranslate with name=cadet.short_name %}{{ name }} — tahrirlash{% endblocktranslate %}{% endif %}{% endblock %}
 {% block content %}
-<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="Yo‘l"><a href="{% url 'cadet_list' %}" class="hover:underline">Kursantlar</a>{% if cadet %} / <a href="{% url 'cadet_detail' cadet.pk %}" class="hover:underline">{{ cadet.short_name }}</a>{% endif %}</nav>
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}"><a href="{% url 'cadet_list' %}" class="hover:underline">{% translate "Kursantlar" %}</a>{% if cadet %} / <a href="{% url 'cadet_detail' cadet.pk %}" class="hover:underline">{{ cadet.short_name }}</a>{% endif %}</nav>
 <div class="mx-auto max-w-xl rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-  <h1 class="text-xl font-semibold">{% if creating %}Yangi kursant{% else %}Kursant ma’lumotlarini tahrirlash{% endif %}</h1>
+  <h1 class="text-xl font-semibold">{% if creating %}{% translate "Yangi kursant" %}{% else %}{% translate "Kursant ma’lumotlarini tahrirlash" %}{% endif %}</h1>
   {% if has_history %}
-  <p class="mt-2 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-900">Bu kursantning naryad tarixi bor. Guruh yoki jins o‘zgartirilsa, tarix o‘chmaydi — o‘zgarish faqat keyingi naryadlarga ta’sir qiladi va jurnalga yoziladi.</p>
+  <p class="mt-2 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-900">{% translate "Bu kursantning naryad tarixi bor. Guruh yoki jins o‘zgartirilsa, tarix o‘chmaydi — o‘zgarish faqat keyingi naryadlarga ta’sir qiladi va jurnalga yoziladi." %}</p>
   {% endif %}
   {% if form.non_field_errors %}
   <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>
@@ -43,7 +44,7 @@
         <legend class="mb-1 block text-sm font-medium text-slate-700">{{ form.gender.label }} *</legend>
         <div class="flex gap-2">
           {% for radio in form.gender %}
-          <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-2.5 has-[:checked]:border-green-700 has-[:checked]:bg-green-50">
+          <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-2.5 has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50">
             {{ radio.tag }} <span>{{ radio.choice_label }}</span>
           </label>
           {% endfor %}
@@ -52,9 +53,9 @@
       </fieldset>
     </div>
     <div>
-      <label for="id_short_name" class="mb-1 block text-sm font-medium text-slate-700">{{ form.short_name.label }} (PDF uchun)</label>
+      <label for="id_short_name" class="mb-1 block text-sm font-medium text-slate-700">{{ form.short_name.label }} {% translate "(PDF uchun)" %}</label>
       {{ form.short_name }}
-      <p class="mt-1 text-xs text-slate-500">Avtomatik: <strong id="short-auto" class="text-slate-800">{% if form.instance.pk %}{{ form.instance.short_name }}{% else %}—{% endif %}</strong>. {{ form.short_name.help_text }}</p>
+      <p class="mt-1 text-xs text-slate-500">{% translate "Avtomatik" %}: <strong id="short-auto" class="text-slate-800">{% if form.instance.pk %}{{ form.instance.short_name }}{% else %}—{% endif %}</strong>. {{ form.short_name.help_text }}</p>
       {% for e in form.short_name.errors %}<p class="mt-1 text-sm text-red-700">{{ e }}</p>{% endfor %}
     </div>
 
@@ -66,8 +67,8 @@
     {% endif %}
 
     <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-      <a href="{% if cadet %}{% url 'cadet_detail' cadet.pk %}{% else %}{% url 'cadet_list' %}{% endif %}" class="rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50">Bekor qilish</a>
-      <button type="submit" class="rounded-lg bg-green-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-900">Saqlash</button>
+      <a href="{% if cadet %}{% url 'cadet_detail' cadet.pk %}{% else %}{% url 'cadet_list' %}{% endif %}" class="rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50">{% translate "Bekor qilish" %}</a>
+      <button type="submit" class="rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900">{% translate "Saqlash" %}</button>
     </div>
   </form>
 </div>

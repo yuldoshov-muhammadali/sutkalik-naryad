@@ -1,10 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Kirish{% endblock %}
+{% load static i18n %}
+{% block title %}{% translate "Kirish" %}{% endblock %}
+{% block page_bg %}
+<div class="fixed inset-0 -z-10 bg-brand-950" aria-hidden="true">
+  {% include "partials/institut_picture.html" with img_class="h-full w-full object-cover dark:brightness-75" %}
+  <div class="absolute inset-0 bg-gradient-to-b from-brand-950/75 via-brand-900/70 to-brand-950/90"></div>
+</div>
+{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-sm">
-  <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-    <h1 class="text-xl font-semibold">Tizimga kirish</h1>
-    <p class="mt-1 text-sm text-slate-600">Login va parolni kurs boshlig‘idan olasiz.</p>
+<div class="mx-auto max-w-sm pt-2 sm:pt-8">
+  <div class="mb-5 flex flex-col items-center text-center text-white">
+    <img src="{% static 'img/emblema-192.png' %}" width="96" height="96" alt="{% translate "Davlat bojxona xizmati emblemasi" %}" class="h-24 w-24 drop-shadow-lg" data-testid="login-emblem">
+    <p class="mt-3 text-lg font-semibold drop-shadow">{% translate "Bojxona instituti" %}</p>
+    <p class="text-sm text-gold-200 drop-shadow">{% translate "2-kurs · sutkalik naryad platformasi" %}</p>
+  </div>
+  <div class="rounded-2xl bg-white/90 p-6 shadow-xl ring-1 ring-white/40 backdrop-blur dark:bg-brand-950/80 dark:ring-white/10">
+    <h1 class="text-xl font-semibold">{% translate "Tizimga kirish" %}</h1>
+    <p class="mt-1 text-sm text-slate-600">{% translate "Login va parolni kurs boshlig‘idan olasiz." %}</p>
     {% if form.non_field_errors %}
     <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
       {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
@@ -15,9 +27,9 @@
       {% include "partials/form_field.html" with field=form.username %}
       {% include "partials/form_field.html" with field=form.password %}
       <input type="hidden" name="next" value="{{ next }}">
-      <button type="submit" class="w-full rounded-lg bg-green-800 px-4 py-2.5 font-semibold text-white shadow hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2">Kirish</button>
+      <button type="submit" class="w-full rounded-lg bg-brand-800 px-4 py-2.5 font-semibold text-white shadow hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2">{% translate "Kirish" %}</button>
     </form>
   </div>
-  <p class="mt-4 text-center text-xs text-slate-500">5 marta noto‘g‘ri urinishdan keyin login 15 daqiqaga bloklanadi.</p>
+  <p class="mt-4 text-center text-xs text-white/85 drop-shadow">{% translate "5 marta noto‘g‘ri urinishdan keyin login 15 daqiqaga bloklanadi." %}</p>
 </div>
 {% endblock %}

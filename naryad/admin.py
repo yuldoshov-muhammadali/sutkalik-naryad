@@ -6,6 +6,9 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
+from django.db import models
+from django.utils.translation import gettext_lazy as _lazy
+from django.utils.translation import ngettext
 
 from .models import (
     Absence,
@@ -17,8 +20,10 @@ from .models import (
     GroupPostAssignment,
     InitialRotation,
     LoginThrottle,
+    Penalty,
     Post,
     PostSlot,
+    PrepNote,
     Setting,
     StudyGroup,
     User,
@@ -39,9 +44,9 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ("role", "must_change_password", "is_active", "is_superuser")
     search_fields = ("username", "first_name", "last_name", "cadet__last_name", "cadet__first_name")
     autocomplete_fields = ("cadet",)
-    fieldsets = BaseUserAdmin.fieldsets + (("Naryad platformasi", {"fields": ("role", "cadet", "must_change_password")}),)
+    fieldsets = BaseUserAdmin.fieldsets + ((_lazy("Naryad platformasi"), {"fields": ("role", "cadet", "must_change_password")}),)
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        ("Naryad platformasi", {"fields": ("role", "cadet", "must_change_password")}),
+        (_lazy("Naryad platformasi"), {"fields": ("role", "cadet", "must_change_password")}),
     )
 
 
@@ -65,11 +70,11 @@ class StudyGroupAdmin(admin.ModelAdmin):
     search_fields = ("code", "direction")
     inlines = [CadetInline]
 
-    @admin.display(description="o‘g‘il")
+    @admin.display(description=_lazy("o‘g‘il"))
     def boys(self, obj):
         return obj.cadets.filter(gender="M", is_active=True).count()
 
-    @admin.display(description="qiz")
+    @admin.display(description=_lazy("qiz"))
     def girls(self, obj):
         return obj.cadets.filter(gender="F", is_active=True).count()
 
@@ -79,19 +84,23 @@ class StudyGroupAdmin(admin.ModelAdmin):
 
 @admin.register(Cadet)
 class CadetAdmin(admin.ModelAdmin):
-    list_display = ("short_name", "full_name", "group", "gender", "list_number", "is_active", "duty_exempt", "duty_position")
+    list_display = ("short_name", "fio", "group", "gender", "list_number", "is_active", "duty_exempt", "duty_position")
     list_filter = ("group", "gender", "is_active", "duty_exempt")
     search_fields = ("last_name", "first_name", "patronymic", "short_name")
     # Naryaddan ozod belgisi faqat kursant kartochkasidan, sabab bilan o'zgartiriladi (jurnalga yoziladi)
     readonly_fields = ("deactivated_at", "duty_exempt", "duty_position", "created_at", "updated_at")
     fieldsets = (
         (None, {"fields": ("group", "list_number", "last_name", "first_name", "patronymic", "gender", "short_name")}),
-        ("Faollik", {"fields": ("is_active", "deactivation_reason", "deactivated_at")}),
-        ("Naryaddan ozod", {"fields": ("duty_exempt", "duty_position"),
-                            "description": "Kursant kartochkasidagi “Naryaddan ozod qilish” / “Naryadga qaytarish” orqali o‘zgartiriladi."}),
-        ("Tizim", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (_lazy("Faollik"), {"fields": ("is_active", "deactivation_reason", "deactivated_at")}),
+        (_lazy("Naryaddan ozod"), {"fields": ("duty_exempt", "duty_position"),
+                            "description": _lazy("Kursant kartochkasidagi “Naryaddan ozod qilish” / “Naryadga qaytarish” orqali o‘zgartiriladi.")}),
+        (_lazy("Tizim"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
     actions = None
+
+    @admin.display(description=_lazy("F.I.Sh."))
+    def fio(self, obj):
+        return obj.full_name
 
     def has_delete_permission(self, request, obj=None):
         # Kursant o'chirilmaydi — faqat faolsizlantiriladi (tarix saqlanadi)
@@ -128,7 +137,7 @@ class PostAdmin(ReadOnlyAdminMixin, admin.ModelAdmin):
     list_filter = ("gender",)
     inlines = [PostSlotInline]
 
-    @admin.display(description="o‘rinlar")
+    @admin.display(description=_lazy("o‘rinlar"))
     def size(self, obj):
         return obj.slots.count()
 
@@ -164,11 +173,11 @@ class DutyWeekAdmin(admin.ModelAdmin):
     readonly_fields = ("created_by", "created_at")
     inlines = [DutyDayInline]
 
-    @admin.display(description="sutkalar")
+    @admin.display(description=_lazy("sutkalar"))
     def days_total(self, obj):
         return obj.days.count()
 
-    @admin.display(description="tasdiqlangan")
+    @admin.display(description=_lazy("tasdiqlangan"))
     def days_approved(self, obj):
         return obj.days.filter(status=DutyDay.Status.APPROVED).count()
 
@@ -220,7 +229,7 @@ class DutyDayAdmin(admin.ModelAdmin):
     readonly_fields = ("warnings", "generated_by", "generated_at", "approved_by", "approved_at")
     inlines = [GroupPostAssignmentInline, AssignmentInline, ChangeLogInline]
 
-    @admin.display(description="ogohlantirish")
+    @admin.display(description=_lazy("ogohlantirish"))
     def warnings_count(self, obj):
         return len(obj.warnings or [])
 
@@ -274,12 +283,28 @@ class ChangeLogAdmin(ReadOnlyAdminMixin, admin.ModelAdmin):
     search_fields = ("reason", "old_cadet__last_name", "new_cadet__last_name", "user__username")
 
 
+@admin.register(Penalty)
+class PenaltyAdmin(ReadOnlyAdminMixin, admin.ModelAdmin):
+    """Faqat ko'rish: zalyot “Zalyotchiklar” sahifasida kiritiladi/bekor qilinadi (jurnalga yoziladi)."""
+
+    list_display = ("cadet", "reason_type", "order_date", "count", "status", "created_by", "created_at")
+    list_filter = ("status", "reason_type")
+    search_fields = ("cadet__last_name", "cadet__first_name", "note")
+
+
 class InitialRotationFormSet(forms.BaseInlineFormSet):
     def clean(self):
         super().clean()
         rows = [f.cleaned_data for f in self.forms if f.cleaned_data and not f.cleaned_data.get("DELETE")]
         if rows and len(rows) != 6:
-            raise forms.ValidationError("Boshlang‘ich taqsimotda 6 ta joyning har biri bir martadan bo‘lishi kerak (hozir %d ta)." % len(rows))
+            raise forms.ValidationError(
+                ngettext(
+                    "Boshlang‘ich taqsimotda 6 ta joyning har biri bir martadan bo‘lishi kerak (hozir %(n)d ta).",
+                    "Boshlang‘ich taqsimotda 6 ta joyning har biri bir martadan bo‘lishi kerak (hozir %(n)d ta).",
+                    len(rows),
+                )
+                % {"n": len(rows)}
+            )
 
 
 class InitialRotationInline(admin.TabularInline):
@@ -289,18 +314,40 @@ class InitialRotationInline(admin.TabularInline):
     extra = 6
     max_num = 6
     verbose_name_plural = (
-        "Boshlang‘ich guruh → joy taqsimoti (faqat bazada tasdiqlangan tarix bo‘lmaganda, birinchi sutka uchun ishlatiladi)"
+        _lazy("Boshlang‘ich guruh → joy taqsimoti (faqat bazada tasdiqlangan tarix bo‘lmaganda, birinchi sutka uchun ishlatiladi)")
     )
 
     def get_extra(self, request, obj=None, **kwargs):
         return max(0, 6 - InitialRotation.objects.count())
 
 
+class PrepNoteInline(admin.StackedInline):
+    """Har joy uchun tayyorgarlik eslatmasi, uch tilda (14-bosqich). Bo'sh bo'lsa kursantga ko'rsatilmaydi."""
+
+    model = PrepNote
+    fields = ("post", "text_uz", "text_ru", "text_en")
+    readonly_fields = ("post",)
+    extra = 0
+    can_delete = False
+    # Har joy alohida blokda, uch til ostma-ost (jadval ko'rinishida 1280 px’dan kengayib ketadi)
+    formfield_overrides = {models.CharField: {"widget": forms.TextInput(attrs={"size": 80})}}
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Setting)
 class SettingAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "recipient_name", "course_head_name", "course_number", "updated_at")
+    list_display = ("__str__", "recipient_name", "course_head_name", "course_number", "approval_lead_hours", "updated_at")
     readonly_fields = ("updated_by", "updated_at")
-    inlines = [InitialRotationInline]
+    inlines = [InitialRotationInline, PrepNoteInline]
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        # Har bir joy uchun eslatma qatori bo'lsin (yangi joy qo'shilsa ham)
+        if Setting.objects.filter(pk=object_id).exists():
+            for post in Post.objects.filter(prep_note__isnull=True):
+                PrepNote.objects.get_or_create(post=post, defaults={"setting_id": int(object_id)})
+        return super().change_view(request, object_id, form_url, extra_context)
 
     def has_add_permission(self, request):
         return not Setting.objects.exists()
@@ -321,7 +368,7 @@ class LoginThrottleAdmin(admin.ModelAdmin):
     search_fields = ("key",)
     readonly_fields = ("key", "failures", "last_failure_at", "blocked_until")
 
-    @admin.display(boolean=True, description="hozir bloklangan")
+    @admin.display(boolean=True, description=_lazy("hozir bloklangan"))
     def blocked(self, obj):
         return obj.is_blocked()
 

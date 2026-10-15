@@ -17,6 +17,10 @@ ROLE_DUTY = "navbatchi"
 ROLE_ASSISTANT = "navbatchi_yordamchisi"
 ROLE_GUARD = "posbon"
 
+# Naryad turi (15-bosqich): oddiy navbat yoki navbatdan tashqari (jazo) naryadi
+KIND_NORMAL = "normal"
+KIND_PENALTY = "penalty"
+
 ROLE_TITLES = {
     ROLE_DUTY: "Navbatchi",
     ROLE_ASSISTANT: "Navbatchi yordamchisi",
@@ -83,6 +87,21 @@ class Record:
     role: str
     group: str
     position: int = 0
+    kind: str = KIND_NORMAL  # jazo naryadi adolat hisobiga kirmaydi (faqat “kecha turgan” cheklovi uchun)
+
+
+@dataclass(frozen=True)
+class Offender:
+    """Faol zalyotchik (15-bosqich): navbatdan tashqari jazo naryadi qarzi bor kursant.
+
+    since — buyruq/tanbeh sanasi (eskisi birinchi), remaining — qolgan jazo naryadlari,
+    last_post — oxirgi jazo naryadi joyi (joy navbatma-navbat almashadi).
+    """
+
+    cadet_id: int
+    since: dt.date
+    remaining: int
+    last_post: str | None = None
 
 
 @dataclass(frozen=True)
@@ -139,6 +158,7 @@ class Assignment:
     slot: Slot
     cadet_id: int | None
     group: str | None
+    kind: str = KIND_NORMAL
 
 
 @dataclass
@@ -170,6 +190,7 @@ class DayResult:
                 role=a.slot.role,
                 group=a.group or "",
                 position=a.slot.position,
+                kind=a.kind,
             )
             for a in self.filled
         ]

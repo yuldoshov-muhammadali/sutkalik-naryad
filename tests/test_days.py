@@ -259,19 +259,21 @@ def test_cadet_cannot_approve_or_see_draft(client, draft):
     cadet_user = User.objects.create_user("k", password=PASSWORD, role="cadet", cadet=Cadet.objects.first())
     client.force_login(cadet_user)
     assert client.post(url("day_approve", SUNDAY), {"version": draft.version}).status_code == 403
-    assert client.get(url("day_detail", SUNDAY)).status_code == 404  # qoralama ko'rinmaydi
+    assert client.get(url("day_detail", SUNDAY)).status_code == 403  # sutka sahifalari kursantga yopiq (14-bosqich)
     for name, args in [("week_list", []), ("absence_list", []), ("day_log", [SUNDAY]), ("day_replace", [SUNDAY, slot("noj1").pk])]:
         assert client.get(url(name, *args)).status_code == 403
     draft.refresh_from_db()
     assert draft.status == "draft"
 
 
-def test_cadet_sees_approved_day(client, draft, admin):
+def test_cadet_cannot_see_approved_day_pages(client, draft, admin):
+    """14-bosqich: kursant boshqa kursantlarning ro'yxatini ko'rmaydi — tasdiqlangan sutka sahifasi ham 403."""
     days.approve(SUNDAY, admin, draft.version)
     cadet_user = User.objects.create_user("k", password=PASSWORD, role="cadet", cadet=Cadet.objects.first())
     client.force_login(cadet_user)
-    body = client.get(url("day_detail", SUNDAY)).content.decode()
-    assert "Tasdiqlangan" in body and "Almashtirish" not in body and "Tasdiqni bekor qilish" not in body
+    assert client.get(url("day_detail", SUNDAY)).status_code == 403
+    assert client.get(reverse("approved_days")).status_code == 403
+    client.force_login(admin)
     assert "13-sentabr" in client.get(reverse("approved_days")).content.decode()
 
 

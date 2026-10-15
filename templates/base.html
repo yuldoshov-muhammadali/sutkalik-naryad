@@ -1,44 +1,60 @@
-{% load static %}<!doctype html>
-<html lang="uz">
+{% load static i18n %}<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" data-theme="auto">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#14532d">
-  <title>{% block title %}Sutkalik naryad{% endblock %} — 2-kurs</title>
+  <meta name="theme-color" content="#142548">
+  <title>{% block title %}{% translate "Sutkalik naryad" %}{% endblock %} — {% translate "2-kurs" %}</title>
+  {# Tungi rejim: CSS dan oldin, sinxron (oq “yaltirash” bo'lmasin). Inline emas — CSP o'zgarmaydi. #}
+  <script src="{% static 'js/theme.js' %}"></script>
+  <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
+  <link rel="icon" type="image/png" href="{% static 'img/emblema-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="{% static 'js/htmx-2.0.4.min.js' %}" defer></script>
   <script src="{% static 'js/app.js' %}" defer></script>
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900 antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-  <header class="bg-green-900 text-white shadow">
-    <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-      <a href="{% if ui_role %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}" class="flex min-h-[44px] min-w-0 items-center gap-2">
-        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/15 text-sm font-bold" aria-hidden="true">SN</span>
+  {% block page_bg %}{% endblock %}
+  <header class="relative z-30 bg-brand-900 text-white shadow">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-4 py-2.5">
+      <a href="{% if ui_role %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}" class="flex min-h-[44px] min-w-0 flex-1 items-center gap-2.5 lg:flex-none" data-testid="brand">
+        <img src="{% static 'img/emblema-64.png' %}" srcset="{% static 'img/emblema-64.png' %} 1x, {% static 'img/emblema-192.png' %} 3x"
+             width="40" height="40" alt="{% translate "Davlat bojxona xizmati emblemasi" %}" class="h-10 w-10 shrink-0 drop-shadow">
         <span class="min-w-0 leading-tight">
-          <span class="block truncate font-semibold">Sutkalik naryad</span>
-          <span class="block truncate text-xs text-green-100">Bojxona instituti · 2-kurs</span>
+          <span class="block font-semibold">{% translate "Sutkalik naryad" %}</span>
+          <span class="block text-xs text-gold-200">{% translate "Bojxona instituti" %} · <span class="whitespace-nowrap">{% translate "2-kurs" %}</span></span>
         </span>
       </a>
+      {# Rejim va til: telefonda ikkinchi qatorda (hammasi sig'sin), kengroq ekranda — bir qatorda #}
+      <div class="order-last flex w-full items-center justify-end gap-1 sm:order-none sm:w-auto">
+        {% include "partials/theme_toggle.html" %}
+        {% include "partials/language_switch.html" %}
+      </div>
       {% if ui_role %}
-      <details class="group relative md:hidden">
-        <summary class="flex cursor-pointer list-none items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium hover:bg-white/20" aria-label="Menyu">
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 5h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2z" clip-rule="evenodd"/></svg>
-          Menyu
-        </summary>
-        <nav class="absolute right-0 z-20 mt-2 w-64 rounded-xl bg-white p-2 text-slate-800 shadow-lg ring-1 ring-slate-200">
-          {% include "partials/menu_items.html" with mobile=True %}
+      <div class="flex items-center gap-1">
+        <details class="group relative lg:hidden">
+          <summary class="flex cursor-pointer list-none items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium hover:bg-white/20" aria-label="{% translate "Menyu" %}">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 5h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2z" clip-rule="evenodd"/></svg>
+            {% translate "Menyu" %}
+          </summary>
+          <nav class="absolute right-0 z-40 mt-2 w-64 rounded-xl bg-white p-2 text-slate-800 shadow-lg ring-1 ring-slate-200">
+            {% include "partials/menu_items.html" with mobile=True %}
+          </nav>
+        </details>
+        <nav class="hidden items-center gap-0.5 lg:flex">
+          {% include "partials/menu_items.html" with mobile=False %}
         </nav>
-      </details>
-      <nav class="hidden items-center gap-1 md:flex">
-        {% include "partials/menu_items.html" with mobile=False %}
-      </nav>
+      </div>
       {% endif %}
     </div>
   </header>
 
-  <main class="mx-auto max-w-5xl px-4 py-5">
+  {% block hero %}{% endblock %}
+
+  <main class="{% block main_class %}mx-auto max-w-5xl px-4 py-5{% endblock %}">
     {% if messages %}
-    <div class="mb-4 space-y-2" role="status">
+    <div class="relative z-20 mb-4 space-y-2" role="status">
       {% for message in messages %}
       <div class="rounded-lg border px-4 py-3 text-sm
         {% if message.tags == 'success' %}border-green-200 bg-green-50 text-green-900
@@ -52,7 +68,7 @@
   </main>
 
   <footer class="mx-auto max-w-5xl px-4 pb-6 text-center text-xs text-slate-500">
-    {% if ui_role %}{{ request.user.get_full_name|default:request.user.username }} · {{ ui_role_title }}{% endif %}
+    {% if ui_role %}{{ request.user.get_full_name|default:request.user.username }} · {{ ui_role_title }} · {% endif %}v{{ app_version }}
   </footer>
 </body>
 </html>

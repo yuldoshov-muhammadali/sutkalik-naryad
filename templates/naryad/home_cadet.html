@@ -1,53 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Mening naryadlarim{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Mening naryadlarim" %}{% endblock %}
+{% block hero %}{% if data.cadet %}{% include "partials/hero.html" with title=_("Mening naryadlarim") subtitle=data.cadet.full_name tag=data.cadet.group.code %}{% else %}{% include "partials/hero.html" with title=_("Mening naryadlarim") %}{% endif %}{% endblock %}
+{% block main_class %}relative z-10 mx-auto -mt-24 max-w-5xl px-4 pb-5 sm:-mt-28{% endblock %}
 {% block content %}
-<h1 class="text-xl font-semibold sm:text-2xl">Mening naryadlarim</h1>
-{% if not data.cadet %}
-  <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Akkauntingiz kursantga bog‘lanmagan. Kurs boshlig‘iga murojaat qiling.</div>
-{% else %}
-  <p class="text-sm text-slate-600">{{ data.cadet.full_name }} · {{ data.cadet.group.code }}</p>
-
-  <section class="mt-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200" aria-labelledby="next-duty">
-    <h2 id="next-duty" class="text-sm font-semibold uppercase tracking-wide text-slate-500">Keyingi naryad</h2>
-    {% with a=data.next_duty %}
-    {% if a %}
-      <p class="mt-2 text-2xl font-semibold text-green-900">{{ a.duty_day.date|date:"d.m.Y" }}, 18:00</p>
-      <p class="mt-1 text-base">{{ a.post_slot.print_label }}</p>
-      <p class="text-sm text-slate-600">{{ a.post_slot.get_role_display }} · {{ a.duty_day.date|date:"d.m" }} 18:00 → ertasi 18:00</p>
-    {% else %}
-      <p class="mt-2 text-slate-600">Tasdiqlangan navbatdagi naryadingiz yo‘q.</p>
-    {% endif %}
-    {% endwith %}
-  </section>
-
-  <div class="mt-4 grid grid-cols-2 gap-2">
-    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-      <p class="text-xs text-slate-500">Shu haftada</p>
-      <p class="text-2xl font-semibold">{{ data.this_week }}</p>
-    </div>
-    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-      <p class="text-xs text-slate-500">Jami naryadlar</p>
-      <p class="text-2xl font-semibold">{{ data.total }}</p>
-    </div>
-  </div>
-
-  <section class="mt-4" aria-labelledby="recent">
-    <h2 id="recent" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Oxirgi naryadlar</h2>
-    {% if data.recent %}
-    <ul class="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
-      {% for a in data.recent %}
-      <li class="flex items-center justify-between gap-3 px-4 py-3">
-        <div class="min-w-0">
-          <p class="font-medium">{{ a.post_slot.print_label }}</p>
-          <p class="text-xs text-slate-500">{{ a.post_slot.get_role_display }}</p>
-        </div>
-        <span class="shrink-0 text-sm text-slate-600">{{ a.duty_day.date|date:"d.m.Y" }}</span>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="rounded-xl bg-white px-4 py-3 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">Hali tasdiqlangan naryad yo‘q.</p>
-    {% endif %}
-  </section>
-{% endif %}
+<div id="home-status" data-live-status hx-get="{% url 'home_status' %}" hx-trigger="naryad:refresh" hx-swap="innerHTML">
+{% include "naryad/_home_cadet_status.html" %}
+</div>
 {% endblock %}

@@ -2,7 +2,7 @@
 
 Sutkalik naryad platformasi 2-kurs sutkalik naryad ro‘yxatini tarix asosida, adolatli va avtomatik tuzadi.
 - Ro‘yxatni **dastur** tuzadi. Kurs boshlig‘i uni tekshiradi, kerak bo‘lsa sabab ko‘rsatib tuzatadi va tasdiqlaydi.
-- Kursantlar faqat tasdiqlangan ro‘yxatlarni va o‘z naryadlarini ko‘radi.
+- Kursant faqat o‘zining tasdiqlangan naryadlarini ko‘radi: navbatdagi naryadi (sana, joy, lavozim) va o‘z tarixi.
 
 Bir sahifalik qisqa yo‘riqnoma (chop etib osib qo‘yish uchun): [`qollanma/qisqa-yoriqnoma.pdf`](qollanma/qisqa-yoriqnoma.pdf).
 
@@ -10,7 +10,7 @@ Bir sahifalik qisqa yo‘riqnoma (chop etib osib qo‘yish uchun): [`qollanma/qi
 - **Sutka** — shu sana 18:00 dan ertasi kuni 18:00 gacha. “13-oktabr sutkasi” = 13-oktabr 18:00 → 14-oktabr 18:00.
 - **2-kurs haftasi** — yakshanba 18:00 dan keyingi yakshanba 18:00 gacha (7 sutka). Kurslar haftama-hafta almashadi, shuning uchun 2-kurs haftasini kurs boshlig‘i o‘zi ochadi.
 - **Qoralama** — dastur tuzgan, hali tasdiqlanmagan ro‘yxat. Uni faqat admin ko‘radi.
-- **Tasdiqlangan** — rasmiy ro‘yxat. Uni hamma ko‘radi va PDF qilib chop etadi.
+- **Tasdiqlangan** — rasmiy ro‘yxat. Kursant undagi o‘z naryadini ko‘radi; to‘liq ro‘yxat va PDF — kurs boshlig‘ida.
 
 ---
 
@@ -20,14 +20,33 @@ Bir sahifalik qisqa yo‘riqnoma (chop etib osib qo‘yish uchun): [`qollanma/qi
 Brauzerda platforma manzilini oching (masalan `https://naryad.example.uz`), login va parolni kiriting.
 - 5 marta noto‘g‘ri parol kiritilsa, login 15 daqiqaga bloklanadi.
 - Birinchi kirishda parolni almashtirish so‘ralishi mumkin.
+- **Til:** kirish sahifasida va har sahifa sarlavhasida (tungi rejim tugmasi yonida) **UZ | RU | EN** tugmalari bor. Sukut bo‘yicha interfeys o‘zbekcha. Tanlangan til akkauntingizda saqlanadi: boshqa telefon yoki kompyuterdan kirganingizda ham shu til ochiladi. Rasmiy PDF naryad shakli va Excel hisoboti har doim o‘zbekcha. Kursantlarning ismlari va siz yozgan sabablar tarjima qilinmaydi.
 
 <img src="qollanma/rasmlar/01-kirish-telefon.png" alt="Kirish sahifasi" width="300">
 
 ### 1.2. Bosh sahifa
+Tepada institut binosi tushirilgan banner bor. Unda:
+- jonli soat (Toshkent vaqti);
+- joriy sutka: qachondan qachongacha, progress chizig‘i va smena almashishiga qolgan vaqt.
+
+Holat kartochkalari har daqiqada o‘zi yangilanadi, sahifani qayta yuklash shart emas.
+
+Sarlavhadagi quyosh/oy tugmasi rejimni almashtiradi: **avtomatik** (telefon/kompyuter sozlamasiga qarab) → **kunduzgi** → **tungi**. Tanlov shu qurilmada eslab qolinadi.
+
 Bosh sahifada:
+- **ertangi ro‘yxat banneri** (pastda batafsil);
 - joriy 2-kurs haftasi va uning 7 sutkasi holati;
 - **“Keyingi qadam”** tugmasi — hozir nima qilish kerakligini aytadi;
 - har guruhning **adolat belgisi**.
+
+**Ertangi ro‘yxat bir kun oldin tayyor bo‘lsin.** D sanadagi sutka D kuni 18:00 da boshlanadi. Uni kamida bir kun oldin — D−1 kuni 18:00 gacha — tasdiqlang, shunda kursantlar 24 soat oldin bilib, tayyorgarlik ko‘radi. Bosh sahifadagi banner:
+- **sariq** — “Ertangi sutka (15-oktabr) hali tasdiqlanmagan. Muddat: bugun 18:00 gacha, 3 soat qoldi.” Yonida **Tuzish** yoki **Ochish** tugmasi;
+- **qizil** — muddat o‘tdi, kursantlar hali bilmaydi;
+- **yashil** — ertangi ro‘yxat tayyor, kursantlarga ko‘rinmoqda.
+
+Banner faqat 2-kurs haftasi kunlarida va hafta boshlanishidan oldingi kuni (shanba) chiqadi. Muddatni boshqaruv panelidagi **Sozlamalar → Tasdiqlash muddati (soat)** da o‘zgartirish mumkin (standart 24). Keyingi sutka avvalgidek faqat oldingisi tasdiqlangandan keyin tuziladi: bugungisini tasdiqlagan zahoti ertangisini tuzish mumkin.
+
+<img src="qollanma/rasmlar/24-admin-ertangi-royxat-banneri.png" alt="Ertangi ro‘yxat banneri" width="300">
 
 ![Bosh sahifa](qollanma/rasmlar/13-bosh-sahifa-tasdiqdan-keyin.png)
 
@@ -109,6 +128,37 @@ Kursant kartochkasida: naryadlar tarixi, joylar va lavozimlar bo‘yicha sonlar,
 
 ![Kursantlar](qollanma/rasmlar/11-kursantlar.png)
 
+### 1.10a. Zalyotchiklar (navbatdan tashqari naryad)
+Menyudagi **Zalyotchiklar** bo‘limi — tanbeh olgan kursantlar uchun navbatdan tashqari (jazo) naryadlari.
+
+**Kiritish.** Formada quyidagilarni to‘ldiring:
+- kursant;
+- sabab turi: ichki tartib-qoidalarni buzish, naryadda uxlab qolish yoki boshqa;
+- izoh (majburiy);
+- buyruq/tanbeh sanasi;
+- jazo naryadlari soni (1–10).
+
+Kursantda faol zalyot bo‘lsa, yangi son unga qo‘shiladi. Faqat o‘g‘il, faol va naryaddan ozod bo‘lmagan kursantni zalyotchik qilish mumkin.
+
+**Qanday qo‘yiladi.** Dastur sutkani tuzganda faol zalyotchikni **1-NO‘J** yoki **1-Yotoqxonaga** posbon o‘rniga qo‘yadi:
+- uning guruhi qayerda turishi muhim emas;
+- shu joy guruhi bitta kam kishi beradi;
+- bir joyga sutkasiga 1 ta zalyotchik qo‘yiladi (Sozlamalarda 2 qilish mumkin);
+- tanbeh sanasi eskisi birinchi;
+- joy navbatma-navbat almashadi.
+
+Kecha turgan yoki sababli holatdagi zalyotchik qo‘yilmaydi — sutka sahifasida sariq eslatma chiqadi.
+
+**Sutka sahifasi.** Jazo o‘rni **Zalyot** belgisi bilan ko‘rinadi. Rasmiy PDF’da bu belgi yo‘q: zalyotchik oddiy qator bo‘lib chiqadi.
+
+**Hisob.** Jazo naryadi sutka **tasdiqlanganda** “o‘tildi” deb sanaladi. Soni tugagach, zalyot o‘zi “bajarildi” bo‘ladi. Tasdiqni bekor qilsangiz, hisob ham qaytadi. Jazo naryadlari adolat hisobiga kirmaydi: zalyotchikning oddiy navbati kamaymaydi.
+
+**Bekor qilish.** Zalyotni sabab yozib bekor qilish mumkin. Hamma amallar jurnalga yoziladi.
+- Bekor qilingan zalyotning kursanti ochiq qoralamada jazo o‘rnida qolsa, sutka tasdiqlanmaydi: uni almashtiring yoki sutkani qayta tuzing.
+- Faol zalyoti bor kursantni naryaddan ozod qilib bo‘lmaydi: avval zalyot bajarilishi yoki bekor qilinishi kerak.
+
+<img src="qollanma/rasmlar/25-zalyotchiklar-telefon.png" alt="Zalyotchiklar sahifasi" width="300">
+
 ### 1.11. Statistika va ogohlantirishlar
 **Statistika** sahifasi hisobni faqat tasdiqlangan sutkalar bo‘yicha qiladi.
 
@@ -148,6 +198,8 @@ Hamma sahifa telefonga moslangan: menyu o‘ng yuqoridagi **Menyu** tugmasida.
 ### 1.13. Boshqaruv paneli
 **Boshqaruv paneli** (`/admin/`) — kamdan-kam kerak bo‘ladigan sozlamalar uchun:
 - imzo (unvon, F.I.Sh.), “Tasdiqlayman” bloki;
+- **tasdiqlash muddati** (soat, standart 24);
+- **tayyorgarlik eslatmalari** — har joy uchun qisqa matn uch tilda (masalan: “17:30 da yo‘riqnomaga keling, forma — kundalik”). Kursant uni o‘z naryadi kartochkasida ko‘radi. Joriy tildagisi bo‘sh bo‘lsa o‘zbekchasi chiqadi, hammasi bo‘sh bo‘lsa — hech narsa;
 - boshlang‘ich guruh → joy taqsimoti;
 - foydalanuvchilar va login cheklovlari.
 
@@ -160,16 +212,22 @@ Unga faqat admin kiradi.
 ### 2.1. Kirish va parol
 - **Login:** `familiya.ism`, masalan `aliyev.vali`.
 - Vaqtinchalik parolni kurs boshlig‘i beradi.
+- Interfeys tilini sarlavhadagi **UZ | RU | EN** tugmalari bilan tanlash mumkin; tanlov akkauntingizda saqlanadi.
 - Birinchi kirishda parolni almashtirish shart. Yangi parol kamida 8 belgi bo‘lsin, faqat raqamlardan iborat yoki oddiy (`12345678`, `parol123`) bo‘lmasin.
 - Keyin parolni **Menyu → Parol** orqali istalgan vaqtda almashtirish mumkin.
 
 <img src="qollanma/rasmlar/20-parol-almashtirish.png" alt="Parolni almashtirish" width="300">
 
 ### 2.2. Mening naryadlarim
-Bosh sahifada:
-- **keyingi naryadingiz** (tasdiqlangan bo‘lsa);
-- shu haftadagi va jami naryadlar soni;
-- oxirgi naryadlar.
+Bosh sahifada katta kartochka **“Mening navbatdagi naryadim”**:
+- sana va vaqt: “15-oktabr, chorshanba 18:00 → 16-oktabr 18:00”;
+- **joy** (masalan, “1-NO‘J bo‘yicha”) va **lavozim** (navbatchi, navbatchi yordamchisi yoki posbon), guruhingiz;
+- jonli hisoblagich: “Naryadga 21 soat 14 daqiqa qoldi”, naryad davomida — “Hozir naryaddasiz, smena almashishiga … qoldi”;
+- **tayyorgarlik eslatmasi** (kurs boshlig‘i kiritgan bo‘lsa).
+
+Naryadingiz bo‘lmasa: “Yaqin kunlarda tasdiqlangan naryadingiz yo‘q”. Navbatdan tashqari (jazo) naryadi bo‘lsa, kartochkada **“Navbatdan tashqari naryad”** belgisi va “Jazo naryadlari: 3 tadan 1 tasi o‘tildi” yozuvi chiqadi. Kartochka ostida shu haftadagi va jami naryadlar soni hamda **Mening tarixim** havolasi.
+
+Faqat **tasdiqlangan** naryad ko‘rinadi, qoralama hech qachon ko‘rinmaydi. Kurs boshlig‘i tasdiqni bekor qilib sizni almashtirsa, kartochkada **“Naryadingiz bekor qilindi”** chiqadi.
 
 **Mening tarixim** — barcha naryadlaringiz, joylar va lavozimlar bo‘yicha sonlar, hamda guruh o‘rtachasi bilan solishtirish. Boshqa kursantlarning ismlari ko‘rinmaydi.
 
@@ -177,16 +235,8 @@ Bosh sahifada:
 |---|---|
 | <img src="qollanma/rasmlar/16-kursant-bosh-sahifa.png" width="260"> | <img src="qollanma/rasmlar/17-kursant-mening-tarixim.png" width="260"> |
 
-### 2.3. Tasdiqlangan ro‘yxatlar
-**Tasdiqlangan naryadlar** — barcha tasdiqlangan sutkalar.
-- Sutkani bossangiz, to‘liq ro‘yxat ochiladi. Uni **PDF** qilib yuklab olish yoki chop etish mumkin.
-- Qoralamalar kursantga ko‘rinmaydi.
-
-| Ro‘yxat | Sutka |
-|---|---|
-| <img src="qollanma/rasmlar/18-kursant-tasdiqlangan-naryadlar.png" width="260"> | <img src="qollanma/rasmlar/19-kursant-sutka.png" width="260"> |
-
-Kursantga ruxsat berilmagan sahifa ochilsa, “Ruxsat yo‘q” xabari chiqadi. Masalan, statistika yoki boshqa kursantning kartochkasi.
+### 2.3. Nimani ko‘rmaysiz
+Kursant faqat **o‘zining** naryadlarini ko‘radi (1.5.0 dan). Boshqa kursantlarning ro‘yxati, sutka sahifalari, PDF, statistika va boshqa kursantning kartochkasi ochilmaydi — “Ruxsat yo‘q” xabari chiqadi.
 
 ---
 

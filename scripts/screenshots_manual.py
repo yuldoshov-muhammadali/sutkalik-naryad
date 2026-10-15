@@ -32,7 +32,7 @@ def login(page, user):
     page.goto(BASE + "/kirish/")
     page.fill("#id_username", user)
     page.fill("#id_password", PASSWORD)
-    page.click("button[type=submit]")
+    page.click("form:has(#id_password) button[type=submit]")
     page.wait_for_url(BASE + "/")
 
 
@@ -117,10 +117,7 @@ with sync_playwright() as p:
     shot(page, "16-kursant-bosh-sahifa", full=True)
     page.goto(BASE + "/mening-tarixim/")
     shot(page, "17-kursant-mening-tarixim", full=True)
-    page.goto(BASE + "/sutkalar/")
-    shot(page, "18-kursant-tasdiqlangan-naryadlar")
-    page.goto(f"{BASE}/sutka/{DAY.isoformat()}/")
-    shot(page, "19-kursant-sutka")
+    # 18–19 (tasdiqlangan ro'yxatlar) olib tashlandi: 14-bosqichdan kursant faqat o'z naryadini ko'radi
     page.goto(BASE + "/parol/")
     shot(page, "20-parol-almashtirish")
     page.goto(BASE + "/statistika/")

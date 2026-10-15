@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Sahifa topilmadi{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Sahifa topilmadi" %}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-md rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200">
   <p class="text-4xl font-bold text-slate-300">404</p>
-  <h1 class="mt-2 text-lg font-semibold">Sahifa topilmadi</h1>
-  <p class="mt-2 text-sm text-slate-600">Manzil noto‘g‘ri yozilgan yoki bu ma’lumot hali mavjud emas (masalan, sutka hali tuzilmagan yoki tasdiqlanmagan).</p>
-  <a href="/" class="mt-5 inline-flex min-h-[44px] items-center rounded-lg bg-green-800 px-5 text-sm font-semibold text-white hover:bg-green-900">Bosh sahifaga</a>
+  <h1 class="mt-2 text-lg font-semibold">{% translate "Sahifa topilmadi" %}</h1>
+  <p class="mt-2 text-sm text-slate-600">{% translate "Manzil noto‘g‘ri yozilgan yoki bu ma’lumot hali mavjud emas (masalan, sutka hali tuzilmagan yoki tasdiqlanmagan)." %}</p>
+  <a href="/" class="mt-5 inline-flex min-h-[44px] items-center rounded-lg bg-brand-800 px-5 text-sm font-semibold text-white hover:bg-brand-900">{% translate "Bosh sahifaga" %}</a>
 </div>
 {% endblock %}

@@ -8,7 +8,7 @@ Loyiha qoidalari: [`CLAUDE.md`](CLAUDE.md). Talablar va sxema: [`docs/01-talabla
 | Foydalanuvchilar (kurs boshlig‘i, kursant) | [`docs/qollanma.md`](docs/qollanma.md), bir sahifalik: [`docs/qollanma/qisqa-yoriqnoma.pdf`](docs/qollanma/qisqa-yoriqnoma.pdf) |
 | Serverga joylash, yangilash, zaxira | [`docs/joylashtirish.md`](docs/joylashtirish.md) |
 | Xavfsizlik | [`docs/xavfsizlik.md`](docs/xavfsizlik.md) |
-| O‘zgarishlar tarixi | [`CHANGELOG.md`](CHANGELOG.md) — joriy versiya **1.1.0** |
+| O‘zgarishlar tarixi | [`CHANGELOG.md`](CHANGELOG.md) — joriy versiya **1.6.1** |
 
 ## Tuzilishi
 
@@ -89,6 +89,7 @@ Boshqaruv paneli `/admin/` — faqat **admin roli** va superuser. Rollar va ruxs
   DATABASE_URL=sqlite:///simulyatsiya.sqlite3 python scripts/simulate_weeks.py
   DATABASE_URL=sqlite:///simulyatsiya.sqlite3 python manage.py runserver   # kursboshligi / Demo-parol-2026
   ```
+  `--zalyotchiklar` qo‘shilsa, 3-hafta boshida 3 ta zalyotchik (2–3 tadan jazo naryadi) kiritiladi. Oxirida natija jadvali chiqadi: jazo naryadlari qayerda bo‘lgani va guruhlar adolati (15-bosqich).
 
 ## Lokal ishga tushirish (Docker’siz, SQLite)
 
@@ -149,7 +150,18 @@ python scripts/demo.py                          # algoritmning namunaviy hisobi
   sh scripts/build_css.sh        # Windows: tailwindcss-windows-x64.exe -c tailwind.config.js -i static/src/input.css -o static/css/app.css --minify
   ```
 - **HTMX** 2.0.4: `static/js/htmx-2.0.4.min.js` (CDN’siz).
-- **Tarjimalar:** Django admin/auth uchun yetishmagan o‘zbekcha matnlar `locale/uz/LC_MESSAGES/django.po` da. O‘zgartirgach: `python scripts/compile_messages.py` (`.mo` fayl ham repozitoriyda).
+- **Rasmlar** (12-bosqich): asl fayllar `assets/institut.jpg`, `assets/emblema.jpg`. Ularni almashtirsangiz: `python scripts/prepare_images.py` (Pillow). Natija `static/img/` ga yoziladi.
+- **Ranglar:** `tailwind.config.js` da `brand` (to‘q ko‘k) va `gold`.
+- **Tungi rejim:** `darkMode: "class"`. Tungi ranglar `static/src/input.css` da, tanlov `static/js/theme.js` va `app.js` da.
+- **Uch til** (13-bosqich): o‘zbekcha (asosiy), ruscha, inglizcha — CLAUDE.md 59-band, atamalar: [`docs/atamalar.md`](docs/atamalar.md).
+  - Tarjimalar `locale/ru/LC_MESSAGES/django.po` va `locale/en/LC_MESSAGES/django.po` da. Django admin/auth uchun yetishmagan o‘zbekcha matnlar `locale/uz/LC_MESSAGES/django.po` da.
+  - msgid — o‘zbekcha matnning o‘zi. Python’da `gettext as _` va `gettext_lazy as _lazy`, shablonlarda `{% translate %}` / `{% blocktranslate %}`.
+  - Yangi matn qo‘shilgach katalogni yangilang. Loyihaning `makemessages` buyrug‘i `_lazy` ni ham taniydi; GNU gettext kerak:
+    ```bash
+    python manage.py makemessages -l ru -l en --no-obsolete --no-location -i "tests/*" -i "scripts/*" -i "naryad/engine/*" \
+      -i "naryad/migrations/*" -i "docs/*" -i "staticfiles/*" -i "assets/*" -i "templates/naryad/pdf/*"
+    ```
+  - `.po` dagi yangi (bo‘sh yoki `fuzzy`) yozuvlarni tarjima qilgach: `python scripts/compile_messages.py` (`.mo` fayllar ham repozitoriyda). `tests/test_i18n.py` bo‘sh/fuzzy yozuv qolsa yiqiladi.
 - **Skrinshotlar** (telefon 390 px va kompyuter 1280 px): [`docs/skrinshotlar/`](docs/skrinshotlar/), qo‘llanma rasmlari: [`docs/qollanma/rasmlar/`](docs/qollanma/rasmlar/) (`scripts/screenshots_manual.py`).
 - **Interfeys auditi:** `python scripts/ui_audit.py http://127.0.0.1:8123 audit/` — har sahifani 360 px va 1280 px’da tekshiradi: gorizontal toshish, 44 px dan kichik tugma, inglizcha matn, CSP xatolari.
 - **JavaScript** faqat `static/js/` dagi fayllarda (inline skript yo‘q — Content-Security-Policy).

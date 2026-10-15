@@ -134,7 +134,7 @@ def test_menu_depends_on_role(client, users):
     assert "Boshqaruv paneli" in body and "Haftalar" in body and "Sababli holatlar" in body
     body = as_role(client, users, "cadet").get(reverse("home")).content.decode()
     assert "Boshqaruv paneli" not in body and "Haftalar" not in body and "Mening naryadlarim" in body
-    assert reverse("approved_days") in body  # "Tasdiqlangan naryadlar"
+    assert reverse("approved_days") not in body and "Tasdiqlangan naryadlar" not in body  # 14-bosqich
 
 
 # ---------------------------------------------------------------------------
@@ -251,13 +251,14 @@ def test_cadet_home_shows_next_and_recent_duties(client, imported, monkeypatch):
 
     monkeypatch.setattr("naryad.dashboard.timezone.now", lambda: _now(dt.date(2026, 9, 18), 9))  # 17-sentabr sutkasi
     body = client.get(reverse("home")).content.decode()
-    assert "Keyingi naryad" in body and "18.09.2026, 18:00" in body
-    assert "Qizlar yotoqxonasi bo‘yicha navbatchi" in body
+    assert "Mening navbatdagi naryadim" in body and "18-sentabr, juma 18:00" in body and "19-sentabr 18:00" in body
+    assert "Qizlar yotoqxonasi bo‘yicha" in body and "Navbatchi" in body
+    assert "Naryadga 9 soat 0 daqiqa qoldi" in body
 
     monkeypatch.setattr("naryad.dashboard.timezone.now", lambda: _now(dt.date(2026, 9, 25), 9))
     body = client.get(reverse("home")).content.decode()
-    assert "Tasdiqlangan navbatdagi naryadingiz yo‘q." in body
-    assert "18.09.2026" in body  # oxirgi naryadlar ro'yxatida
+    assert "Yaqin kunlarda tasdiqlangan naryadingiz yo‘q" in body
+    assert reverse("my_card") in body  # tarix — “Mening tarixim” sahifasida
 
 
 def test_cadet_sees_only_approved(client, db_cadets, users):
@@ -272,7 +273,7 @@ def test_cadet_sees_only_approved(client, db_cadets, users):
     user = User.objects.create_user("q", password=PASSWORD, role="cadet", cadet=girl_assignment.cadet)
     client.force_login(user)
     body = client.get(reverse("home")).content.decode()
-    assert "Tasdiqlangan navbatdagi naryadingiz yo‘q." in body  # qoralama ko'rinmaydi
+    assert "Yaqin kunlarda tasdiqlangan naryadingiz yo‘q" in body  # qoralama ko'rinmaydi
     assert DutyDay.objects.get().status == "draft"
 
 
