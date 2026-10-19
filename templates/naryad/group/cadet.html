@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ cadet.short_name }}{% endblock %}
+{% block content %}
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}"><a href="{% url 'group_overview' %}" class="hover:underline">{% translate "Mening guruhim" %}</a> / {{ cadet.short_name }}</nav>
+<h1 class="text-xl font-semibold sm:text-2xl">{{ cadet.full_name }} <span class="text-base font-normal text-slate-500">{{ cadet.group.code }}</span></h1>
+<p class="mt-1 text-sm">{% if cadet.duty_exempt %}<span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">{% translate "Naryadga chiqmaydi" %}</span>
+  {% elif sick %}<span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-900">{% blocktranslate with start=sick.start_date|date:"d.m" end=sick.end_date|date:"d.m" %}Kasal: {{ start }}–{{ end }}{% endblocktranslate %}</span>{% endif %}</p>
+<section class="mt-4" aria-labelledby="up-title">
+  <h2 id="up-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Navbatdagi naryadlar" %}</h2>
+  <ul class="space-y-2">{% for a in upcoming %}
+    <li class="rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200 {% if a.duty_day.date == today %}ring-2 ring-gold-400{% endif %}"><p class="font-medium">{{ a.duty_day.date|date:"d.m.Y" }} · {% translate a.post_slot.post.name %}</p><p class="text-xs text-slate-500">{{ a.post_slot.get_role_display }}</p></li>
+  {% empty %}<li class="text-sm text-slate-500">{% translate "Yaqin kunlarda naryadi yo‘q" %}</li>{% endfor %}</ul>
+</section>
+<section class="mt-5" aria-labelledby="past-title">
+  <h2 id="past-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Oxirgi naryadlar" %}</h2>
+  <ul class="space-y-2">{% for a in past %}
+    <li class="rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200"><p class="font-medium">{{ a.duty_day.date|date:"d.m.Y" }} · {% translate a.post_slot.post.name %}</p><p class="text-xs text-slate-500">{{ a.post_slot.get_role_display }}</p></li>
+  {% empty %}<li class="text-sm text-slate-500">{% translate "Hali tasdiqlangan naryad yo‘q." %}</li>{% endfor %}</ul>
+</section>
+{% endblock %}

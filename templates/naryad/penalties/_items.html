@@ -7,8 +7,10 @@
           {% if p.status == 'active' %}<span class="ml-1 rounded bg-gold-100 px-1.5 py-0.5 text-xs font-semibold text-gold-900">{{ p.get_status_display }}</span>
           {% elif p.status == 'done' %}<span class="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-xs font-semibold text-green-800">{{ p.get_status_display }}</span>
           {% else %}<span class="ml-1 rounded bg-slate-200 px-1.5 py-0.5 text-xs font-semibold text-slate-700">{{ p.get_status_display }}</span>{% endif %}
+          {% if p.is_new and p.status != 'cancelled' %}<span class="ml-1 rounded bg-red-600 px-1.5 py-0.5 text-xs font-semibold text-white" title="{% translate "Yangi (ko‘rib chiqilmagan)" %}" data-testid="new-badge">{% translate "Yangi" context "zalyot" %}</span>{% endif %}
         </p>
         <p class="text-sm text-slate-600"><span class="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-semibold text-slate-700">{{ p.get_reason_type_display }}</span> {% blocktranslate with d=p.order_date|date:"d.m.Y" %}tanbeh {{ d }}{% endblocktranslate %} · {{ p.note }}</p>
+        <p class="text-xs text-slate-500" data-testid="entered-by">{% translate "Kim kiritdi" %}: {{ p.created_by.get_full_name|default:p.created_by.username|default:"—" }}{% if p.created_by.role == 'commander' %} ({% translate "guruh komandiri" %}){% endif %} · {{ p.created_at|date:"d.m.Y H:i" }}</p>
         {% if p.cancel_reason %}<p class="text-xs text-slate-500">{% translate "Bekor qilish sababi" %}: {{ p.cancel_reason }}</p>{% endif %}
       </div>
       <div class="shrink-0 text-right" data-testid="penalty-progress">
@@ -24,6 +26,10 @@
     </p>
     {% endif %}
     {% if cancellable %}
+    <div class="mt-2 flex flex-wrap gap-2">
+      <a href="{% url 'penalty_edit' p.pk %}" class="inline-flex min-h-[44px] items-center rounded-lg px-3 text-xs font-semibold text-brand-900 ring-1 ring-brand-800 hover:bg-brand-50">{% translate "Tahrirlash" %}</a>
+      {% if p.is_new %}<form method="post" action="{% url 'penalty_review' p.pk %}">{% csrf_token %}<button type="submit" class="min-h-[44px] rounded-lg px-3 text-xs font-semibold text-green-800 ring-1 ring-green-300 hover:bg-green-50" data-testid="review-{{ p.pk }}">✓ {% translate "Ko‘rib chiqildi" %}</button></form>{% endif %}
+    </div>
     <details class="mt-2">
       <summary class="inline-flex min-h-[44px] cursor-pointer list-none items-center rounded-lg px-3 py-2 text-xs font-semibold text-red-700 ring-1 ring-red-300 hover:bg-red-50">{% translate "Bekor qilish…" %}</summary>
       <form method="post" action="{% url 'penalty_cancel' p.pk %}" class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">

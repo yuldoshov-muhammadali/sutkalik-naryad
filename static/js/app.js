@@ -161,6 +161,23 @@
     window.setInterval(countdownTick, 1000);
   }
 
+  // --- Ro'yxatdan qidirib tanlash: <input data-filter-select="id_cadet"> (17-bosqich, Kasallar ro'yxati) ---
+  // Mos kelmagan variantlar yashiriladi; bitta qolsa — o'zi tanlanadi.
+  document.addEventListener("input", function (event) {
+    var input = event.target.closest("[data-filter-select]");
+    if (!input) return;
+    var select = document.getElementById(input.getAttribute("data-filter-select"));
+    if (!select) return;
+    var q = input.value.trim().toLowerCase();
+    var visible = [];
+    Array.prototype.forEach.call(select.options, function (opt) {
+      var show = !opt.value || !q || opt.text.toLowerCase().indexOf(q) !== -1;
+      opt.hidden = !show;
+      if (show && opt.value) visible.push(opt);
+    });
+    if (visible.length === 1) select.value = visible[0].value;
+  });
+
   // Sessiya tugagan bo'lsa (kirish sahifasiga yo'naltirilgan) — butun sahifani kirishga o'tkazamiz
   document.addEventListener("htmx:beforeSwap", function (event) {
     var xhr = event.detail.xhr;

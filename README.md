@@ -1,6 +1,6 @@
-# Sutkalik naryad platformasi (2-kurs)
+# E-NARYAD — 2-kurs sutkalik naryad platformasi
 
-Bojxona instituti 2-kurs kursantlari uchun sutkalik naryadni tarix asosida, adolatli va avtomatik tuzuvchi veb-platforma.
+**E-NARYAD** — Bojxona instituti 2-kurs kursantlari uchun sutkalik naryadni tarix asosida, adolatli va avtomatik tuzuvchi veb-platforma.
 Loyiha qoidalari: [`CLAUDE.md`](CLAUDE.md). Talablar va sxema: [`docs/01-talablar-va-sxema.md`](docs/01-talablar-va-sxema.md). Algoritm: [`docs/02-algoritm.md`](docs/02-algoritm.md).
 
 | Kim uchun | Hujjat |

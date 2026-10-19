@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Sinov ma’lumotlarini tozalash" %}{% endblock %}
+{% block content %}
+<h1 class="text-xl font-semibold sm:text-2xl">{% translate "Sinov ma’lumotlarini tozalash" %}</h1>
+<p class="mt-1 text-sm text-slate-600">{% translate "Hamma narsa 0 dan boshlanadi: navbat zanjiri boshlang‘ich taqsimotdan (Sozlamalar) boshlanadi." %} <a href="{% url 'admin:naryad_setting_change' 1 %}" class="font-semibold text-brand-800 underline">{% translate "Boshlang‘ich navbat" %}</a></p>
+
+<section class="mt-4 grid gap-3 lg:grid-cols-2" aria-label="{% translate "Ko‘rib chiqish" %}" data-testid="clear-preview">
+  <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <h2 class="font-semibold text-red-800">{% translate "O‘chadi" %}</h2>
+    <ul class="mt-2 space-y-1 text-sm">
+      <li>{% translate "Haftalar" %}: <b data-testid="pv-weeks">{{ p.weeks }}</b></li>
+      <li>{% translate "Sutkalar" %}: <b data-testid="pv-days">{{ p.days }}</b> — {% blocktranslate with a=p.days_approved d=p.days_draft i=p.days_imported pl=p.days_platform %}tasdiqlangan {{ a }}, qoralama {{ d }}; import qilingan {{ i }}, platformada tuzilgan {{ pl }}{% endblocktranslate %}</li>
+      <li>{% translate "Naryad yozuvlari" %}: <b data-testid="pv-assignments">{{ p.assignments }}</b> ({% blocktranslate with n=p.assignments_penalty %}shundan jazo naryadi {{ n }}{% endblocktranslate %}) · {% translate "Guruh → joy" %}: {{ p.group_posts }} · {% translate "E’lon qilingan" %}: {{ p.published }}</li>
+      <li>{% translate "Zalyotlar" %}: <b data-testid="pv-penalties">{{ p.penalties }}</b> ({% blocktranslate with n=p.penalty_entries %}kiritishlar {{ n }}{% endblocktranslate %})</li>
+      <li>{% translate "Jurnal yozuvlari" %}: <b data-testid="pv-log">{{ p.changelog }}</b></li>
+    </ul>
+  </div>
+  <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <h2 class="font-semibold text-green-800">{% translate "Qoladi" %}</h2>
+    <p class="mt-2 text-sm text-slate-700">{% translate "Kursantlar, guruhlar, joylar, foydalanuvchilar va akkauntlar, sozlamalar, boshlang‘ich taqsimot, lavozim va “naryadga chiqmaydi” belgilari, sababli holatlar va kasallar ro‘yxati (hujjatlari bilan)." %}</p>
+  </div>
+</section>
+
+<details class="mt-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  <summary class="cursor-pointer text-sm font-semibold">{% translate "Kursantlar bo‘yicha turgan soni (oldin → keyin)" %}</summary>
+  <div class="mt-2 max-h-80 overflow-y-auto"><table class="min-w-full text-sm" data-testid="pv-cadets">
+    <thead class="text-left text-xs text-slate-500"><tr><th class="py-1">{% translate "Kursant" %}</th><th>{% translate "Guruh" %}</th><th class="text-right">{% translate "Oldin" %}</th><th class="text-right">{% translate "Keyin" %}</th></tr></thead>
+    <tbody>{% for c, before, after in p.cadets %}<tr class="border-t border-slate-100"><td class="py-1">{{ c.short_name }}</td><td class="text-slate-500">{{ c.group.code }}</td><td class="text-right tabular-nums">{{ before }}</td><td class="text-right tabular-nums font-semibold">{{ after }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+</details>
+
+{% if p.nothing_to_delete %}
+<p class="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-900 ring-1 ring-green-200" data-testid="nothing-to-delete">{% translate "O‘chiradigan sinov ma’lumoti yo‘q — allaqachon tozalangan." %}</p>
+{% else %}
+<section class="mt-4 rounded-2xl border-2 border-red-300 bg-red-50 p-4" aria-labelledby="clear-confirm" data-testid="clear-confirm">
+  <h2 id="clear-confirm" class="font-semibold text-red-900">{% translate "Tasdiqlash" %}</h2>
+  <p class="mt-1 text-sm text-red-900">{% translate "Naryadlar, statistika, zalyotlar va jurnal butunlay o‘chadi. Qaytarib bo‘lmaydi (faqat zaxira nusxadan). Navbat zanjiri boshidan boshlanadi." %}</p>
+  <p class="mt-1 text-xs text-red-800">{% translate "O‘chirishdan oldin to‘liq zaxira avtomatik olinadi; zaxira olinmasa hech narsa o‘chirilmaydi." %}</p>
+  <form method="post" action="{% url 'clear_test_data_run' %}" class="mt-3 grid gap-3 sm:grid-cols-3 sm:items-end">
+    {% csrf_token %}<input type="hidden" name="token" value="{{ p.token }}">
+    <label class="text-sm font-medium">{% blocktranslate with w=word_1 %}1-bosqich: “{{ w }}” deb yozing{% endblocktranslate %}<input type="text" name="word_1" required autocomplete="off" class="mt-1 block w-full rounded-lg border border-red-300 px-3 py-2"></label>
+    <label class="text-sm font-medium">{% blocktranslate with w=word_2 %}2-bosqich: “{{ w }}” deb yozing{% endblocktranslate %}<input type="text" name="word_2" required autocomplete="off" class="mt-1 block w-full rounded-lg border border-red-300 px-3 py-2"></label>
+    <button type="submit" class="min-h-[44px] rounded-lg bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800" data-confirm="{% translate "Oxirgi marta: sinov ma’lumotlari butunlay o‘chiriladi. Davom etasizmi?" %}">{% translate "Zaxira olib, tozalash" %}</button>
+  </form>
+</section>
+{% endif %}
+
+<section class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby="backups-title">
+  <h2 id="backups-title" class="font-semibold">{% translate "Zaxira nusxalar" %}</h2>
+  <p class="mt-1 text-xs text-slate-500">{% translate "Railway’da server diski vaqtinchalik — zaxirani darhol yuklab oling. Tiklash: python manage.py migrate, python manage.py flush --no-input, python manage.py loaddata zaxira_….json.gz" %}</p>
+  <ul class="mt-2 space-y-1 text-sm">{% for b in backups %}<li><a href="{% url 'backup_download' b.name %}" class="font-medium text-brand-800 hover:underline" data-testid="backup-link">⬇ {{ b.name }}</a> <span class="text-xs text-slate-500">{{ b.stat.st_size|filesizeformat }}</span></li>{% empty %}<li class="text-slate-500">{% translate "Yo‘q." %}</li>{% endfor %}</ul>
+</section>
+{% endblock %}

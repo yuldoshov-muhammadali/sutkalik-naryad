@@ -252,6 +252,8 @@ class CadetDashboard:
     total: int = 0
     this_week: int = 0
     penalty: object | None = None  # faol zalyot (15-bosqich): “Jazo naryadlari: 3 tadan 1 tasi o'tildi”
+    sick_docs: int = 0
+    sick: object | None = None  # 17-bosqich: hozir kasallar ro'yxatida — faqat sanalar (tavsif ko'rsatilmaydi)
     server_now_ms: int = 0
     templates: dict = field(default_factory=dict)
 
@@ -301,4 +303,8 @@ def cadet_dashboard(user, now: dt.datetime | None = None) -> CadetDashboard:
     from .penalties import active_penalty
 
     data.penalty = active_penalty(cadet)
+    from .sick import current_sickness
+
+    data.sick = current_sickness(cadet, today)
+    data.sick_docs = data.sick.documents.count() if data.sick else 0  # 18-bosqich: “Hujjatlaringiz: 2 ta”
     return data

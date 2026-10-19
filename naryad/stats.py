@@ -470,7 +470,7 @@ def _excel_export(period: Period) -> bytes:
             sheet("Qizlar", header, data)
         else:
             header = (["F.I.Sh."] + [p.name for p in posts] + [str(ROLE_SHORT[r]) for r in ROLES]
-                      + ["Jami", "Joriy haftada", "Oxirgi naryad", "Naryaddan ozod", "Jazo naryadlari (navbatdan tashqari)"])
+                      + ["Jami", "Joriy haftada", "Oxirgi naryad", "Naryadga chiqmaydi (lavozim)", "Jazo naryadlari (navbatdan tashqari)"])
             data = [[r.cadet.full_name] + [r.by_post.get(p.code, 0) for p in posts] + [r.by_role.get(x, 0) for x in ROLES]
                     + [r.total, r.this_week, r.last_date, r.cadet.duty_position if r.cadet.duty_exempt else "", r.penalty]
                     for r in rows]

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Zalyot kiritish" %}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md rounded-2xl bg-white p-5 shadow-lg ring-1 ring-slate-200" role="dialog" aria-labelledby="confirm-title" data-testid="penalty-confirm">
+  <h1 id="confirm-title" class="text-lg font-semibold">{% translate "Tasdiqlang" %}</h1>
+  <p class="mt-2 text-base">{% blocktranslate count n=data.count with name=data.cadet.full_name group=data.cadet.group.code %}{{ name }} ({{ group }}) ga {{ n }} ta jazo naryadi kiritiladi. Davom etasizmi?{% plural %}{{ name }} ({{ group }}) ga {{ n }} ta jazo naryadi kiritiladi. Davom etasizmi?{% endblocktranslate %}</p>
+  <dl class="mt-3 space-y-1 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+    <div><dt class="inline text-slate-500">{% translate "Sabab turi" %}:</dt> <dd class="inline">{% for value, label in form.reason_type.field.choices %}{% if value == data.reason_type %}{{ label }}{% endif %}{% endfor %}</dd></div>
+    <div><dt class="inline text-slate-500">{% translate "Izoh" %}:</dt> <dd class="inline">{{ data.note }}</dd></div>
+    <div><dt class="inline text-slate-500">{% translate "Buyruq/tanbeh sanasi" %}:</dt> <dd class="inline">{{ data.order_date|date:"d.m.Y" }}</dd></div>
+  </dl>
+  <form method="post" action="{% url 'group_penalty_add' %}" class="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    {% csrf_token %}
+    <input type="hidden" name="cadet" value="{{ data.cadet.pk }}"><input type="hidden" name="reason_type" value="{{ data.reason_type }}">
+    <input type="hidden" name="note" value="{{ data.note }}"><input type="hidden" name="order_date" value="{{ data.order_date|date:'Y-m-d' }}">
+    <input type="hidden" name="count" value="{{ data.count }}"><input type="hidden" name="confirm" value="1">
+    <a href="{% url 'group_penalty_add' %}" class="inline-flex min-h-[44px] items-center justify-center rounded-lg px-4 text-sm font-semibold text-slate-600 ring-1 ring-slate-300">{% translate "Bekor qilish" %}</a>
+    <button type="submit" class="min-h-[44px] rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900" data-testid="penalty-confirm-submit">{% translate "Ha, kiritish" %}</button>
+  </form>
+</div>
+{% endblock %}

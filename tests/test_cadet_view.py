@@ -82,7 +82,7 @@ def test_card_shows_date_post_role_group_and_countdown(client, admin, monkeypatc
     assert "13-sentabr, yakshanba 18:00 → 14-sentabr 18:00" in body
     assert a.post_slot.post.name in body and a.post_slot.get_role_display() in body and a.group.code in body
     assert "Naryadga 8 soat 14 daqiqa qoldi" in body
-    assert "Tasdiqlangan naryadlar" not in body and reverse("approved_days") not in body
+    assert "Tasdiqlangan naryadlar" in body and reverse("approved_days") in body  # 16-bosqichda qaytdi
     assert reverse("my_card") in body  # “Mening tarixim” havolasi
 
 
@@ -130,16 +130,18 @@ def test_cadet_sees_only_own_data(client, admin):
     other = Cadet.objects.exclude(pk=a.cadet_id).first()
     login_cadet(client, a.cadet)
     for name, args in [
-        ("day_detail", [SUNDAY.isoformat()]),
-        ("day_pdf", [SUNDAY.isoformat()]),
-        ("day_print", [SUNDAY.isoformat()]),
-        ("week_pdf", [SUNDAY.isoformat()]),
-        ("approved_days", []),
         ("cadet_detail", [other.pk]),
         ("cadet_list", []),
         ("stats", []),
+        ("day_log", [SUNDAY.isoformat()]),
+        ("absence_list", []),
+        ("penalty_list", []),
     ]:
         assert client.get(reverse(name, args=args)).status_code == 403, name
+    # 16-bosqich: tasdiqlangan sutka (sahifa, PDF, chop etish) kursantga yana ochiq — CLAUDE.md 63-band
+    for name in ("day_detail", "day_pdf", "day_print", "week_pdf"):
+        assert client.get(reverse(name, args=[SUNDAY.isoformat()])).status_code == 200, name
+    assert client.get(reverse("approved_days")).status_code == 200
     card = client.get(reverse("cadet_detail", args=[a.cadet_id])).content.decode()  # “Mening tarixim”
     assert "13.09.2026" in card and a.post_slot.post.name in card and a.post_slot.get_role_display() in card
     assert other.full_name not in card
@@ -159,7 +161,7 @@ def test_old_cadet_sees_cancelled_new_cadet_sees_duty(client, admin, monkeypatch
     body = home(login_cadet(client, old.cadet))
     assert "Naryadingiz bekor qilindi" in body and "13.09.2026 sutkasi" in body
     assert 'data-testid="duty-post"' not in body
-    assert "kasal" not in body and "almashtirildi" not in body  # sababsiz — faqat xabar
+    assert "kasal bo‘lib qoldi" not in body and "almashtirildi" not in body  # sababsiz — faqat xabar
     # Yangi kursant qoralamada — hali ko'rmaydi; tasdiqlangach ko'radi
     new_client = client.__class__()
     assert 'data-testid="duty-post"' not in home(login_cadet(new_client, new))

@@ -5,8 +5,8 @@
 <nav class="crumbs mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}">
   <span>{% if can.week_view %}<a href="{% url 'week_list' %}" class="hover:underline">{% translate "Haftalar" %}</a>{% else %}<a href="{% url 'approved_days' %}" class="hover:underline">{% translate "Tasdiqlangan naryadlar" %}</a>{% endif %} / {{ date|date:"d.m.Y" }}</span>
   <span class="flex gap-1">
-    <a href="{% url 'day_detail' prev_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="{% translate "Oldingi sutka" %}">← {{ prev_date|date:"d.m" }}</a>
-    <a href="{% url 'day_detail' next_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="{% translate "Keyingi sutka" %}">{{ next_date|date:"d.m" }} →</a>
+    {% if prev_date %}<a href="{% url 'day_detail' prev_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="{% translate "Oldingi sutka" %}">← {{ prev_date|date:"d.m" }}</a>{% endif %}
+    {% if next_date %}<a href="{% url 'day_detail' next_date|date:'Y-m-d' %}" class="rounded-lg px-2 py-1 ring-1 ring-slate-300 hover:bg-white" aria-label="{% translate "Keyingi sutka" %}">{{ next_date|date:"d.m" }} →</a>{% endif %}
   </span>
 </nav>
 
@@ -18,10 +18,24 @@
   {% include "naryad/days/_status.html" with status=duty_day.status|default:"none" %}
 </div>
 
+{% if cadet_view %}<div class="mt-4">{% include "partials/duty_reason_notice.html" %}</div>{% endif %}
+
 {% if issues %}
 <div class="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900" role="alert">
   <p class="font-semibold">{% translate "Diqqat — tasdiqlashdan oldin tuzating:" %}</p>
   <ul class="mt-1 list-disc space-y-1 pl-5">{% for i in issues %}<li>{{ i.text }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% if sick_issues %}
+<div class="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="alert" data-testid="sick-issues">
+  <p class="font-semibold">{% translate "Qoralamada kasal kursant bor — tasdiqlashdan oldin almashtiring:" %}</p>
+  <ul class="mt-2 space-y-2">{% for i in sick_issues %}<li class="flex flex-wrap items-center justify-between gap-2"><span>{{ i.text }}</span>
+    {% if editable %}<button type="button" hx-get="{% url 'day_replace' date|date:'Y-m-d' i.slot_id %}" hx-target="#modal" class="min-h-[44px] rounded-lg bg-amber-600 px-3 text-xs font-semibold text-white hover:bg-amber-700">{% translate "Almashtirish" %}</button>{% endif %}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% if sick_notices %}
+<div class="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="status" data-testid="sick-notices">
+  <ul class="list-disc space-y-1 pl-5">{% for n in sick_notices %}<li>{{ n }}</li>{% endfor %}</ul>
 </div>
 {% endif %}
 {% if notes %}
@@ -46,7 +60,7 @@
   {% elif not duty_day.is_approved %}
     {% if can.day_approve %}
     <form method="post" action="{% url 'day_approve' date|date:'Y-m-d' %}">{% csrf_token %}<input type="hidden" name="version" value="{{ duty_day.version }}">
-      <button type="submit" {% if issues %}disabled title="{% translate "Avval ogohlantirishlarni tuzating" %}"{% endif %}
+      <button type="submit" {% if issues or sick_issues %}disabled title="{% translate "Avval ogohlantirishlarni tuzating" %}"{% endif %}
               class="rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900 disabled:cursor-not-allowed disabled:bg-slate-300">{% translate "Tasdiqlash" %}</button></form>
     {% endif %}
     {% if can.day_generate %}
@@ -121,9 +135,9 @@
     </div>
     <ul>
       {% for row in section.rows %}
-      <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-2.5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6rem_8rem] {% if not row.assignment %}bg-red-50{% elif row.is_penalty %}bg-gold-50{% endif %}"{% if row.is_penalty %} data-testid="penalty-row"{% endif %}>
+      <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-2.5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6rem_8rem] {% if cadet_view %}{% if row.cadet and row.cadet.pk == my_cadet_id %}bg-brand-50 ring-2 ring-inset ring-brand-400{% endif %}{% elif not row.assignment %}bg-red-50{% elif row.is_penalty %}bg-gold-50{% endif %}"{% if cadet_view %}{% if row.cadet and row.cadet.pk == my_cadet_id %} data-testid="my-row" aria-current="true"{% endif %}{% elif row.is_penalty %} data-testid="penalty-row"{% endif %}>
         <span class="col-span-2 text-xs text-slate-500 md:col-span-1 md:text-sm md:text-slate-800">{% if row.slot.show_label %}{% translate row.slot.print_label %}{% else %}<span class="md:invisible">{% translate row.slot.print_label %}</span>{% endif %}</span>
-        <span class="min-w-0 break-words font-medium">{% if row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="{% translate "qo‘lda" %}">✎</span>{% endif %}{% if row.is_penalty %} <span class="whitespace-nowrap rounded bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-brand-950" title="{% translate "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Zalyot" %}</span>{% endif %}{% else %}<span class="text-red-700">{% translate "— bo‘sh —" %}</span>{% endif %}</span>
+        <span class="min-w-0 break-words font-medium">{% if row.cadet and cadet_view %}{{ row.cadet.short_name }}{% if row.cadet.pk == my_cadet_id %} <span class="whitespace-nowrap rounded bg-brand-800 px-1.5 py-0.5 text-xs font-semibold text-white">{% translate "Siz" %}</span>{% endif %}{% elif row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="{% translate "qo‘lda" %}">✎</span>{% endif %}{% if row.is_penalty %} <span class="whitespace-nowrap rounded bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-brand-950" title="{% translate "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Zalyot" %}</span>{% endif %}{% else %}<span class="text-red-700">{% translate "— bo‘sh —" %}</span>{% endif %}</span>
         <span class="text-sm text-slate-600 md:order-none">{% if row.assignment %}{{ row.assignment.group.code }}{% endif %}</span>
         <span class="col-span-2 md:col-span-1 md:text-right">
           {% if editable %}

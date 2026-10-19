@@ -1,6 +1,6 @@
 # Foydalanuvchi qo‘llanmasi
 
-Sutkalik naryad platformasi 2-kurs sutkalik naryad ro‘yxatini tarix asosida, adolatli va avtomatik tuzadi.
+**E-NARYAD** platformasi 2-kurs sutkalik naryad ro‘yxatini tarix asosida, adolatli va avtomatik tuzadi.
 - Ro‘yxatni **dastur** tuzadi. Kurs boshlig‘i uni tekshiradi, kerak bo‘lsa sabab ko‘rsatib tuzatadi va tasdiqlaydi.
 - Kursant faqat o‘zining tasdiqlangan naryadlarini ko‘radi: navbatdagi naryadi (sana, joy, lavozim) va o‘z tarixi.
 

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Guruh zalyotlari" %}{% endblock %}
+{% block content %}
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}"><a href="{% url 'group_overview' %}" class="hover:underline">{% translate "Mening guruhim" %}</a> / {% translate "Guruh zalyotlari" %}</nav>
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <h1 class="text-xl font-semibold sm:text-2xl">{% translate "Guruh zalyotlari" %} <span class="text-base font-normal text-slate-500">{{ group.code }}</span></h1>
+  <a href="{% url 'group_penalty_add' %}" class="inline-flex min-h-[44px] items-center rounded-lg bg-brand-800 px-4 text-sm font-semibold text-white shadow hover:bg-brand-900" data-testid="penalty-add-link">+ {% translate "Zalyot kiritish" %}</a>
+</div>
+<div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="group-ledger">
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "Zalyotchilar" %}</p><p class="text-2xl font-semibold tabular-nums" data-testid="ledger-offenders">{{ summary.offenders|length }}</p></div>
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "Jami jazo naryadlari" %}</p><p class="text-2xl font-semibold tabular-nums" data-testid="ledger-added">{{ summary.added }}</p></div>
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "o‘tildi" %}</p><p class="text-2xl font-semibold tabular-nums" data-testid="ledger-served">{{ summary.served }}</p></div>
+  <div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "qoldi" %}</p><p class="text-2xl font-semibold tabular-nums" data-testid="ledger-remaining">{{ summary.remaining }}</p></div>
+</div>
+<section class="mt-5" aria-labelledby="g-active">
+  <h2 id="g-active" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% blocktranslate with n=active|length %}Faol ({{ n }}){% endblocktranslate %}</h2>
+  {% include "naryad/group/_penalty_items.html" with items=active %}
+</section>
+{% if finished %}
+<section class="mt-5" aria-labelledby="g-finished">
+  <h2 id="g-finished" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% blocktranslate count n=finished|length %}Bajarilgan va bekor qilinganlar ({{ n }}){% plural %}Bajarilgan va bekor qilinganlar ({{ n }}){% endblocktranslate %}</h2>
+  {% include "naryad/group/_penalty_items.html" with items=finished %}
+</section>
+{% endif %}
+<p class="mt-4 text-xs text-slate-500">{% translate "Kiritilgan zalyotni tahrirlash yoki bekor qilish — faqat kurs boshlig‘i (admin)." %}</p>
+{% endblock %}

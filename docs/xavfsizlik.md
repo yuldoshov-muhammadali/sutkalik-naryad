@@ -55,6 +55,11 @@ Yangi URL qo‘shilsa, test uni ro‘yxatda talab qiladi (`test_every_url_is_cov
   - ochilgandagi hajmi ≤ 30 MB (“zip bomba”dan himoya);
   - ko‘pi bilan 1000 qator va 30 ustun o‘qiladi;
   - bitta xato bo‘lsa hech narsa yozilmaydi (avval ko‘rib chiqish, keyin tasdiqlash).
+- **Kasallik hujjatlari (rasm, 18-bosqich):**
+  - faqat admin yuklaydi; ko‘pi bilan 5 ta rasm, har biri ≤ 8 MB;
+  - turi kengaytma bo‘yicha emas, mazmuni bo‘yicha (Pillow) tekshiriladi: faqat JPEG/PNG/WEBP, ≤ 50 Mpiksel (“dekompressiya bombasi”dan himoya); PDF, SVG, HTML, exe rad etiladi;
+  - rasm qaytadan JPEG qilib yoziladi: EXIF (GPS va h.k.) o‘chadi, uzun tomoni ≤ 2000 px;
+  - ma’lumotlar bazasida saqlanadi, ommaviy media URL yo‘q. Ko‘rish faqat `/kasal/<id>/hujjat/<UUID>/` orqali — admin va kursantning o‘zi; `Cache-Control: private, no-store`, `nosniff`, `X-Robots-Tag: noindex`.
 - **O‘tgan tarix importi** (`import_history`) — faqat server buyrug‘i, veb orqali yuklanmaydi.
 - **Bir vaqtda tahrirlash** — sutka versiyasi (`version`) va qator qulfi: eskirgan sahifadan o‘zgartirish rad etiladi.
 - **Jurnal** — har bir tuzish, almashtirish, tasdiqlash, bekor qilish, o‘chirish kim va qachon qilgani bilan yoziladi; sabab majburiy.

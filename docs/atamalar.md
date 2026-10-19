@@ -26,7 +26,28 @@ quyidagi atamalar bir xil tarjima qilinadi.
 | Qoralama / Tasdiqlangan | Черновик / Утверждено | Draft / Approved |
 | Tuzish / Qayta tuzish / Tasdiqlash | Сформировать / Пересформировать / Утвердить | Generate / Regenerate / Approve |
 | Sababli holat | Уважительная причина | Excused absence |
-| Naryaddan ozod | Освобождён от наряда | Exempt from duty |
+| Naryadga chiqmaydi (lavozimdagi kursant; 16-bosqichgacha “Naryaddan ozod”) | Не заступает в наряд | Not on the duty roster |
+| Kurs starshinasi | Старшина курса | Course senior cadet |
+| Tasdiqlangan naryadlar | Утверждённые наряды | Approved duty rosters |
+| Sababli holat eslatmasi | Напоминание об уважительной причине | Valid reason reminder |
+| Kasallar ro‘yxati | Список больных | Sick list |
+| Kasallik muddati | Срок болезни | Illness period |
+| Sog‘ayib qaytdi | Выздоровел | Recovered |
+| Muddatni uzaytirish | Продлить срок | Extend period |
+| Kasallik varaqasi | Больничный лист | Sick note |
+| Tibbiy punkt ma’lumotnomasi | Справка медпункта | Infirmary certificate |
+| Hujjat | Документ | Document |
+| E-NARYAD (platforma nomi, tarjima qilinmaydi) | E-NARYAD | E-NARYAD |
+| Guruh komandiri | Командир группы | Group commander |
+| Mening guruhim | Моя группа | My group |
+| Hozir naryadda | Сейчас в наряде | On duty now |
+| Kasal | Болен | Sick |
+| Zalyot kiritish | Внести взыскание | Add reprimand |
+| Zalyot hisobi | Учёт взысканий | Reprimand records |
+| Kim kiritdi | Кто внёс | Entered by |
+| Ko‘rib chiqildi | Рассмотрено | Reviewed |
+| Yangi (ko‘rib chiqilmagan) | Новое (не рассмотрено) | New (not reviewed) |
+| Sinov ma’lumotlarini tozalash | Очистка тестовых данных | Clear test data |
 | Adolat ko‘rsatkichi | Показатель справедливости | Fairness indicator |
 | Mening navbatdagi naryadim | Мой ближайший наряд | My next duty |
 | Tayyorgarlik eslatmasi | Памятка для подготовки | Preparation note |

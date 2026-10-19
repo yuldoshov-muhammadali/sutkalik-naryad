@@ -1,0 +1,23 @@
+{% load i18n %}{# Mening guruhim (19-bosqich): faqat tasdiqlangan sutkalar; kasallik — faqat sanalar #}
+{% include "naryad/group/_counts.html" %}
+<ul class="mt-4 space-y-2" data-testid="group-rows">
+  {% for r in summary.rows %}
+  <li>
+    <a href="{% url 'group_cadet' r.cadet.pk %}" class="block rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 {% if r.on_duty_now %}ring-2 ring-gold-400{% endif %}" data-testid="row-{{ r.cadet.pk }}">
+      <div class="flex flex-wrap items-start justify-between gap-2">
+        <p class="font-medium">{{ r.cadet.full_name }}</p>
+        {% if r.exempt %}<span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">{% translate "Naryadga chiqmaydi" %}</span>
+        {% elif r.on_duty_now %}<span class="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-900" data-testid="on-duty-now">{% translate "Hozir naryadda" %}</span>
+        {% elif r.sick %}<span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-900" data-testid="sick-badge">{% blocktranslate with start=r.sick.start_date|date:"d.m" end=r.sick.end_date|date:"d.m" %}Kasal: {{ start }}–{{ end }}{% endblocktranslate %}</span>{% endif %}
+      </div>
+      {% if r.penalty %}<p class="mt-1 text-xs font-semibold text-gold-800" data-testid="penalty-badge">{% blocktranslate count total=r.penalty.count with served=r.penalty.served %}Zalyotchi: {{ total }} tadan {{ served }} tasi o‘tildi{% plural %}Zalyotchi: {{ total }} tadan {{ served }} tasi o‘tildi{% endblocktranslate %}</p>{% endif %}
+      {% if not r.exempt %}
+      <p class="mt-1 text-sm text-slate-700">{% if r.next_duty %}<span class="text-slate-500">{% translate "Navbatdagi" %}:</span> {{ r.next_duty.duty_day.date|date:"d.m.Y" }} · {% translate r.next_duty.post_slot.post.name %} · {{ r.next_duty.post_slot.get_role_display }}{% else %}<span class="text-slate-500">{% translate "Yaqin kunlarda naryadi yo‘q" %}</span>{% endif %}</p>
+      <p class="text-xs text-slate-500">{% translate "Oxirgi" %}: {% if r.last_duty %}{{ r.last_duty.duty_day.date|date:"d.m.Y" }} · {% translate r.last_duty.post_slot.post.name %}{% else %}—{% endif %}</p>
+      {% endif %}
+    </a>
+  </li>
+  {% empty %}
+  <li class="rounded-xl bg-white px-4 py-6 text-center text-sm text-slate-500 shadow-sm ring-1 ring-slate-200">{% translate "Topilmadi." %}</li>
+  {% endfor %}
+</ul>

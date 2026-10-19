@@ -17,7 +17,7 @@
   <div class="overflow-x-auto">
     <table class="mt-2 w-full text-sm">
       <thead class="bg-slate-50 text-left text-xs text-slate-500">
-        <tr><th class="px-3 py-2 font-medium">{% translate "Guruh" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "O‘g‘il" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Qiz" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Kutilgan" %}</th><th class="px-2 py-2 text-right font-medium" title="{% translate "Faol o‘g‘il bolalar, naryaddan ozodlarsiz" %}">{% translate "Naryadga chiqadi" %}</th><th class="px-3 py-2 text-right font-medium">{% translate "Faol emas" %}</th></tr>
+        <tr><th class="px-3 py-2 font-medium">{% translate "Guruh" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "O‘g‘il" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Qiz" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Kutilgan" %}</th><th class="px-2 py-2 text-right font-medium" title="{% translate "Faol o‘g‘il bolalar, naryadga chiqmaydigan lavozimdagilarsiz" %}">{% translate "Naryadga chiqadi" %}</th><th class="px-3 py-2 text-right font-medium">{% translate "Faol emas" %}</th></tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         {% for row in summary %}
@@ -26,7 +26,7 @@
           <td class="px-2 py-2 text-right">{{ row.boys }}</td>
           <td class="px-2 py-2 text-right">{{ row.girls }}</td>
           <td class="px-2 py-2 text-right {% if row.ok %}text-brand-700{% else %}font-semibold text-red-700{% endif %}">{% if row.expected %}{{ row.expected.0 }}/{{ row.expected.1 }} {% if row.ok %}✓{% else %}✗{% endif %}{% else %}—{% endif %}</td>
-          <td class="px-2 py-2 text-right font-semibold" data-testid="on-duty-{{ row.group.code }}">{{ row.on_duty }}{% if row.exempt %} <span class="hidden text-xs font-normal text-indigo-700 sm:inline">{% blocktranslate count n=row.exempt %}({{ n }} ozod){% plural %}({{ n }} ozod){% endblocktranslate %}</span>{% endif %}</td>
+          <td class="px-2 py-2 text-right font-semibold" data-testid="on-duty-{{ row.group.code }}">{{ row.on_duty }}{% if row.exempt %} <span class="hidden text-xs font-normal text-indigo-700 sm:inline">{% blocktranslate count n=row.exempt %}({{ n }} lavozimda){% plural %}({{ n }} lavozimda){% endblocktranslate %}</span>{% endif %}</td>
           <td class="px-3 py-2 text-right text-slate-500">{{ row.inactive|default:"—" }}</td>
         </tr>
         {% endfor %}
@@ -37,7 +37,7 @@
           <td class="px-2 py-2 text-right">{{ totals.boys }}</td>
           <td class="px-2 py-2 text-right">{{ totals.girls }}</td>
           <td class="px-2 py-2 text-right {% if totals.ok %}text-brand-700{% else %}text-red-700{% endif %}">{{ totals.expected.0 }}/{{ totals.expected.1 }} {% if totals.ok %}✓{% else %}✗{% endif %}</td>
-          <td class="px-2 py-2 text-right">{{ totals.on_duty }}{% if totals.exempt %} <span class="block whitespace-nowrap text-xs font-normal text-indigo-700 sm:inline">{% blocktranslate count n=totals.exempt %}({{ n }} ozod){% plural %}({{ n }} ozod){% endblocktranslate %}</span>{% endif %}</td>
+          <td class="px-2 py-2 text-right">{{ totals.on_duty }}{% if totals.exempt %} <span class="block whitespace-nowrap text-xs font-normal text-indigo-700 sm:inline">{% blocktranslate count n=totals.exempt %}({{ n }} lavozimda){% plural %}({{ n }} lavozimda){% endblocktranslate %}</span>{% endif %}</td>
           <td class="px-3 py-2"></td>
         </tr>
       </tfoot>
@@ -72,7 +72,7 @@
       <option value="faol" {% if filters.holat == "faol" %}selected{% endif %}>{% translate "Faol" %}</option>
       <option value="faol-emas" {% if filters.holat == "faol-emas" %}selected{% endif %}>{% translate "Faol emas" %}</option>
       <option value="naryadga" {% if filters.holat == "naryadga" %}selected{% endif %}>{% translate "Naryadga chiqadi" %}</option>
-      <option value="ozod" {% if filters.holat == "ozod" %}selected{% endif %}>{% translate "Naryaddan ozod" %}</option>
+      <option value="lavozimda" {% if filters.holat == "lavozimda" %}selected{% endif %}>{% translate "Naryadga chiqmaydi" %}</option>
     </select>
   </label>
   <noscript><button class="col-span-2 rounded-lg bg-brand-800 px-3 py-2 text-sm font-semibold text-white sm:col-span-4">{% translate "Qidirish" %}</button></noscript>

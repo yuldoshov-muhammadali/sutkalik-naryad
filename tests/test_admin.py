@@ -104,6 +104,9 @@ def test_settings_page_saves_initial_rotation(admin_client_uz, db_groups):
     data = {
         "approval_lead_hours": 24,
         "penalty_per_post": 1,
+        "commander_penalty_max": 3,
+        "commander_order_max_age_days": 30,
+        "commander_daily_limit": 5,
         "prep_notes-TOTAL_FORMS": str(len(notes)),
         "prep_notes-INITIAL_FORMS": str(len(notes)),
         "prep_notes-MIN_NUM_FORMS": "0",

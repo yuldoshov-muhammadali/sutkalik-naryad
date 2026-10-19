@@ -1,4 +1,12 @@
-{% load i18n %}{% if banner %}{# Ertangi ro‘yxat muddati (14-bosqich, CLAUDE.md 60-band) #}
+{% load i18n %}{% if new_penalties %}{# 20-bosqich: komandirlar kiritgan, ko‘rib chiqilmagan zalyotlar #}
+<div class="mb-3 flex flex-col gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-900 shadow-sm sm:flex-row sm:items-center sm:justify-between" role="alert" data-testid="new-penalties-banner">
+  <p class="text-sm font-semibold">{% blocktranslate count n=new_penalties %}Komandirlar kiritgan {{ n }} ta yangi zalyot ko‘rib chiqilmagan{% plural %}Komandirlar kiritgan {{ n }} ta yangi zalyot ko‘rib chiqilmagan{% endblocktranslate %}</p>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'penalty_list' %}" class="inline-flex min-h-[44px] items-center rounded-lg bg-white px-4 text-sm font-semibold text-red-900 ring-1 ring-red-300 hover:bg-red-100">{% translate "Zalyotchiklar" %} →</a>
+    <form method="post" action="{% url 'penalty_review_all' %}">{% csrf_token %}<input type="hidden" name="next" value="{% url 'home' %}"><button type="submit" class="min-h-[44px] rounded-lg bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800">✓ {% translate "Ko‘rib chiqildi" %}</button></form>
+  </div>
+</div>
+{% endif %}{% if banner %}{# Ertangi ro‘yxat muddati (14-bosqich, CLAUDE.md 60-band) #}
 <div class="mb-4 flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-lg sm:flex-row sm:items-center sm:justify-between
   {% if banner.level == 'red' %}border-red-200 bg-red-50 text-red-900{% elif banner.level == 'yellow' %}border-amber-200 bg-amber-50 text-amber-900{% else %}border-green-200 bg-green-50 text-green-900{% endif %}"
   role="{% if banner.level == 'green' %}status{% else %}alert{% endif %}" data-testid="approval-banner" data-level="{{ banner.level }}">

@@ -1,4 +1,4 @@
-"""Sutkalik naryad platformasi modellari (docs/01-talablar-va-sxema.md, 4-bo'lim).
+"""E-NARYAD platformasi modellari (docs/01-talablar-va-sxema.md, 4-bo'lim).
 
 Vaqt: bazada faqat sanalar saqlanadi. Sutka shu sanada 18:00 da boshlanadi,
 2-kurs haftasi yakshanba 18:00 dan keyingi yakshanba 18:00 gacha (7 sutka).
@@ -8,6 +8,7 @@ Statistika saqlanmaydi — tasdiqlangan sutkalardagi Assignment dan hisoblanadi.
 from __future__ import annotations
 
 import datetime as dt
+import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
@@ -52,6 +53,7 @@ def duty_start(day: dt.date) -> dt.datetime:
 class UserRole(models.TextChoices):
     ADMIN = "admin", _lazy("Admin (kurs boshlig‘i)")
     CADET = "cadet", _lazy("Kursant (faqat ko‘rish)")
+    COMMANDER = "commander", _lazy("Guruh komandiri (o‘z guruhini ko‘rish)")
 
 
 class AppUserManager(UserManager):
@@ -98,6 +100,30 @@ class User(AbstractUser):
         super().clean()
         if self.role == UserRole.CADET and not self.cadet_id and not self.is_superuser:
             raise ValidationError({"cadet": _("Kursant roli uchun kursant tanlanishi shart.")})
+        if self.role == UserRole.COMMANDER:
+            self.clean_commander()
+
+    def clean_commander(self):
+        """Guruh komandiri (19-bosqich, CLAUDE.md 67-band): faqat guruh komandiri lavozimidagi faol kursant,
+        guruhiga bitta faol komandir akkaunti. Guruh kursantning guruhidan olinadi."""
+        cadet = self.cadet
+        if cadet is None:
+            raise ValidationError({"cadet": _("Guruh komandiri roli uchun kursant tanlanishi shart.")})
+        if not cadet.is_group_commander:
+            raise ValidationError({"role": _(
+                "%(name)s guruh komandiri lavozimida emas — komandir rolini faqat guruh komandiriga berish mumkin."
+            ) % {"name": cadet.short_name or cadet.full_name}})
+        if not cadet.is_active:
+            raise ValidationError({"cadet": _("Faol bo‘lmagan kursantga komandir roli berilmaydi.")})
+        if self.is_active:
+            other = (
+                User.objects.filter(role=UserRole.COMMANDER, is_active=True, cadet__group_id=cadet.group_id)
+                .exclude(pk=self.pk).select_related("cadet").first()
+            )
+            if other is not None:
+                raise ValidationError({"role": _("%(group)s guruhida faol komandir akkaunti allaqachon bor: %(username)s.") % {
+                    "group": cadet.group.code, "username": other.username,
+                }})
 
     def save(self, *args, **kwargs):
         # Admin panelga faqat admin roli va superuser kiradi (CLAUDE.md 10-bo'lim, 19-band)
@@ -114,6 +140,10 @@ class User(AbstractUser):
         if self.is_active and self.role == UserRole.ADMIN:
             return True
         return super().has_module_perms(app_label)
+
+    @property
+    def is_commander(self) -> bool:
+        return self.role == UserRole.COMMANDER
 
     @property
     def is_admin_role(self) -> bool:
@@ -168,7 +198,7 @@ class Cadet(models.Model):
     deactivation_reason = models.CharField(_lazy("faolsizlantirish sababi"), max_length=200, blank=True)
     # Komandirlar va kurs lavozimlari: faol (akkaunti ishlaydi), lekin sutkalik naryadga qo'yilmaydi
     # (CLAUDE.md 2- va 4-bo'lim, 10-bo'lim 56-band). Faqat kursant kartochkasidan, sabab bilan o'zgartiriladi.
-    duty_exempt = models.BooleanField(_lazy("naryaddan ozod"), default=False)
+    duty_exempt = models.BooleanField(_lazy("naryadga chiqmaydi"), default=False)
     duty_position = models.CharField(
         _lazy("lavozimi"), max_length=100, blank=True, help_text=_lazy("Masalan: Kurs starshinasi, BI-225 guruh komandiri.")
     )
@@ -207,6 +237,11 @@ class Cadet(models.Model):
     @property
     def full_name(self) -> str:
         return " ".join(p for p in (self.last_name, self.first_name, self.patronymic) if p)
+
+    @property
+    def is_group_commander(self) -> bool:
+        """Guruh komandiri lavozimi (masalan “BI-225 guruh komandiri”); o‘rinbosar, starshina, pisar, kaptyorchik — emas."""
+        return self.duty_exempt and self.duty_position.strip().lower().endswith("guruh komandiri")
 
     @property
     def on_duty(self) -> bool:
@@ -582,6 +617,8 @@ class Absence(models.Model):
     end_date = models.DateField(_lazy("oxirgi sutka (ichida)"))
     reason_type = models.CharField(_lazy("sabab"), max_length=20, choices=Reason.choices)
     note = models.CharField(_lazy("izoh"), max_length=300, blank=True)
+    # Kasallik tavsifi (17-bosqich): faqat admin ko'radi; kursant va komandir faqat sana–sanani ko'radi
+    illness = models.CharField(_lazy("kasallik"), max_length=200, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_lazy("kim kiritdi"),
@@ -618,6 +655,52 @@ class Absence(models.Model):
         return self.start_date <= day <= self.end_date
 
 
+class SickDocumentManager(models.Manager):
+    """Rasm baytlari ro'yxat so'rovlarida yuklanmaydi (18-bosqich): faqat ko'rish view'i `with_bytes()` bilan oladi."""
+
+    def get_queryset(self):
+        return super().get_queryset().defer("image", "thumb")
+
+    def with_bytes(self):
+        return super().get_queryset()
+
+
+class SickDocument(models.Model):
+    """Kasallik hujjati rasmi (18-bosqich, CLAUDE.md 66-band). Ma'lumotlar bazasida saqlanadi (Railway disk vaqtinchalik),
+    shuning uchun zaxira nusxaga ham kiradi. Tashqi havola yo'q — faqat ruxsat tekshiradigan view orqali (UUID)."""
+
+    class Kind(models.TextChoices):
+        SICK_NOTE = "varaqa", _lazy("Kasallik varaqasi")
+        INFIRMARY = "tibbiy", _lazy("Tibbiy punkt ma’lumotnomasi")
+        OTHER = "boshqa", _lazy("Boshqa")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    absence = models.ForeignKey(Absence, verbose_name=_lazy("kasallik yozuvi"), on_delete=models.CASCADE, related_name="documents")
+    kind = models.CharField(_lazy("hujjat turi"), max_length=10, choices=Kind.choices, default=Kind.SICK_NOTE)
+    note = models.CharField(_lazy("izoh"), max_length=200, blank=True)
+    image = models.BinaryField(_lazy("rasm (JPEG)"), editable=False)
+    thumb = models.BinaryField(_lazy("kichik rasm (JPEG)"), editable=False)
+    width = models.PositiveIntegerField(default=0, editable=False)
+    height = models.PositiveIntegerField(default=0, editable=False)
+    size = models.PositiveIntegerField(_lazy("hajmi (bayt)"), default=0, editable=False)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_lazy("kim yukladi"), on_delete=models.PROTECT, null=True, blank=True,
+        editable=False, related_name="+",
+    )
+    created_at = models.DateTimeField(_lazy("yuklangan"), auto_now_add=True)
+
+    objects = SickDocumentManager()
+
+    class Meta:
+        db_table = "sick_document"
+        ordering = ["created_at"]
+        verbose_name = _lazy("kasallik hujjati")
+        verbose_name_plural = _lazy("kasallik hujjatlari")
+
+    def __str__(self) -> str:
+        return f"{self.get_kind_display()} — {self.absence.cadet}"
+
+
 class Penalty(models.Model):
     """Zalyot (15-bosqich): navbatdan tashqari jazo naryadlari. CLAUDE.md 10-bo'lim, 61-band.
 
@@ -650,6 +733,11 @@ class Penalty(models.Model):
     created_at = models.DateTimeField(_lazy("kiritilgan vaqti"), auto_now_add=True)
     finished_at = models.DateTimeField(_lazy("yakunlangan vaqti"), null=True, blank=True)
     cancel_reason = models.TextField(_lazy("bekor qilish sababi"), blank=True)
+    # 20-bosqich: komandir kiritgan (yoki qo'shgan) zalyot admin ko'rib chiqmaguncha “Yangi”
+    reviewed_at = models.DateTimeField(_lazy("ko‘rib chiqilgan vaqti"), null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_lazy("ko‘rib chiqdi"), on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
 
     class Meta:
         db_table = "penalty"
@@ -670,6 +758,12 @@ class Penalty(models.Model):
         return self.status == self.Status.ACTIVE
 
     @property
+    def is_new(self) -> bool:
+        return self.reviewed_at is None
+
+
+
+    @property
     def served(self) -> int:
         """O'tilgan jazo naryadlari: faqat TASDIQLANGAN sutkalardagilari."""
         if hasattr(self, "served_count"):
@@ -680,6 +774,30 @@ class Penalty(models.Model):
     def remaining(self) -> int:
         return max(0, self.count - self.served)
 
+
+
+class PenaltyEntry(models.Model):
+    """Har bir zalyot kiritish (20-bosqich): kim, qachon, nechta. Bir faol zalyotga bir nechta kiritish qo'shilishi mumkin.
+    “Kim kiritdi” hisobi, davr filtri va takroriy yuborishni aniqlash shu yozuvlardan."""
+
+    penalty = models.ForeignKey(Penalty, verbose_name=_lazy("zalyot"), on_delete=models.CASCADE, related_name="entries")
+    cadet = models.ForeignKey(Cadet, verbose_name=_lazy("kursant"), on_delete=models.PROTECT, related_name="+")
+    reason_type = models.CharField(_lazy("sabab turi"), max_length=10, choices=Penalty.Reason.choices)
+    note = models.TextField(_lazy("izoh"))
+    order_date = models.DateField(_lazy("buyruq/tanbeh sanasi"))
+    count = models.PositiveSmallIntegerField(_lazy("jazo naryadlari soni"), validators=[MinValueValidator(1)])
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_lazy("kim kiritdi"), on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
+    by_commander = models.BooleanField(_lazy("komandir kiritgan"), default=False)
+    created_at = models.DateTimeField(_lazy("kiritilgan vaqti"), auto_now_add=True)
+
+    class Meta:
+        db_table = "penalty_entry"
+        ordering = ["created_at", "pk"]
+        verbose_name = _lazy("zalyot kiritish")
+        verbose_name_plural = _lazy("zalyot kiritishlar")
+        indexes = [models.Index(fields=["cadet", "order_date", "reason_type", "created_at"], name="penalty_entry_dedup_idx")]
 
 CHANGELOG_CADET_ACTIONS = (
     "cadet_create",
@@ -692,10 +810,20 @@ CHANGELOG_CADET_ACTIONS = (
     "absence_add",
     "absence_change",
     "absence_delete",
+    "sick_add",
+    "sick_edit",
+    "sick_extend",
+    "sick_recover",
+    "sick_delete",
+    "doc_add",
+    "doc_replace",
+    "doc_delete",
     "penalty_add",
     "penalty_cancel",
     "penalty_done",
     "penalty_resume",
+    "penalty_edit",
+    "penalty_review",
 )
 
 
@@ -719,15 +847,26 @@ class ChangeLog(models.Model):
         CADET_DEACTIVATE = "cadet_deactivate", _lazy("Kursant faolsizlantirildi")
         CADET_ACTIVATE = "cadet_activate", _lazy("Kursant qayta faollashtirildi")
         CADET_IMPORT = "cadet_import", _lazy("Kursant Excel’dan import qilindi")
-        CADET_EXEMPT = "cadet_exempt", _lazy("Naryaddan ozod qilindi")
+        CADET_EXEMPT = "cadet_exempt", _lazy("Naryadga chiqmaydi deb belgilandi")
         CADET_UNEXEMPT = "cadet_unexempt", _lazy("Naryadga qaytarildi")
         ABSENCE_ADD = "absence_add", _lazy("Sababli holat kiritildi")
         ABSENCE_CHANGE = "absence_change", _lazy("Sababli holat o‘zgartirildi")
         ABSENCE_DELETE = "absence_delete", _lazy("Sababli holat o‘chirildi")
+        SICK_ADD = "sick_add", _lazy("Kasallar ro‘yxatiga kiritildi")
+        SICK_EDIT = "sick_edit", _lazy("Kasallik yozuvi tahrirlandi")
+        SICK_EXTEND = "sick_extend", _lazy("Kasallik muddati uzaytirildi")
+        SICK_RECOVER = "sick_recover", _lazy("Sog‘ayib qaytdi")
+        SICK_DELETE = "sick_delete", _lazy("Kasallik yozuvi o‘chirildi")
+        DOC_ADD = "doc_add", _lazy("Kasallik hujjati yuklandi")
+        DOC_REPLACE = "doc_replace", _lazy("Kasallik hujjati almashtirildi")
+        DOC_DELETE = "doc_delete", _lazy("Kasallik hujjati o‘chirildi")
         PENALTY_ADD = "penalty_add", _lazy("Zalyot kiritildi")
         PENALTY_CANCEL = "penalty_cancel", _lazy("Zalyot bekor qilindi")
         PENALTY_DONE = "penalty_done", _lazy("Zalyot bajarildi")
         PENALTY_RESUME = "penalty_resume", _lazy("Zalyot qayta faollashdi")
+        PENALTY_EDIT = "penalty_edit", _lazy("Zalyot tahrirlandi")
+        PENALTY_REVIEW = "penalty_review", _lazy("Zalyot ko‘rib chiqildi")
+        TEST_DATA_CLEARED = "test_data_cleared", _lazy("Sinov ma’lumotlari tozalandi")
 
     REASON_REQUIRED = (
         Action.REPLACE, Action.SWAP, Action.REOPEN, Action.DRAFT_DELETE, Action.CADET_DEACTIVATE,
@@ -785,7 +924,8 @@ class ChangeLog(models.Model):
             ),
             models.CheckConstraint(
                 condition=(Q(action__in=CHANGELOG_CADET_ACTIONS) & Q(cadet__isnull=False))
-                | (~Q(action__in=CHANGELOG_CADET_ACTIONS) & Q(day_date__isnull=False)),
+                | (~Q(action__in=CHANGELOG_CADET_ACTIONS) & Q(day_date__isnull=False))
+                | Q(action="test_data_cleared"),  # 20-bosqich: tozalash yozuvi — na kursant, na sutka
                 name="change_log_subject_required",
             ),
         ]
@@ -836,6 +976,20 @@ class Setting(models.Model):
         default=engine_config.PENALTY_PER_POST_DEFAULT,
         validators=[MinValueValidator(1), MaxValueValidator(2)],
         help_text=_lazy("1-NO‘J va 1-Yotoqxonada bir sutkada ko‘pi bilan nechta zalyotchik posbon bo‘ladi (1 yoki 2)."),
+    )
+    # 20-bosqich: guruh komandiri zalyot kiritishi
+    commander_penalty_max = models.PositiveSmallIntegerField(
+        _lazy("komandir kirita oladigan eng ko‘p jazo naryadlari"), default=3,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        help_text=_lazy("Bitta kiritishda (admin uchun 1–10 qoladi)."),
+    )
+    commander_order_max_age_days = models.PositiveSmallIntegerField(
+        _lazy("tanbeh sanasi necha kundan eski bo‘lmasin (komandir)"), default=30,
+        validators=[MinValueValidator(1), MaxValueValidator(365)],
+    )
+    commander_daily_limit = models.PositiveSmallIntegerField(
+        _lazy("komandir bir kunda kirita oladigan zalyotlar"), default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(50)],
     )
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

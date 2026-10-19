@@ -7,4 +7,5 @@
 <div id="home-status" data-live-status hx-get="{% url 'home_status' %}" hx-trigger="naryad:refresh" hx-swap="innerHTML">
 {% include "naryad/_home_cadet_status.html" %}
 </div>
+{% if data.cadet %}<div class="mt-4">{% include "partials/duty_reason_notice.html" %}</div>{% endif %}
 {% endblock %}

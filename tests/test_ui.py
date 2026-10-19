@@ -125,8 +125,8 @@ def test_roles_doc_matches_permission_table():
         row = next((line for line in text.splitlines() if f"`{action}`" in line), None)
         assert row is not None, f"docs/05-rollar.md da {action} yo‘q"
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
-        marks = cells[-2:]  # admin, kursant
-        assert marks == ["✅" if r in roles else "—" for r in (perms.ADMIN, perms.CADET)], action
+        marks = cells[-3:]  # admin, kursant, guruh komandiri (19-bosqich)
+        assert marks == ["✅" if r in roles else "—" for r in (perms.ADMIN, perms.CADET, perms.COMMANDER)], action
 
 
 def test_menu_depends_on_role(client, users):
@@ -134,7 +134,7 @@ def test_menu_depends_on_role(client, users):
     assert "Boshqaruv paneli" in body and "Haftalar" in body and "Sababli holatlar" in body
     body = as_role(client, users, "cadet").get(reverse("home")).content.decode()
     assert "Boshqaruv paneli" not in body and "Haftalar" not in body and "Mening naryadlarim" in body
-    assert reverse("approved_days") not in body and "Tasdiqlangan naryadlar" not in body  # 14-bosqich
+    assert reverse("approved_days") in body and "Tasdiqlangan naryadlar" in body  # 16-bosqichda qaytdi
 
 
 # ---------------------------------------------------------------------------
@@ -294,8 +294,9 @@ def test_create_cadet_accounts_is_idempotent(db_cadets, tmp_path):
     out = StringIO()
     call_command("create_cadet_accounts", "--output-dir", str(tmp_path), stdout=out)
     assert "Yangi akkauntlar: 100 ta" in out.getvalue()
-    assert User.objects.filter(role="cadet").count() == 100
-    assert User.objects.filter(role="cadet", must_change_password=True).count() == 100
+    # 19-bosqich: 6 guruh komandiriga rol avtomatik “commander”
+    assert User.objects.filter(role="cadet").count() == 94 and User.objects.filter(role="commander").count() == 6
+    assert User.objects.filter(must_change_password=True).count() == 100
     files = list(tmp_path.glob("akkauntlar_*.xlsx"))
     assert len(files) == 1
 
@@ -310,7 +311,7 @@ def test_create_cadet_accounts_is_idempotent(db_cadets, tmp_path):
     out = StringIO()
     call_command("create_cadet_accounts", "--output-dir", str(tmp_path), stdout=out)
     assert "Yangi akkauntlar: 0 ta" in out.getvalue() and "100 ta" in out.getvalue()
-    assert User.objects.filter(role="cadet").count() == 100
+    assert User.objects.filter(role__in=["cadet", "commander"]).count() == 100
     assert len(list(tmp_path.glob("akkauntlar_*.xlsx"))) == 1  # yangi fayl yozilmadi
     usernames = list(User.objects.values_list("username", flat=True))
     assert len(usernames) == len(set(usernames))
@@ -332,7 +333,7 @@ def test_inactive_cadets_get_no_account(db_cadets, tmp_path):
     c.save()
     call_command("create_cadet_accounts", "--output-dir", str(tmp_path), stdout=StringIO())
     assert not User.objects.filter(cadet=c).exists()
-    assert User.objects.filter(role="cadet").count() == 99
+    assert User.objects.filter(role__in=["cadet", "commander"]).count() == 99
 
 
 # ---------------------------------------------------------------------------
@@ -380,10 +381,10 @@ def test_admin_can_unblock_login_and_force_password_change(client, users):
     assert "must_change_password" in body
 
 
-def test_only_two_roles_exist():
+def test_only_three_roles_exist():
     from naryad.models import UserRole
 
-    assert set(UserRole.values) == {"admin", "cadet"}
-    assert set(perms.ROLE_TITLES) == {"admin", "cadet"}
+    assert set(UserRole.values) == {"admin", "cadet", "commander"}  # 19-bosqich: guruh komandiri
+    assert set(perms.ROLE_TITLES) == {"admin", "cadet", "commander"}
     for action, (_, roles) in perms.PERMISSIONS.items():
-        assert roles <= {"admin", "cadet"}, action
+        assert roles <= {"admin", "cadet", "commander"}, action

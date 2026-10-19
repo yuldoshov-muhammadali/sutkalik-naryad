@@ -266,13 +266,15 @@ def test_cadet_cannot_approve_or_see_draft(client, draft):
     assert draft.status == "draft"
 
 
-def test_cadet_cannot_see_approved_day_pages(client, draft, admin):
-    """14-bosqich: kursant boshqa kursantlarning ro'yxatini ko'rmaydi — tasdiqlangan sutka sahifasi ham 403."""
-    days.approve(SUNDAY, admin, draft.version)
+def test_cadet_sees_approved_day_pages_read_only(client, draft, admin):
+    """16-bosqich: kursant tasdiqlangan sutkani faqat o'qish uchun ko'radi; qoralama — 403 (CLAUDE.md 63-band)."""
     cadet_user = User.objects.create_user("k", password=PASSWORD, role="cadet", cadet=Cadet.objects.first())
     client.force_login(cadet_user)
-    assert client.get(url("day_detail", SUNDAY)).status_code == 403
-    assert client.get(reverse("approved_days")).status_code == 403
+    assert client.get(url("day_detail", SUNDAY)).status_code == 403  # hali qoralama
+    days.approve(SUNDAY, admin, draft.version)
+    body = client.get(url("day_detail", SUNDAY)).content.decode()
+    assert "Almashtirish" not in body and "Tasdiqni bekor qilish" not in body and "Jurnal" not in body
+    assert "13-sentabr" in client.get(reverse("approved_days")).content.decode()
     client.force_login(admin)
     assert "13-sentabr" in client.get(reverse("approved_days")).content.decode()
 

@@ -15,6 +15,12 @@ Foydalanuvchilar: kursboshligi, kurs.ofitseri (admin), kursant (parol Demo-parol
 oxirida natija jadvali: jazo naryadlari faqat 1-NO‘J / 1-Yotoqxonada, guruhlar adolati (oddiy naryadlar).
 
     DATABASE_URL=sqlite:///simulyatsiya-zalyot.sqlite3 python scripts/simulate_weeks.py --zalyotchiklar
+
+20-bosqich: `--komandirlar` — 6 ta guruh komandiri akkaunti; 3-hafta boshida har komandir o'z guruhidan 1 tadan
+zalyotchi kiritadi (jami 6 ta, 2 tadan jazo naryadi) — komandir qoidalari bilan (simulyatsiyada tanbeh sanasi
+chegarasi 365 kun, chunki haftalar o'tmishda).
+
+    DATABASE_URL=sqlite:///simulyatsiya-komandir.sqlite3 python scripts/simulate_weeks.py --komandirlar
 """
 
 from __future__ import annotations
@@ -54,6 +60,7 @@ def main() -> None:
     parser.add_argument("--weeks", type=int, default=12)
     parser.add_argument("--seed", type=int, default=9)
     parser.add_argument("--zalyotchiklar", action="store_true", help="3 ta zalyotchik bilan (15-bosqich)")
+    parser.add_argument("--komandirlar", action="store_true", help="6 ta komandir kiritgan zalyotchi bilan (20-bosqich)")
     args = parser.parse_args()
 
     print(f"Baza: {connection.settings_dict['NAME']}")
@@ -89,6 +96,8 @@ def main() -> None:
         days.open_week(start, admin)
         if args.zalyotchiklar and n == OFFENDERS_WEEK:
             add_offenders(start, admin)
+        if args.komandirlar and n == OFFENDERS_WEEK:
+            add_commander_offenders(start)
         favour_pending = n % 3 == 0  # har 3-haftada bir marta
         for i in range(7):
             date = start + dt.timedelta(days=i)
@@ -111,7 +120,7 @@ def main() -> None:
         print(f"{n:2}. hafta {start:%d.%m.%Y} — 7 sutka tasdiqlandi")
     total = Assignment.objects.filter(duty_day__status="approved").count()
     print(f"Tayyor: {len(starts) * 7} sutka, {total} tayinlash, {replaced} tasodifiy va {favoured} ataylab qo'lda almashtirish.")
-    if args.zalyotchiklar:
+    if args.zalyotchiklar or args.komandirlar:
         report_offenders()
 
 
@@ -123,6 +132,24 @@ def add_offenders(start, admin) -> None:
         cadet = Cadet.objects.filter(group__code=group, gender="M", is_active=True, duty_exempt=False).order_by("list_number").first()
         penalties.add(cadet, reason, "Simulyatsiya: tanbeh", start, count, admin)
         print(f"   zalyot: {cadet.short_name} ({group}) — {count} ta jazo naryadi")
+
+
+def add_commander_offenders(start) -> None:
+    """Har guruh komandiri (akkaunt yaratiladi) o'z guruhidan bitta zalyotchi kiritadi."""
+    from naryad import penalties
+    from naryad.models import Cadet, Setting, User
+
+    Setting.objects.filter(pk=Setting.load().pk).update(commander_order_max_age_days=365)
+    for boss in Cadet.objects.filter(duty_position__iendswith="guruh komandiri").select_related("group").order_by("group__display_order"):
+        u = User.objects.filter(cadet=boss).first() or User(username=f"komandir.{boss.group.code.lower()}", role="commander", cadet=boss)
+        u.role = "commander"
+        u.set_password(PASSWORD)
+        u.must_change_password = False
+        u.full_clean(exclude=["password"])
+        u.save()
+        cadet = Cadet.objects.filter(group=boss.group, gender="M", is_active=True, duty_exempt=False).order_by("-list_number").first()
+        penalties.add(cadet, "tartib", "Simulyatsiya: komandir tanbehi", start, 2, u)
+        print(f"   komandir {u.username}: zalyot {cadet.short_name} ({boss.group.code}) — 2 ta jazo naryadi")
 
 
 def report_offenders() -> None:
