@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -119,3 +120,18 @@ def db_cadets(db_groups):
         for sql in connection.ops.sequence_reset_sql(no_style(), [Cadet]):
             cursor.execute(sql)
     return cadets
+
+
+# 16-bosqich: “ozod” yozuvi sahifalardan olib tashlandi (uch tilda). Kursant ismlari (masalan, Ozodbek) hisobga olinmaydi.
+EXEMPT_WORD = re.compile(r"\w*(?:ozod|освобожд|exempt)\w*", re.IGNORECASE)
+
+
+def exempt_words(html: str) -> set[str]:
+    """Sahifada ko‘rinadigan matn (va title/aria-label) ichidagi “ozod” so‘zlari — ismlardan tashqari."""
+    from naryad.models import Cadet as CadetModel
+
+    html = re.sub(r"<(script|style)\b.*?</\1>", " ", html, flags=re.DOTALL)
+    attrs = " ".join(re.findall(r'(?:title|aria-label|placeholder)="([^"]*)"', html))
+    text = re.sub(r"<[^>]+>", " ", html) + " " + attrs
+    names = " ".join(" ".join(n) for n in CadetModel.objects.values_list("last_name", "first_name", "patronymic")).lower()
+    return {w for w in EXEMPT_WORD.findall(text) if w.lower() not in names}

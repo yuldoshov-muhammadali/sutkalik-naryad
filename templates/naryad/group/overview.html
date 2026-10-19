@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Mening guruhim" %}{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold sm:text-2xl">{% translate "Mening guruhim" %} <span class="text-base font-normal text-slate-500">{{ summary.group.code }}</span></h1>
+    <p class="text-sm text-slate-600">{% translate "Faqat tasdiqlangan sutkalar. Faqat ko‘rish uchun." %}</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'group_week' %}" class="inline-flex min-h-[44px] items-center rounded-lg bg-white px-4 text-sm font-semibold text-brand-900 shadow-sm ring-1 ring-slate-300 hover:bg-brand-50">{% translate "Haftalik ko‘rinish" %} →</a>
+    <a href="{% url 'group_penalty_add' %}" class="inline-flex min-h-[44px] items-center rounded-lg bg-brand-800 px-4 text-sm font-semibold text-white shadow hover:bg-brand-900">+ {% translate "Zalyot kiritish" %}</a>
+  </div>
+</div>
+<form method="get" class="mt-4 flex gap-2" role="search">
+  <label class="sr-only" for="group-q">{% translate "Familiya bo‘yicha qidirish" %}</label>
+  <input id="group-q" type="search" name="q" value="{{ q }}" placeholder="{% translate "Familiya bo‘yicha qidirish" %}" class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-base">
+  <button type="submit" class="min-h-[44px] rounded-lg bg-brand-800 px-4 text-sm font-semibold text-white">{% translate "Qidirish" %}</button>
+</form>
+<div id="group-status" class="mt-4" data-live-status hx-get="{% url 'group_status' %}{% if q %}?q={{ q|urlencode }}{% endif %}" hx-trigger="naryad:refresh" hx-swap="innerHTML">
+{% include "naryad/group/_status.html" %}
+</div>
+{% endblock %}

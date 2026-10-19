@@ -1,9 +1,9 @@
 {% extends "admin/base.html" %}
 {% load static i18n %}
-{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {% if site_title %}{{ site_title }}{% else %}{% translate "Sutkalik naryad" %}{% endif %}{% endblock %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {% if site_title %}{{ site_title }}{% else %}{{ platform_name }}{% endif %}{% endblock %}
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin_extra/naryad.css' %}">{% endblock %}
 {% block branding %}
-<div id="site-name"><a href="{% url 'admin:index' %}">{% if site_header %}{{ site_header }}{% else %}{% translate "Sutkalik naryad — boshqaruv paneli" %}{% endif %}</a></div>
+<div id="site-name"><a href="{% url 'admin:index' %}">{% if site_header %}{{ site_header }}{% else %}{{ platform_name }}{% endif %}</a></div>
 {% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
 {% endblock %}
 {% block nav-global %}<a class="naryad-back" href="{% url 'home' %}">← {% translate "Platformaga qaytish" %}</a>{% endblock %}

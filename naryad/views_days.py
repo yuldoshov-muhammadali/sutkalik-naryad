@@ -18,7 +18,7 @@ from . import absences as absence_service
 from . import days, i18n, services
 from . import permissions as perms
 from .dashboard import current_duty_date, fmt_day
-from .models import Absence, ChangeLog, DutyDay, DutyWeek, PostSlot
+from .models import Absence, Assignment, ChangeLog, DutyDay, DutyWeek, PostSlot
 
 
 def parse_date(value: str) -> dt.date:
@@ -132,7 +132,8 @@ def day_detail(request, date):
     duty_day = DutyDay.objects.filter(date=date).select_related("week", "approved_by", "generated_by").first()
     can_draft = perms.can(request.user, "day.view_draft")
     if not can_draft and (duty_day is None or not duty_day.is_approved):
-        raise Http404("Bu sutka hali tasdiqlanmagan.")
+        # Kursant: qoralama ham, tuzilmagan sutka ham yopiq (16-bosqich, CLAUDE.md 63-band)
+        raise PermissionDenied(_("Bu sutka hali tasdiqlanmagan."))
     week = duty_day.week if duty_day else DutyWeek.objects.filter(start_date=services.week_start(date)).first()
     if week is None and can_draft:
         messages.warning(request, _("%(day)s ochilgan 2-kurs haftasiga tegishli emas.") % {"day": f"{date:%d.%m.%Y}"})
@@ -149,9 +150,18 @@ def day_detail(request, date):
         "next_date": date + dt.timedelta(days=1),
         "editable": duty_day is not None and not duty_day.is_approved and perms.can(request.user, "day.edit"),
     }
+    if not can_draft:
+        # Kursant ko'rinishi (faqat o'qish): qo'shni TASDIQLANGAN sutkalar, o'z o'rni ajratiladi
+        approved = DutyDay.objects.filter(status=DutyDay.Status.APPROVED)
+        prev_day = approved.filter(date__lt=date).order_by("-date").values_list("date", flat=True).first()
+        next_day = approved.filter(date__gt=date).order_by("date").values_list("date", flat=True).first()
+        context.update({"cadet_view": True, "prev_date": prev_day, "next_date": next_day,
+                        "my_cadet_id": request.user.cadet_id})
     if can_draft:
         all_issues = days.day_issues(duty_day) if duty_day and not duty_day.is_approved else []
-        context["issues"] = [i for i in all_issues if i.blocks_approval]
+        context["issues"] = [i for i in all_issues if i.blocks_approval and i.kind != "sick"]
+        context["sick_issues"] = [i for i in all_issues if i.kind == "sick"]  # sariq blok, tasdiqlanmaydi (17-bosqich)
+        context["sick_notices"] = days.approved_sick_notices(duty_day) if duty_day and duty_day.is_approved else []
         # tasdiqlashga to'sqinlik qilmaydigan eslatmalar (zalyotchiklar, 15-bosqich)
         context["notes"] = [i.text for i in all_issues if not i.blocks_approval] + (
             days.penalty_notices(duty_day) if duty_day and not duty_day.is_approved else []
@@ -299,8 +309,12 @@ def day_log(request, date):
 @perms.role_required("day.view_approved")
 def approved_days(request):
     qs = DutyDay.objects.filter(status=DutyDay.Status.APPROVED).order_by("-date")[:60]
-    rows = [{"day": d, "title": f"{fmt_day(d.date)} → {fmt_day(d.date + dt.timedelta(days=1))}", "weekday": i18n.weekday(d.date)} for d in qs]
-    return render(request, "naryad/days/approved.html", {"rows": rows})
+    cadet_id = getattr(request.user, "cadet_id", None)
+    # kursantning o'zi turgan sutkalar belgilanadi (16-bosqich)
+    mine = set(Assignment.objects.filter(cadet_id=cadet_id, duty_day__in=qs).values_list("duty_day_id", flat=True)) if cadet_id else set()
+    rows = [{"day": d, "title": f"{fmt_day(d.date)} → {fmt_day(d.date + dt.timedelta(days=1))}", "weekday": i18n.weekday(d.date),
+             "mine": d.pk in mine} for d in qs]
+    return render(request, "naryad/days/approved.html", {"rows": rows, "cadet_view": not perms.can(request.user, "day.view_draft")})
 
 
 # ---------------------------------------------------------------------------
@@ -368,12 +382,12 @@ def _pdf_response(content: bytes, filename: str, inline: bool) -> HttpResponse:
 
 
 def _visible_day(request, date: dt.date) -> DutyDay:
-    """Tasdiqlangan sutka — hamma rol; qoralama — faqat admin (day.view_draft)."""
+    """Tasdiqlangan sutka — hamma rol; qoralama — faqat admin (day.view_draft), kursantga 403."""
     duty_day = DutyDay.objects.filter(date=date).first()
     if duty_day is None:
         raise Http404("Bu sutka hali tuzilmagan.")
     if not duty_day.is_approved and not perms.can(request.user, "day.view_draft"):
-        raise Http404("Bu sutka hali tasdiqlanmagan.")
+        raise PermissionDenied(_("Bu sutka hali tasdiqlanmagan."))
     return duty_day
 
 

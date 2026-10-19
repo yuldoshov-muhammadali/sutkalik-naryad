@@ -1,0 +1,6 @@
+{% load i18n %}<div class="grid grid-cols-2 gap-2" data-testid="group-counts">
+  <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "Hozir naryadda" %}</p>
+    <p class="text-2xl font-semibold tabular-nums" data-testid="on-duty-count">{% blocktranslate count n=summary.on_duty_count %}{{ n }} kishi{% plural %}{{ n }} kishi{% endblocktranslate %}</p></div>
+  <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200"><p class="text-xs text-slate-500">{% translate "Kasal" %}</p>
+    <p class="text-2xl font-semibold tabular-nums" data-testid="sick-count">{% blocktranslate count n=summary.sick_count %}{{ n }} kishi{% plural %}{{ n }} kishi{% endblocktranslate %}</p></div>
+</div>

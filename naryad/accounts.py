@@ -1,4 +1,7 @@
-"""Kursant akkauntlarini ommaviy yaratish (create_cadet_accounts buyrug'i)."""
+"""Kursant akkauntlarini ommaviy yaratish (create_cadet_accounts buyrug'i, boshqaruv panelidagi amallar).
+
+19-bosqich: guruh komandiri lavozimidagi kursantga rol avtomatik `commander` (guruhida faol komandir bo'lmasa).
+"""
 
 from __future__ import annotations
 
@@ -8,6 +11,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
@@ -59,11 +63,23 @@ class AccountsReport:
     file: Path | None = None
 
 
+def role_for(cadet: Cadet) -> str:
+    """Guruh komandiri — commander (guruhida boshqa faol komandir bo'lmasa), qolganlar — cadet."""
+    if cadet.is_group_commander and not User.objects.filter(
+        role=UserRole.COMMANDER, is_active=True, cadet__group_id=cadet.group_id
+    ).exists():
+        return UserRole.COMMANDER
+    return UserRole.CADET
+
+
 @transaction.atomic
-def create_cadet_accounts(output_dir: Path, today=None) -> AccountsReport:
+def create_cadet_accounts(output_dir: Path | None, today=None, cadets=None) -> AccountsReport:
+    """Akkaunti yo'q faol kursantlarga akkaunt. `output_dir=None` — fayl yozilmaydi (boshqaruv paneli Excel'ni o'zi beradi)."""
     report = AccountsReport()
     taken = {u.casefold() for u in User.objects.values_list("username", flat=True)}
-    cadets = Cadet.objects.filter(is_active=True).select_related("group").order_by("group__display_order", "list_number", "pk")
+    if cadets is None:
+        cadets = Cadet.objects.filter(is_active=True)
+    cadets = cadets.filter(is_active=True).select_related("group").order_by("group__display_order", "list_number", "pk")
     for cadet in cadets:
         if User.objects.filter(cadet=cadet).exists():
             report.skipped += 1
@@ -74,40 +90,70 @@ def create_cadet_accounts(output_dir: Path, today=None) -> AccountsReport:
             username=username,
             first_name=cadet.first_name,
             last_name=cadet.last_name,
-            role=UserRole.CADET,
+            role=role_for(cadet),
             cadet=cadet,
             must_change_password=True,
         )
         user.set_password(password)
+        user.full_clean(exclude=["password"])
         user.save()
         report.created.append(CreatedAccount(cadet=cadet, username=username, password=password))
-    if report.created:
+    if report.created and output_dir is not None:
         report.file = write_accounts_xlsx(report.created, Path(output_dir), today or timezone.localdate())
     return report
 
 
-def write_accounts_xlsx(accounts: list[CreatedAccount], output_dir: Path, today) -> Path:
-    from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Border, Font, Side
+@transaction.atomic
+def reset_passwords(users) -> list[CreatedAccount]:
+    """Parolni tiklash: yangi vaqtinchalik parol, birinchi kirishda almashtirish majburiy (komandirga ham)."""
+    out = []
+    for user in users.select_related("cadet__group"):
+        if user.cadet is None:
+            continue
+        password = temp_password()
+        user.set_password(password)
+        user.must_change_password = True
+        user.save()
+        out.append(CreatedAccount(cadet=user.cadet, username=user.username, password=password))
+    return out
 
+
+def write_accounts_xlsx(accounts: list[CreatedAccount], output_dir: Path, today) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / f"akkauntlar_{today:%Y-%m-%d}.xlsx"
     n = 1
     while path.exists():
         n += 1
         path = output_dir / f"akkauntlar_{today:%Y-%m-%d}_{n}.xlsx"
+    accounts_workbook(accounts, today).save(path)
+    return path
+
+
+def accounts_xlsx_bytes(accounts: list[CreatedAccount], today) -> bytes:
+    import io
+
+    out = io.BytesIO()
+    accounts_workbook(accounts, today).save(out)
+    return out.getvalue()
+
+
+def accounts_workbook(accounts: list[CreatedAccount], today):
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Border, Font, Side
 
     wb = Workbook()
     ws = wb.active
     ws.title = "akkauntlar"
-    ws.append([f"Sutkalik naryad platformasi — kursant akkauntlari ({today:%d.%m.%Y})"])
+    ws.append([f"{settings.SITE_NAME} — kursant akkauntlari ({today:%d.%m.%Y})"])
     ws.append(["Parol vaqtinchalik: birinchi kirishda o‘zingizning parolingizga almashtirasiz. Varaqni kesib, egasiga bering."])
     ws.append([])
-    header = ["№", "Guruh", "F.I.Sh.", "Login", "Vaqtinchalik parol", "Imzo"]
+    header = ["№", "Guruh", "F.I.Sh.", "Login", "Vaqtinchalik parol", "Rol", "Imzo"]
     ws.append(header)
     thin = Side(style="thin", color="999999")
     for i, acc in enumerate(accounts, start=1):
-        ws.append([i, acc.cadet.group.code, acc.cadet.full_name, acc.username, acc.password, ""])
+        role = "Guruh komandiri" if acc.cadet.is_group_commander and User.objects.filter(
+            username=acc.username, role=UserRole.COMMANDER).exists() else "Kursant"
+        ws.append([i, acc.cadet.group.code, acc.cadet.full_name, acc.username, acc.password, role, ""])
     ws["A1"].font = Font(bold=True, size=13)
     for cell in ws[4]:
         cell.font = Font(bold=True)
@@ -118,10 +164,9 @@ def write_accounts_xlsx(accounts: list[CreatedAccount], output_dir: Path, today)
         if row[0].row > 4:
             row[3].font = Font(name="Consolas", size=12)
             row[4].font = Font(name="Consolas", size=12, bold=True)
-    for col, width in zip("ABCDEF", [5, 10, 42, 26, 20, 16]):
+    for col, width in zip("ABCDEFG", [5, 10, 42, 26, 20, 16, 16]):
         ws.column_dimensions[col].width = width
     ws.print_title_rows = "4:4"
     ws.page_setup.orientation = "landscape"
     ws.page_setup.fitToWidth = 1
-    wb.save(path)
-    return path
+    return wb

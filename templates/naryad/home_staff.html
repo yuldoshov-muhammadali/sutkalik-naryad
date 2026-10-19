@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% translate "Bosh sahifa" %}{% endblock %}
-{% block hero %}{% include "partials/hero.html" with title=_("2-kurs sutkalik naryadi") subtitle=_("Kurs boshlig‘i paneli") %}{% endblock %}
+{% block hero %}{% include "partials/hero.html" with title=platform_name subtitle=_("Kurs boshlig‘i paneli") %}{% endblock %}
 {% block main_class %}relative z-10 mx-auto -mt-24 max-w-5xl px-4 pb-5 sm:-mt-28{% endblock %}
 {% block content %}
 <div id="home-status" data-live-status hx-get="{% url 'home_status' %}" hx-trigger="naryad:refresh" hx-swap="innerHTML">

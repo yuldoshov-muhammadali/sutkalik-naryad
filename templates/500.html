@@ -1,15 +1,15 @@
-{% load static i18n %}<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+{% load static i18n branding %}<!doctype html>{% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% translate "Serverda xatolik" %} — {% translate "2-kurs" %}</title>
+  <title>{% translate "Serverda xatolik" %} — {% site_name %}</title>
   <script src="{% static 'js/theme.js' %}"></script>
   <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900 antialiased">
-  <header class="flex items-center gap-2.5 bg-brand-900 px-4 py-2.5 text-white shadow"><img src="{% static 'img/emblema-64.png' %}" width="40" height="40" alt="" class="h-10 w-10"><span class="font-semibold">{% translate "Sutkalik naryad" %}</span></header>
+  <header class="flex items-center gap-2.5 bg-brand-900 px-4 py-2.5 text-white shadow"><img src="{% static 'img/emblema-64.png' %}" width="40" height="40" alt="" class="h-10 w-10"><span class="font-bold tracking-wide">{% site_name %}</span></header>
   <main class="mx-auto max-w-md px-4 py-10">
     <div class="rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200">
       <p class="text-4xl font-bold text-slate-300">500</p>

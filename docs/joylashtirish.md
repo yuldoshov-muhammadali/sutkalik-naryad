@@ -215,7 +215,7 @@ Windows’da kompyuter qayta yoqilganda dastur avtomatik ishga tushishi uchun: D
    railway run python manage.py createsuperuser
    railway run python manage.py load_roster
    ```
-5. Zaxira: `backup` servisi faqat A/B variantlarda ishlaydi. Railway’da PostgreSQL servisining zaxira (*Backups*) imkoniyatini yoqing yoki vaqti-vaqti bilan `railway run pg_dump` qiling.
+5. Zaxira: `backup` servisi faqat A/B variantlarda ishlaydi. Railway’da PostgreSQL servisining zaxira (*Backups*) imkoniyatini yoqing yoki vaqti-vaqti bilan `railway run pg_dump` qiling. Kasallik hujjatlari rasmlari (18-bosqich) ham bazada — zaxiraga kiradi. Har rasm taxminan 0,2 MB qo‘shadi: 100 kursant × 12 hafta demo bazasi 0,13 MB, 10 ta rasm bilan 2,2 MB (`pg_dump -Fc`).
 
 ---
 
@@ -313,3 +313,31 @@ Loglar:
 - Django log fayli konteyner ichida `/app/logs/naryad.log` (5 MB × 5 fayl).
 
 Docker loglari har servis uchun 10 MB × 5 fayl bilan cheklangan.
+
+---
+
+## Sinov ma’lumotlarini tozalash (20-bosqich)
+
+Haqiqiy naryad boshlanishidan oldin sinov uchun tuzilgan haftalar, import qilingan tarix, zalyotlar va jurnal bir marta o‘chiriladi. Kursantlar, akkauntlar, sozlamalar va kasallar qoladi.
+
+**Railway’da (tavsiya etiladi — brauzer orqali):**
+1. Railway → PostgreSQL servisi → *Backups*: qo‘lda zaxira oling (qo‘shimcha himoya).
+2. Platformaga admin bo‘lib kiring → *Boshqaruv paneli* → *Sozlamalar* → “Sinov ma’lumotlarini tozalash” havolasi (`/sozlamalar/tozalash/`).
+3. “Ko‘rib chiqish” sonlarini tekshiring: haftalar, sutkalar (import qilingan / platformada), naryadlar, zalyotlar, jurnal.
+4. “TOZALASH” va “HAMMASI NOL” so‘zlarini yozib, “Zaxira olib, tozalash” tugmasini bosing.
+5. Sahifadagi “Zaxira nusxalar” ro‘yxatidan `zaxira_…json.gz` faylini **darhol yuklab oling**: Railway diski vaqtinchalik, qayta joylashtirishda fayl yo‘qoladi.
+6. Sozlamalarda “Boshlang‘ich taqsimot”ni tekshiring, birinchi haqiqiy 2-kurs haftasini oching (yakshanba) va birinchi sutkani tuzing.
+
+**Buyruq bilan** (`railway ssh` orqali konteyner ichida):
+```bash
+python manage.py clear_test_data --dry-run      # faqat ko‘rib chiqish
+python manage.py clear_test_data                # so‘zlarni so‘raydi, avval zaxira oladi
+```
+
+**Zaxiradan tiklash** (xato tozalangan bo‘lsa):
+```bash
+python manage.py migrate
+python manage.py flush --no-input
+python manage.py loaddata zaxira_2026-10-19_10-00-00.json.gz
+```
+Railway PostgreSQL zaxirasidan tiklash ham mumkin: *Backups* → kerakli nusxa → *Restore*.

@@ -1,4 +1,4 @@
-# CLAUDE.md — Sutkalik naryad platformasi (2-kurs)
+# CLAUDE.md — E-NARYAD (2-kurs sutkalik naryad platformasi)
 
 Bu fayl loyihaning yagona “manba hujjati”. Har bir javobdan oldin shu fayldagi qoidalarga amal qil. Qoidalar o‘zgarsa, avval shu fayl yangilanadi.
 
@@ -180,8 +180,8 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
 23. **Joy nomlari (import)**: hozirgi variantlar qoladi (kod, nomi, “Kurs bo‘yicha”, “Patrul” va h.k.); yangilari chiqsa keyin qo‘shiladi.
 24. **Rollar va ruxsatlar** (5-bosqich): yagona jadval `naryad/permissions.py` (`docs/05-rollar.md`). Sababli yo‘qliklarni kiritish — admin.
 25. **Kirish xavfsizligi** (5-bosqich): 5 marta noto‘g‘ri urinish → login 15 daqiqaga bloklanadi; kursant akkauntlari vaqtinchalik parol bilan yaratiladi va birinchi kirishda parol majburiy almashtiriladi.
-26. **Tuzuvchi roli olib tashlandi** (5-bosqichdan keyin): ro‘yxatni dastur o‘zi tuzadi, shuning uchun alohida “tuzuvchi (navbatchi kursant)” roli kerak emas. Faqat ikki rol: **admin** (kurs boshlig‘i) — hafta ochish, qoralama tuzish tugmasi, sabab bilan tuzatish, tasdiqlash, hammasi; **kursant** — faqat tasdiqlangan sutkalar va o‘z tarixi. Bazadagi eski `compiler` rolidagi foydalanuvchilar migratsiyada `cadet` ga o‘tkaziladi.
-27. **PDF’ni kursantlar ham yuklab oladi** (5-bosqichdan keyin; **14-bosqichda bekor qilindi — 60-band**): tasdiqlangan sutkaning PDF’ini har bir kursant yuklab olishi va chop etishi mumkin; qoralama PDF’i — faqat admin.
+26. **Tuzuvchi roli olib tashlandi** (5-bosqichdan keyin): ro‘yxatni dastur o‘zi tuzadi, shuning uchun alohida “tuzuvchi (navbatchi kursant)” roli kerak emas. Faqat ikki rol (19-bosqichdan uchta — 67-band): **admin** (kurs boshlig‘i) — hafta ochish, qoralama tuzish tugmasi, sabab bilan tuzatish, tasdiqlash, hammasi; **kursant** — faqat tasdiqlangan sutkalar va o‘z tarixi. Bazadagi eski `compiler` rolidagi foydalanuvchilar migratsiyada `cadet` ga o‘tkaziladi.
+27. **PDF’ni kursantlar ham yuklab oladi** (5-bosqichdan keyin; 14-bosqichda bekor qilingan edi, **16-bosqichda qayta tiklandi — 63-band**): tasdiqlangan sutkaning PDF’ini har bir kursant yuklab olishi va chop etishi mumkin; qoralama PDF’i — faqat admin.
 28. **Kursantlar ro‘yxati** (6-bosqich): faqat admin ko‘radi va boshqaradi (tuzuvchi roli yo‘q — 26-band); kursant faqat o‘z kartochkasini ko‘radi (`/mening-tarixim/`). Qidiruv — familiya bo‘yicha.
 29. **Faolsizlantirish** (6-bosqich): sabab majburiy (chetlatilgan, akademik ta’til, boshqa kursga o‘tgan, boshqa — izoh bilan); kursantning akkaunti ham bloklanadi, qayta faollashtirilganda tiklanadi. Hammasi jurnalga yoziladi.
 30. **Guruh yoki jins o‘zgarishi** (6-bosqich): naryad tarixi bor kursantda tasdiqlash belgisi talab qilinadi; tarix o‘chmaydi (eski naryadlar o‘sha paytdagi guruh bilan qoladi), jurnalga yoziladi. Boshqa guruhga o‘tgan kursant yangi guruh ro‘yxatining oxiriga tushadi.
@@ -195,7 +195,7 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
 38. **Qoralamani o‘chirish** (8-bosqich): faqat admin, faqat eng oxirgi qoralama, sabab majburiy, jurnalga yoziladi (jurnal `day_date` orqali saqlanib qoladi). Shu yo‘l bilan oldingi sutkaning tasdig‘ini bekor qilish mumkin bo‘ladi.
 39. **Bo‘sh o‘ringa kursant qo‘yish** — sabab majburiy (o‘zgarmaydi). **“Qayta tuzish”** — ogohlantiruvchi tasdiqlash oynasi bilan (o‘zgarmaydi).
 40. **PDF** (8-bosqich): rasmiy shakl, A4, bitta sahifa, WeasyPrint. Shrift: `fonts/times.ttf` (+ `timesbd.ttf`) bo‘lsa — Times New Roman, bo‘lmasa — Liberation Serif (o‘lchamlari bir xil). Times New Roman fayllari repozitoriyda yo‘q (`.gitignore`). Jadvalda “Lavozim | F.I.Sh. | Guruh” sarlavha qatori bor, Markazdan tashqari har bo‘lim qalin sarlavha qatori bilan boshlanadi. Qoralama PDF’ida har sahifada xira “QORALAMA” yozuvi.
-41. **PDF ruxsatlari va fayl nomlari** (8-bosqich; ruxsatlar 14-bosqichda o‘zgardi — PDF faqat admin, 60-band): tasdiqlangan sutka PDF’i — hamma rol; qoralama PDF’i — faqat admin; hafta PDF’ida kursant faqat tasdiqlangan sutkalarni oladi. Nomlar: `naryad_2026-09-18.pdf`, `naryad_hafta_2026-09-13.pdf`.
+41. **PDF ruxsatlari va fayl nomlari** (8-bosqich; 14-bosqichda PDF faqat admin bo‘lgan edi, 16-bosqichda qayta tiklandi — 63-band): tasdiqlangan sutka PDF’i — hamma rol; qoralama PDF’i — faqat admin; hafta PDF’ida kursant faqat tasdiqlangan sutkalarni oladi. Nomlar: `naryad_2026-09-18.pdf`, `naryad_hafta_2026-09-13.pdf`.
 42. **Markaz qatori** (8-bosqich savoli): bitta qator — “Markaz bo‘yicha navbatchi yordamchisi”, 1 o‘rin. Namunadagi ikkinchi qator xato.
 43. **Imzo joylashuvi**: chapda “Kurs boshlig‘i”, ostida unvon (“mayor”), o‘ngda “X.Turobov” — hozirgi holat qoladi.
 44. **Telefondan chop etish**: chop etish sahifasidagi “PDF’ni alohida ochish” havolasi bilan — hozirgi holat qoladi.
@@ -232,14 +232,14 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
     - **Kompilyatsiya:** `python scripts/compile_messages.py`.
     - **Test:** `tests/test_i18n.py` bo‘sh/fuzzy yozuv va qolib ketgan o‘zbekcha so‘zlarni tekshiradi.
 60. **Kursant ko‘rinishi va ertangi ro‘yxat muddati (14-bosqich, 1.5.0):**
-    - **Kursant faqat o‘z naryadini ko‘radi.** Bosh sahifadagi “Mening navbatdagi naryadim” kartochkasida:
+    - **~~Kursant faqat o‘z naryadini ko‘radi.~~** (16-bosqichda BEKOR QILINDI — 63-band; kartochka saqlanadi.) Bosh sahifadagi “Mening navbatdagi naryadim” kartochkasida:
       - sana va vaqt: “15-oktabr, chorshanba 18:00 → 16-oktabr 18:00”;
       - joy, lavozim va guruh;
       - jonli hisoblagich: “Naryadga … qoldi”, naryad davomida “Hozir naryaddasiz, smena almashishiga … qoldi”. Matnlar server vaqtidan, JS shablonlari `data-` atributlarida;
       - tayyorgarlik eslatmasi.
 
       Naryad bo‘lmasa: “Yaqin kunlarda tasdiqlangan naryadingiz yo‘q”. Kartochka ostida faqat “shu haftada / jami” va “Mening tarixim” havolasi.
-    - **Ko‘rinish chegarasi:** faqat tasdiqlangan sutkalar ko‘rinadi, qoralama hech qachon. `day.view_approved` va `pdf.export` — faqat admin. Kursantga 403 qaytadi:
+    - **Ko‘rinish chegarasi** (16-bosqichda BEKOR QILINDI — 63-band; endi kursant tasdiqlangan sutka sahifasi va PDF’ini ko‘radi): faqat tasdiqlangan sutkalar ko‘rinadi, qoralama hech qachon. `day.view_approved` va `pdf.export` — faqat admin edi. Kursantga 403 qaytadi:
       - sutka sahifalari;
       - “Tasdiqlangan naryadlar” ro‘yxati (menyudan olib tashlandi);
       - PDF va chop etish;
@@ -288,3 +288,119 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
     - Faol zalyotchik oddiy navbatda boshqa joylarga qo‘yilmagani sabab oddiy naryadlari orqada qolsa, algoritm keyin uni tarix bo‘yicha o‘zi oldinga qo‘yadi. Alohida tenglashtirish yo‘q.
     - Faol zalyoti bor kursantni naryaddan ozod qilib bo‘lmaydi: avval zalyot bajarilishi yoki bekor qilinishi kerak (`cadets.exempt_blocker`).
     - Bekor qilingan zalyotning kursanti qoralamada jazo o‘rnida qolsa, sutka TASDIQLANMAYDI. Uni almashtirish yoki sutkani qayta tuzish kerak.
+63. **Kursant tasdiqlangan ro‘yxatni ko‘radi, sababli holat eslatmasi, “ozod” yozuvi yo‘q (16-bosqich, 1.7.0):**
+    - **Tasdiqlangan ro‘yxat:** `day.view_approved` va `pdf.export` — admin va kursant. Bu 60-banddagi “faqat o‘z naryadi” va “PDF faqat admin” qoidalarini bekor qiladi, 27- va 41-bandlar qayta kuchga kiradi.
+      - Kursant menyusida “Tasdiqlangan naryadlar” bor. Sutka sahifasi faqat o‘qish uchun: joylar bo‘yicha guruhlangan, kursantning o‘z o‘rni ajratilgan (“Siz”). Bosh sahifadagi “Mening navbatdagi naryadim” saqlanadi.
+      - PDF — rasmiy o‘zbekcha shakl, o‘zgarmagan.
+      - Qoralama yoki tuzilmagan sutka (sahifa, PDF, chop etish) kursantga **403**. Qo‘shni sutka havolalari faqat tasdiqlanganlarga.
+      - Kursantga ko‘rinmaydi (403 yoki shablonda chiqmaydi): tugmalar, sabablar, izohlar, jurnal, “qo‘lda” belgisi, boshqa kursantlarning kartochkasi va tarixi, statistika, sababli holatlar, zalyotchiklar.
+      - Jazo naryadi ro‘yxatda oddiy posbon.
+      - Ruxsatlar serverda tekshiriladi.
+    - **Sababli holat eslatmasi:** `templates/partials/duty_reason_notice.html`, uch tilda. U kursant bosh sahifasida, “Tasdiqlangan naryadlar” va sutka sahifasida chiqadi; keyingi bosqichda guruh komandiri paneliga ham qo‘yiladi. Admin sahifalarida chiqmaydi.
+    - **“Ozod” yozuvi olib tashlandi** (uch tilda). Ko‘rsatishda lavozim yozuvi (`duty_position`) qoladi; filtr va ustun — “Naryadga chiqmaydi” (`?holat=lavozimda`, eski `ozod` ham ishlaydi).
+      - Faqat yozuv o‘zgardi: `duty_exempt`, generator qoidalari, adolat va o‘rtacha hisoblari (56-, 57-bandlar) o‘zgarmaydi.
+      - Eski jurnal yozuvlari o‘zgarmaydi.
+      - Atama `docs/atamalar.md` da. Testlar “ozod” so‘zini kursant ismlaridan (masalan, Ozodbek) ajratib tekshiradi (`tests/conftest.py::exempt_words`).
+64. **Kasallar ro‘yxati (17-bosqich, 1.8.0):**
+    - **Alohida jadval yo‘q.** Kasallik — `Absence` (`reason_type = "kasal"`) + `illness` (qisqa tavsif, faqat admin ko‘radi). Shuning uchun generator, almashtirish oynasi, “Sababli holatlar” sahifasi va zalyot ogohlantirishlari uni avtomatik hisobga oladi. Dvigatel o‘zgarmaydi. Xizmat: `naryad/sick.py`, sahifalar: `naryad/views_sick.py`, `/kasallar/`, ruxsat `sick.manage` (faqat admin, kursantga 403).
+    - **Muddat:** sanalar sutka boshlanish sanalari, birinchi va oxirgi kun ham ichida. Muddat tugagach kursant oddiy navbatga qaytadi, o‘tkazilgan navbatlar qarz bo‘lib yig‘ilmaydi (algoritm 4-bo‘lim: haftalik/jami hisob bo‘yicha o‘zi oldinga qo‘yadi).
+      - Tugash sanasi majburiy: aniq bo‘lmasa taxminiy, keyin “Muddatni uzaytirish” (faqat oldinga).
+      - “Sog‘ayib qaytdi” — tugash sanasi joriy sutka (`current_duty_date`), kursant keyingi sutkadan navbatda. Faqat boshlangan va hali tugamagan yozuvda.
+      - Boshlangan yozuvning boshlanish sanasi o‘zgarmaydi va yozuv o‘chirilmaydi; kelgusidagini o‘chirish mumkin (36-band).
+      - Ustma-ust yozuv kiritilmaydi.
+    - **Jurnal:** `sick_add`, `sick_edit`, `sick_extend`, `sick_recover`, `sick_delete` (kursant bilan; tafsilotlar o‘zbekcha, tavsif bilan).
+    - **Naryadga ta’siri:**
+      - almashtirish oynasida kasal kursant “Kasal: sana–sana” sababi bilan tanlab bo‘lmaydi;
+      - qoralamada — sariq ogohlantirish va shu o‘ringa “Almashtirish” tugmasi, sutka tasdiqlanmaydi (32-band);
+      - tasdiqlangan sutka O‘ZGARMAYDI — kiritishda va sutka sahifasida adminga “… sutkada naryadda, u tasdiqlangan. Almashtirish uchun avval tasdiqni bekor qiling.”;
+      - kasal zalyotchi — mavjud ogohlantirish, jazo naryadi sog‘aygach davom etadi.
+    - **Kim nimani ko‘radi:**
+      - admin — hammasini, tavsif bilan;
+      - kursantning o‘zi — bosh sahifada kartochka o‘rnida faqat “Siz kasallar ro‘yxatidasiz: 15.10 dan 20.10 gacha”, tavsifsiz;
+      - boshqa kursantlar — hech narsa: ro‘yxat, sutka sahifasi va PDF’da belgi yo‘q;
+      - guruh komandiri (19-bosqich) faqat “kasal, sana–sana”ni ko‘radi — tavsif shuning uchun alohida maydonda.
+    - **Hujjat rasmi** yo‘q (18-bosqichda qo‘shiladi).
+65. **Platforma nomi E-NARYAD (18-bosqich, 1.9.0):**
+    - Nom hamma tilda bir xil, tarjima qilinmaydi. Yagona manba — `settings.SITE_NAME`.
+      - Shablonlar `platform_name` kontekst o‘zgaruvchisini ishlatadi (`naryad.context_processors.ui`). `site_name` ishlatilmaydi: Django kirish sahifasi uni sayt domeni bilan almashtiradi.
+      - Kontekst protsessori ishlamaydigan 500 sahifasida `{% load branding %}{% site_name %}`.
+      - Boshqaruv paneli (`NaryadAdminSite`) va ilova nomi ham `settings.SITE_NAME` dan oladi. Qo‘lda qattiq yozilmaydi.
+    - Brauzer tab nomi: `<sahifa> — E-NARYAD`. Yuqori panelda nom va “Bojxona instituti · 2-kurs” izohi (2-kurs — joy ma’nosida, nomda emas).
+    - “Sutkalik naryad” hujjat ma’nosida qoladi (“sutkalik naryadlar ro‘yxati”, PDF, sutka sahifasi).
+    - **PDF naryad shakli O‘ZGARMAYDI**, faqat metama’lumotda `Creator: E-NARYAD` (`<meta name="generator">`).
+    - Ichki nomlar o‘zgarmaydi: `naryad` paketi va ilovasi, migratsiyalar, baza jadvallari, URL’lar, Docker/Railway nomlari (`sutkalik-naryad` image), repozitoriy papkasi.
+    - Zip nomi 1.9.0 dan: `e-naryad-vX.Y.Z.zip`.
+66. **Kasallik hujjatlari — rasmlar (18-bosqich, 1.9.0):**
+    - **Model** `SickDocument` (`naryad/documents.py`):
+      - UUID kalit, `Absence` ga CASCADE;
+      - tur: kasallik varaqasi / tibbiy punkt ma’lumotnomasi / boshqa; ixtiyoriy izoh;
+      - JPEG rasm va kichik rasm ma’lumotlar bazasida (`BinaryField`), chunki Railway disk vaqtinchalik. Rasmlar zaxira nusxaga kiradi (`pg_dump`, `dumpdata`).
+      - Standart menejer baytlarni `defer` qiladi, faqat ko‘rish view’i `with_bytes()` bilan oladi.
+    - **Yuklash** — faqat admin (`sick.manage`):
+      - bitta kasallik yozuviga ≤ 5 rasm, har biri ≤ 8 MB;
+      - turi mazmuni bo‘yicha (Pillow): JPEG/MPO, PNG, WEBP; HEIC — aniq xabar bilan rad;
+      - ≤ 50 Mpiksel; EXIF orientatsiya qo‘llanadi, rasm qayta JPEG qilib yoziladi (metama’lumot, GPS o‘chadi), uzun tomoni ≤ 2000 px, sifat 85, kichik rasm 360 px.
+    - **Jurnal:** `doc_add`, `doc_replace`, `doc_delete` — tur va yozuv sanalari, rasm mazmuni yozilmaydi. Kasallik yozuvi o‘chirilsa, rasmlari ham o‘chadi va jurnalga soni yoziladi. Hujjatlar sutkalarga ta’sir qilmaydi.
+    - **Ko‘rish** `/kasal/<absence_id>/hujjat/<UUID>/` (`?kichik=1`):
+      - faqat admin yoki o‘sha kursant (`documents.own`, faqat ko‘rish); boshqa kursant va guruh komandiri (19-bosqichda ham) — 403, kirmagan — kirish sahifasi;
+      - sarlavhalar: `Cache-Control: private, no-store`, `X-Content-Type-Options: nosniff`, `X-Robots-Tag: noindex`;
+      - ommaviy media URL yo‘q.
+    - **Interfeys:**
+      - kasallar ro‘yxatida “📎 n · Hujjatlar” yoki “Hujjat yo‘q” (majburiy emas);
+      - yozuv sahifasida galereya: CSS `:target` lightbox, JavaScript yo‘q, CSP o‘zgarmaydi; yuklash formasi `accept="image/*"` (telefon kamerasi);
+      - kursant kartochkasida “Kasallik hujjatlari — Hujjatlaringiz: n ta”, tavsifsiz (64-band).
+67. **Guruh komandiri roli va “Mening guruhim” (19-bosqich, 1.10.0):**
+    - **Rollar:** admin, kursant, `commander` (guruh komandiri). Komandir — kursant ham; uning barcha kursant imkoniyatlari (16-bosqich) saqlanadi va ustiga faqat ko‘rish uchun “Mening guruhim” qo‘shiladi. Bu bosqichda hech narsa kiritmaydi (zalyot — 20-bosqichda).
+    - **Kimga beriladi:**
+      - faqat guruh komandiri lavozimidagi faol kursantga (`Cadet.is_group_commander`: `duty_exempt` va lavozim “… guruh komandiri” bilan tugaydi; o‘rinbosar, starshina, pisar, kaptyorchik — yo‘q);
+      - guruh kursantning guruhidan olinadi, komandir uni tanlamaydi;
+      - har guruhga bitta faol komandir akkaunti (`User.clean_commander`).
+    - **Akkauntlar:** `create_cadet_accounts`, boshqaruv panelidagi “Akkaunt yaratish (Excel)” va “Vaqtinchalik parol berish (Excel)”. Komandirga rol avtomatik. `must_change_password` komandirga ham amal qiladi.
+    - **Doira** — yagona joy `naryad/group_scope.py`:
+      - `scoped_cadets(user)` = o‘z guruhining faol kursantlari;
+      - `commander_required` dekoratori (ruxsat `group.view` + doira);
+      - boshqa guruh id’si — 404 (mavjudligi oshkor bo‘lmaydi);
+      - URL parametri bilan guruhni o‘zgartirib bo‘lmaydi;
+      - lavozimidan bo‘shagan yoki faolsiz komandir — 403.
+    - **Ko‘rinadi:**
+      - faqat TASDIQLANGAN sutkalar: navbatdagi va oxirgi naryad (sana, joy, lavozim);
+      - holat: “Hozir naryadda” / “Kasal: sana–sana” / “Naryadga chiqmaydi” (lavozim matnisiz);
+      - jonli sonlar, joriy va keyingi hafta jadvali, familiya bo‘yicha qidiruv.
+    - **Ko‘rinmaydi:**
+      - qoralamalar; kasallik tavsifi va hujjat rasmlari (URL — 403); sababli holat va ozodlik sabablari; zalyot;
+      - statistika, jurnal, sozlamalar, admin bo‘limlari va har qanday o‘zgartirish (POST — 403);
+      - boshqa guruhlarning alohida ma’lumotlari — faqat umumiy tasdiqlangan ro‘yxat, oddiy kursant darajasida.
+    - Komandirning bosh sahifasida “Mening naryadim” o‘rnida “Mening guruhim” kartochkasi (komandir naryadga chiqmaydi).
+68. **Komandir zalyot kiritadi va zalyot hisobi (20-bosqich, 1.11.0):**
+    - **Zalyot qoidalari o‘zgarmaydi** (61-, 62-bandlar): faqat 1-NO‘J / 1-Yotoqxona, posbon, tasdiqlanganda “o‘tildi”, adolat hisobiga kirmaydi, PDF’da “zalyot” yo‘q, generator o‘zgarmaydi.
+    - **Kim kiritadi:**
+      - admin — istalgan kursantga, 1–10 ta;
+      - guruh komandiri (`penalty.group` + guruh doirasi, 67-band) — faqat o‘z guruhining o‘g‘il, faol, naryadga chiqadigan kursantiga.
+    - **Komandir cheklovlari** — `Setting`, serverda `penalties.commander_error`:
+      - bir kiritishda ≤ `commander_penalty_max` (3);
+      - tanbeh sanasi kelajakda emas (hamma uchun) va ≤ `commander_order_max_age_days` (30) kun eski;
+      - kuniga ≤ `commander_daily_limit` (5) kiritish.
+    - **Kiritish tartibi:**
+      - forma → tasdiqlash sahifasi → saqlash; zalyot darhol faol;
+      - bir xil kursant + sana + sabab 60 soniya ichida qayta yaratilmaydi (`DuplicateEntry`);
+      - faol zalyotga qo‘shilsa — soni qo‘shiladi, alohida `PenaltyEntry` va jurnal yozuvi.
+    - **Ko‘rib chiqish:** komandir kiritgan yoki qo‘shgan zalyot `reviewed_at = NULL` — “Yangi”. Admin bannerida soni, “Ko‘rib chiqildi” faqat belgini oladi.
+    - **Tahrir va bekor qilish** — faqat admin (komandirga 403): kursantdan boshqa hamma maydon; soni ≥ o‘tilgan; jurnalga eski → yangi.
+    - **Hisob** (`penalties.ledger`):
+      - kiritilgan — tanbeh sanasi davrga tushgan `PenaltyEntry`;
+      - o‘tildi — davrdagi tasdiqlangan jazo naryadlari;
+      - qoldi — hozirgi faol zalyotlar qoldig‘i;
+      - kesimlar: guruh, kursant, kim kiritdi; Excel varaqlari o‘zbekcha.
+      - Komandir faqat o‘z guruhining jami ko‘rsatkichlarini ko‘radi.
+    - **Kursant** o‘z zalyotini ko‘radi (61-band), kim kiritganini ko‘rmaydi; boshqa kursantlar hech narsa ko‘rmaydi.
+69. **Sinov ma’lumotlarini to‘liq tozalash (20-bosqich, 1.11.0):**
+    - `naryad/cleanup.py`, sahifa `/sozlamalar/tozalash/` (`settings.manage`) va `python manage.py clear_test_data [--dry-run] [--confirm TOZALASH --confirm2 "HAMMASI NOL"]`.
+    - **O‘chadi:** `DutyWeek`, `DutyDay` (qoralama va tasdiqlangan, import qilingan ham), `Assignment` (oddiy va jazo), `GroupPostAssignment`, `PublishedDuty`, `Penalty`, `PenaltyEntry`, butun `ChangeLog`. Keyin jurnalda bitta `test_data_cleared` yozuvi.
+    - **Qoladi:** kursantlar, guruhlar, joylar, foydalanuvchilar, `Setting`, `InitialRotation`, `PrepNote`, lavozim / `duty_exempt`, `Absence` va kasallik hujjatlari, login cheklovlari.
+    - **Tartib:**
+      - ko‘rib chiqish (hech narsa o‘zgarmaydi, holat izi `token`);
+      - ikki so‘z;
+      - avtomatik zaxira `settings.BACKUP_DIR` ga (`dumpdata --natural-foreign`, `.json.gz`) — muvaffaqiyatsiz bo‘lsa o‘chirilmaydi;
+      - bitta tranzaksiya. Izi mos kelmasa yoki o‘chiradigan narsa qolmagan bo‘lsa — rad.
+    - **Tiklash:** `migrate` → `flush --no-input` → `loaddata zaxira_….json.gz`.
+    - **Tozalashdan keyin** navbat zanjiri `InitialRotation` dan boshlanadi (Sozlamalarda ko‘rinadi va o‘zgaradi). Birinchi sutka ochilgan haftada bo‘sh tarixdan tuziladi (14-band).

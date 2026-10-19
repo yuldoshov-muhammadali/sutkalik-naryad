@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#142548">
-  <title>{% block title %}{% translate "Sutkalik naryad" %}{% endblock %} — {% translate "2-kurs" %}</title>
+  <title>{% block title %}{% translate "Bosh sahifa" %}{% endblock %} — {{ platform_name }}</title>
   {# Tungi rejim: CSS dan oldin, sinxron (oq “yaltirash” bo'lmasin). Inline emas — CSP o'zgarmaydi. #}
   <script src="{% static 'js/theme.js' %}"></script>
   <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
@@ -22,7 +22,7 @@
         <img src="{% static 'img/emblema-64.png' %}" srcset="{% static 'img/emblema-64.png' %} 1x, {% static 'img/emblema-192.png' %} 3x"
              width="40" height="40" alt="{% translate "Davlat bojxona xizmati emblemasi" %}" class="h-10 w-10 shrink-0 drop-shadow">
         <span class="min-w-0 leading-tight">
-          <span class="block font-semibold">{% translate "Sutkalik naryad" %}</span>
+          <span class="block font-bold tracking-wide" data-testid="site-name">{{ platform_name }}</span>
           <span class="block text-xs text-gold-200">{% translate "Bojxona instituti" %} · <span class="whitespace-nowrap">{% translate "2-kurs" %}</span></span>
         </span>
       </a>

@@ -8,10 +8,22 @@
   </div>
   {% endfor %}
 
+  {% if group %}
+  {# 19-bosqich: guruh komandiri naryadga chiqmaydi — “Mening naryadim” o‘rnida “Mening guruhim” #}
+  <section class="rounded-2xl bg-white/85 p-5 shadow-lg ring-1 ring-slate-200 backdrop-blur" aria-labelledby="my-group" data-testid="my-group">
+    <h2 id="my-group" class="text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Mening guruhim" %} · {{ group.group.code }}</h2>
+    <div class="mt-3">{% include "naryad/group/_counts.html" with summary=group %}</div>
+    <a href="{% url 'group_overview' %}" class="mt-3 flex min-h-[44px] items-center justify-center rounded-xl bg-brand-800 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-900">{% translate "Mening guruhim" %} →</a>
+  </section>
+  {% else %}
   <section class="rounded-2xl bg-white/85 p-5 shadow-lg ring-1 ring-slate-200 backdrop-blur{% if data.card.on_duty %} ring-2 ring-gold-400{% endif %}" aria-labelledby="next-duty" data-testid="my-duty">
     <h2 id="next-duty" class="text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Mening navbatdagi naryadim" %}</h2>
     {% with card=data.card %}
-    {% if card %}
+    {% if data.sick %}
+      {# 17-bosqich: kasallik davrida kartochka o‘rnida faqat sanalar — tavsif ko‘rsatilmaydi #}
+      <p class="mt-2 rounded-lg bg-sky-50 px-3 py-3 text-lg font-semibold text-sky-900" data-testid="sick-card">{% blocktranslate with start=data.sick.start_date|date:"d.m" end=data.sick.end_date|date:"d.m" %}Siz kasallar ro‘yxatidasiz: {{ start }} dan {{ end }} gacha{% endblocktranslate %}</p>
+      {% if data.sick_docs %}<a href="{% url 'my_card' %}#hujjatlar" class="mt-2 inline-flex min-h-[44px] items-center text-sm font-semibold text-sky-900 hover:underline" data-testid="sick-docs-link">📎 {% blocktranslate count n=data.sick_docs %}Hujjatlaringiz: {{ n }} ta{% plural %}Hujjatlaringiz: {{ n }} ta{% endblocktranslate %} →</a>{% endif %}
+    {% elif card %}
       {% if card.assignment.kind == 'penalty' %}<p class="mt-2 inline-block rounded bg-gold-400 px-2 py-0.5 text-sm font-semibold text-brand-950" data-testid="duty-penalty">{% translate "Navbatdan tashqari naryad" %}</p>{% endif %}
       <p class="mt-2 text-base font-medium text-slate-700" data-testid="duty-when"><span class="whitespace-nowrap">{{ card.when_start }}</span> → <span class="whitespace-nowrap">{{ card.when_end }}</span></p>
       <p class="mt-3 text-2xl font-bold leading-tight text-brand-900 sm:text-3xl" data-testid="duty-post">{% translate card.assignment.post_slot.post.name %}</p>
@@ -32,6 +44,7 @@
     {% endif %}
     {% endwith %}
   </section>
+  {% endif %}
 
   {% if data.penalty %}
   <div class="mt-4 rounded-xl border border-gold-300 bg-gold-50 px-4 py-3 text-sm text-gold-900" data-testid="penalty-progress">
@@ -39,6 +52,7 @@
   </div>
   {% endif %}
 
+  {% if not group %}
   <div class="mt-4 grid grid-cols-2 gap-2">
     <div class="rounded-xl bg-white/85 p-4 shadow-sm ring-1 ring-slate-200 backdrop-blur">
       <p class="text-xs text-slate-500">{% translate "Shu haftada" %}</p>
@@ -49,5 +63,6 @@
       <p class="text-2xl font-semibold tabular-nums">{{ data.total }}</p>
     </div>
   </div>
+  {% endif %}
   <a href="{% url 'my_card' %}" class="mt-4 flex min-h-[44px] items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-semibold text-brand-900 shadow-sm ring-1 ring-slate-200 hover:bg-brand-50">{% translate "Mening tarixim" %} →</a>
 {% endif %}

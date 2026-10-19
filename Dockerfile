@@ -1,4 +1,4 @@
-# Sutkalik naryad platformasi — bitta image: lokal (docker-compose.yml), server (docker-compose.prod.yml), Railway
+# E-NARYAD (sutkalik naryad platformasi) — bitta image: lokal (docker-compose.yml), server (docker-compose.prod.yml), Railway
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

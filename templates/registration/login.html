@@ -11,8 +11,8 @@
 <div class="mx-auto max-w-sm pt-2 sm:pt-8">
   <div class="mb-5 flex flex-col items-center text-center text-white">
     <img src="{% static 'img/emblema-192.png' %}" width="96" height="96" alt="{% translate "Davlat bojxona xizmati emblemasi" %}" class="h-24 w-24 drop-shadow-lg" data-testid="login-emblem">
-    <p class="mt-3 text-lg font-semibold drop-shadow">{% translate "Bojxona instituti" %}</p>
-    <p class="text-sm text-gold-200 drop-shadow">{% translate "2-kurs · sutkalik naryad platformasi" %}</p>
+    <p class="mt-3 text-3xl font-bold tracking-wide drop-shadow" data-testid="site-name">{{ platform_name }}</p>
+    <p class="text-sm text-gold-200 drop-shadow">{% translate "Bojxona instituti" %} · {% translate "2-kurs" %}</p>
   </div>
   <div class="rounded-2xl bg-white/90 p-6 shadow-xl ring-1 ring-white/40 backdrop-blur dark:bg-brand-950/80 dark:ring-white/10">
     <h1 class="text-xl font-semibold">{% translate "Tizimga kirish" %}</h1>

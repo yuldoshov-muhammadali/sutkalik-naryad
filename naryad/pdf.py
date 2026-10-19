@@ -71,6 +71,7 @@ def render_html(days: list[DutyDay]) -> str:
             "recipient_lines": [line.strip() for line in setting.recipient_position.splitlines() if line.strip()],
             "font_faces": faces,
             "font_family": family,
+            "platform_name": settings.SITE_NAME,  # faqat PDF metama'lumoti (Creator); shakl va matn o'zgarmaydi
         },
     )
 

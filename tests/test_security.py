@@ -40,8 +40,24 @@ def world(db_cadets):
     from naryad import penalties
 
     penalty = penalties.add(other, "tartib", "Kechikib keldi", SUNDAY, 2, admin)
+    # 18-bosqich: kasallik hujjati rasmlari — boshqa kursantniki va o'zimniki
+    from naryad.models import SickDocument
+
+    from .test_documents import jpeg_bytes
+
+    def doc(a):
+        return SickDocument.objects.create(absence=a, image=jpeg_bytes(), thumb=jpeg_bytes(), created_by=admin)
+
+    own_absence = Absence.objects.create(cadet=me, start_date=SUNDAY - dt.timedelta(days=30), end_date=SUNDAY - dt.timedelta(days=28),
+                                         reason_type="kasal", created_by=admin)
+    # 19-bosqich: guruh komandiri (o'z guruhi — boshqa guruhdan farqli)
+    boss = Cadet.objects.filter(duty_position__iendswith="guruh komandiri").exclude(group=other.group).order_by("pk").first()
+    commander = User.objects.create_user("komandir", password=PASSWORD, role="commander", cadet=boss)
+    own_group = Cadet.objects.filter(group=boss.group).exclude(pk=boss.pk).first()
+    other_group = Cadet.objects.exclude(group=boss.group).first()
     return {"admin": admin, "cadet": cadet, "me": me, "other": other, "draft": draft, "slot": slot, "absence": absence,
-            "penalty": penalty}
+            "penalty": penalty, "doc": doc(absence), "own_absence": own_absence, "own_doc": doc(own_absence),
+            "commander": commander, "own_group": own_group, "other_group": other_group}
 
 
 def urls(w) -> dict[str, str]:
@@ -92,6 +108,36 @@ def urls(w) -> dict[str, str]:
         "absence_delete": reverse("absence_delete", args=[w["absence"].pk]),
         "stats": reverse("stats"),
         "stats_excel": reverse("stats_excel"),
+        # Kasallar ro'yxati (17-bosqich) — faqat admin
+        "sick_list": reverse("sick_list"),
+        "sick_create": reverse("sick_create"),
+        "sick_edit": reverse("sick_edit", args=[w["absence"].pk]),
+        "sick_extend": reverse("sick_extend", args=[w["absence"].pk]),
+        "sick_recover": reverse("sick_recover", args=[w["absence"].pk]),
+        "sick_delete": reverse("sick_delete", args=[w["absence"].pk]),
+        # Kasallik hujjatlari (18-bosqich)
+        "sick_doc_upload": reverse("sick_doc_upload", args=[w["absence"].pk]),
+        "sick_doc_replace": reverse("sick_doc_replace", args=[w["absence"].pk, w["doc"].pk]),
+        "sick_doc_delete": reverse("sick_doc_delete", args=[w["absence"].pk, w["doc"].pk]),
+        "sick_doc:other": reverse("sick_doc", args=[w["absence"].pk, w["doc"].pk]),
+        "sick_doc:own": reverse("sick_doc", args=[w["own_absence"].pk, w["own_doc"].pk]),
+        # Mening guruhim (19-bosqich) — faqat guruh komandiri
+        "group_overview": reverse("group_overview"),
+        "group_status": reverse("group_status"),
+        "group_week": reverse("group_week"),
+        "group_cadet:own_group": reverse("group_cadet", args=[w["own_group"].pk]),
+        "group_cadet:other_group": reverse("group_cadet", args=[w["other_group"].pk]),
+        # 20-bosqich: komandir zalyoti, admin tahriri va hisobi, sinov ma'lumotlarini tozalash
+        "group_penalties": reverse("group_penalties"),
+        "group_penalty_add": reverse("group_penalty_add"),
+        "penalty_edit": reverse("penalty_edit", args=[w["penalty"].pk]),
+        "penalty_review": reverse("penalty_review", args=[w["penalty"].pk]),
+        "penalty_review_all": reverse("penalty_review_all"),
+        "penalty_ledger": reverse("penalty_ledger"),
+        "penalty_ledger_excel": reverse("penalty_ledger_excel"),
+        "clear_test_data": reverse("clear_test_data"),
+        "clear_test_data_run": reverse("clear_test_data_run"),
+        "backup_download": reverse("backup_download", args=["zaxira_2026-10-19_10-00-00.json.gz"]),
     }
 
 
@@ -103,21 +149,43 @@ CADET_GET = {
     "password_change": 200,
     "cadet_detail:own": 200,
     "my_card": 302,
-    # 14-bosqich: kursant boshqa kursantlarning ro'yxatini ko'rmaydi — sutka sahifalari va PDF yopiq
-    "approved_days": 403,
-    "day_detail:approved": 403,
-    "day_pdf:approved": 403,
-    "day_print:approved": 403,
-    "week_pdf": 403,
+    # 16-bosqich: tasdiqlangan sutkalar (sahifa, PDF, chop etish) yana ochiq — faqat o'qish; qoralama hech qachon
+    "approved_days": 200,
+    "day_detail:approved": 200,
+    "day_pdf:approved": 200,
+    "day_print:approved": 200,
+    "week_pdf": 200,  # faqat tasdiqlangan sutkalar
     "day_detail:draft": 403,
     "day_pdf:draft": 403,
     "day_print:draft": 403,
     "logout": 405,  # faqat POST
+    "sick_doc:own": 200,  # o'z kasallik hujjati — faqat ko'rish (18-bosqich)
 }
+# Guruh komandiri: kursant imkoniyatlari + o'z guruhi (19-bosqich). "own" kalitlari — boshqa kursantniki, shuning uchun yopiq.
+COMMANDER_GET = {
+    **CADET_GET,
+    "cadet_detail:own": 403,  # world["me"] — komandirning o'zi emas
+    "sick_doc:own": 403,  # boshqa kursantning hujjati — komandirga ham yopiq
+    "group_overview": 200,
+    "group_status": 200,
+    "group_week": 200,
+    "group_cadet:own_group": 200,
+    "group_cadet:other_group": 404,  # IDOR: boshqa guruh — mavjudligi ham oshkor bo'lmaydi
+    "group_penalties": 200,
+    "group_penalty_add": 200,
+}
+MODIFYING = ["cadet_create", "cadet_import", "cadet_edit", "cadet_deactivate", "cadet_activate", "cadet_exempt",
+             "cadet_unexempt", "week_open",
+             "day_generate", "day_replace", "day_swap", "day_approve", "day_reopen", "day_delete",
+             "absence_list", "absence_end", "absence_delete",
+             "sick_create", "sick_edit", "sick_extend", "sick_recover", "sick_delete",
+             "sick_doc_upload", "sick_doc_replace", "sick_doc_delete", "penalty_list", "penalty_cancel",
+             "penalty_edit", "penalty_review", "penalty_review_all", "clear_test_data_run"]
 PUBLIC = {"login"}
 # Faqat POST qabul qiladigan manzillar: GET so'rovi hamma uchun 405 (ruxsat POST'da tekshiriladi)
 POST_ONLY = {"logout", "set_language", "penalty_cancel", "cadet_deactivate", "cadet_activate", "cadet_exempt", "cadet_unexempt", "week_open", "day_generate", "day_approve", "day_reopen",
-             "day_delete", "absence_end", "absence_delete"}
+             "day_delete", "absence_end", "absence_delete", "sick_extend", "sick_recover", "sick_delete",
+             "sick_doc_upload", "sick_doc_replace", "sick_doc_delete", "penalty_review", "penalty_review_all", "clear_test_data_run"}
 
 
 def all_url_names() -> set[str]:
@@ -158,19 +226,26 @@ def test_cadet_sees_only_what_is_allowed(client, world):
         assert client.get(url).status_code == expected, (key, url)
 
 
-def test_cadet_cannot_change_anything_by_post(client, world):
-    client.force_login(world["cadet"])
+def test_commander_sees_only_what_is_allowed(client, world):
+    client.force_login(world["commander"])
+    for key, url in urls(world).items():
+        expected = 405 if key in POST_ONLY else COMMANDER_GET.get(key, 403)
+        assert client.get(url).status_code == expected, (key, url)
+    assert client.get(reverse("cadet_detail", args=[world["commander"].cadet_id])).status_code == 200  # o'z kartochkasi
+
+
+@pytest.mark.parametrize("role", ["cadet", "commander"])
+def test_cadet_and_commander_cannot_change_anything_by_post(client, world, role):
+    client.force_login(world[role])
     draft = DutyDay.objects.get(date=MONDAY)
-    for key in ["cadet_create", "cadet_import", "cadet_edit", "cadet_deactivate", "cadet_activate", "cadet_exempt",
-                "cadet_unexempt", "week_open",
-                "day_generate", "day_replace", "day_swap", "day_approve", "day_reopen", "day_delete",
-                "absence_list", "absence_end", "absence_delete"]:
+    for key in MODIFYING:
         response = client.post(urls(world)[key], {"version": draft.version, "reason": "x", "reason_code": "boshqa", "note": "x"})
         assert response.status_code == 403, key
     draft.refresh_from_db()
     assert draft.status == DutyDay.Status.DRAFT
     assert DutyDay.objects.get(date=SUNDAY).status == DutyDay.Status.APPROVED
     assert Absence.objects.filter(pk=world["absence"].pk).exists()
+    assert world["absence"].end_date == Absence.objects.get(pk=world["absence"].pk).end_date  # kasallik o'zgarmadi
 
 
 def test_cadet_cannot_read_other_cadets_by_typing_ids(client, world):
@@ -192,7 +267,11 @@ def test_admin_opens_every_page(client, world):
     for key, url in urls(world).items():
         if key in POST_ONLY:
             continue
-        expected = (403,) if key == "my_card" else (200, 302)  # “Mening tarixim” — faqat kursant roli
+        # “Mening tarixim” — faqat kursant roli; “Mening guruhim” — faqat guruh komandiri (admin ham ko'rmaydi)
+        if key == "backup_download":
+            expected = (404,)  # bunday zaxira fayli yo'q
+        else:
+            expected = (403,) if key == "my_card" or key.startswith("group_") else (200, 302)
         assert client.get(url).status_code in expected, (key, url)
 
 

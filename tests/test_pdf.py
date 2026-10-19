@@ -147,13 +147,16 @@ def test_download_and_filename(client, sept18, admin):
     assert resp["Content-Disposition"].startswith("inline;")
 
 
-def test_cadet_gets_no_pdf(client, sept18, rotation, admin):
-    """14-bosqich: PDF’da butun ro'yxat bor — kursantga yopiq (tasdiqlangan ham, qoralama ham)."""
+def test_cadet_gets_only_approved_pdf(client, sept18, rotation, admin):
+    """16-bosqich: tasdiqlangan sutka PDF’i kursantga ochiq (o'zbekcha, shakl o'zgarmaydi); qoralama PDF’i — 403."""
     cadet_client(client)
-    assert client.get(reverse("day_pdf", args=["2026-09-18"])).status_code == 403
-    assert client.get(reverse("day_print", args=["2026-09-18"])).status_code == 403
+    resp = client.get(reverse("day_pdf", args=["2026-09-18"]))
+    assert resp.status_code == 200 and resp["Content-Type"] == "application/pdf"
+    assert "QORALAMA" not in pdf_text(resp.content)[1]
+    assert client.get(reverse("day_print", args=["2026-09-18"])).status_code == 200
     services.generate_draft(dt.date(2026, 9, 19), admin)
     assert client.get(reverse("day_pdf", args=["2026-09-19"])).status_code == 403
+    assert client.get(reverse("day_print", args=["2026-09-19"])).status_code == 403
     client.logout()
     resp = client.get(reverse("day_pdf", args=["2026-09-18"]))
     assert resp.status_code == 302 and resp["Location"].startswith(reverse("login"))
@@ -175,7 +178,9 @@ def test_week_pdf_pages_and_permissions(client, sept18, admin):
     pages, text = pdf_text(resp.content)
     assert pages == 2 and "18-sentabr kunidan" in text and "19-sentabr kunidan" in text
     cadet_client(client)
-    assert client.get(reverse("week_pdf", args=["2026-09-13"])).status_code == 403  # 14-bosqich
+    resp = client.get(reverse("week_pdf", args=["2026-09-13"]))  # 16-bosqich: faqat tasdiqlangan sutkalar
+    pages, text = pdf_text(resp.content)
+    assert pages == 1 and "18-sentabr kunidan" in text and "19-sentabr kunidan" not in text
 
 
 def test_print_page_embeds_pdf(client, sept18, admin):

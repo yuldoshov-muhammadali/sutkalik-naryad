@@ -120,9 +120,10 @@ def sections(duty_day: DutyDay | None) -> list[Section]:
 
 @dataclass
 class Issue:
-    kind: str  # "empty" | "inactive" | "exempt" | "absent"
+    kind: str  # "empty" | "inactive" | "exempt" | "absent" | "sick" | "penalty"
     text: str
     blocks_approval: bool = True
+    slot_id: int | None = None  # "sick": sariq ogohlantirishdagi “Almashtirish” tugmasi uchun (17-bosqich)
 
 
 def day_issues(duty_day: DutyDay) -> list[Issue]:
@@ -155,7 +156,7 @@ def day_issues(duty_day: DutyDay) -> list[Issue]:
             }))
         elif a.cadet.duty_exempt:
             issues.append(
-                Issue("exempt", _("%(name)s (%(slot)s) naryaddan ozod (%(position)s) — almashtiring yoki qayta tuzing.") % {
+                Issue("exempt", _("%(name)s (%(slot)s) — %(position)s, naryadga chiqmaydi — almashtiring yoki qayta tuzing.") % {
                     "name": a.cadet.short_name, "slot": _(a.post_slot.print_label), "position": a.cadet.duty_position,
                 })
             )
@@ -164,6 +165,15 @@ def day_issues(duty_day: DutyDay) -> list[Issue]:
             issues.append(Issue("penalty", _("%(name)s zalyoti bekor qilingan — jazo o‘rnini almashtiring yoki qayta tuzing.") % {
                 "name": a.cadet.short_name,
             }))
+        elif a.cadet_id in absences and absences[a.cadet_id].reason_type == Absence.Reason.SICK:
+            # 17-bosqich: kasallar ro'yxatidagi kursant — sariq ogohlantirish va “Almashtirish” tugmasi (tasdiqlanmaydi)
+            ab = absences[a.cadet_id]
+            issues.append(
+                Issue("sick", _("%(name)s (%(slot)s) kasallar ro‘yxatida (%(start)s–%(end)s) — “Almashtirish” bilan boshqa kursant qo‘ying.") % {
+                    "name": a.cadet.short_name, "slot": _(a.post_slot.print_label),
+                    "start": f"{ab.start_date:%d.%m}", "end": f"{ab.end_date:%d.%m}",
+                }, slot_id=a.post_slot_id)
+            )
         elif a.cadet_id in absences:
             ab = absences[a.cadet_id]
             issues.append(
@@ -174,6 +184,18 @@ def day_issues(duty_day: DutyDay) -> list[Issue]:
                 })
             )
     return issues
+
+
+def approved_sick_notices(duty_day: DutyDay) -> list[str]:
+    """Tasdiqlangan sutkada kasallar ro'yxatidagi kursant — faqat admin uchun ogohlantirish, ro'yxat o'zgarmaydi."""
+    from .sick import approved_conflict_text
+
+    sick = set(
+        Absence.objects.filter(reason_type=Absence.Reason.SICK, start_date__lte=duty_day.date, end_date__gte=duty_day.date)
+        .values_list("cadet_id", flat=True)
+    )
+    rows = duty_day.assignments.filter(cadet_id__in=sick).select_related("cadet").order_by("post_slot__post__display_order")
+    return [approved_conflict_text(a.cadet, duty_day.date) for a in rows]
 
 
 def penalty_notices(duty_day: DutyDay) -> list[str]:
@@ -202,7 +224,7 @@ def penalty_notices(duty_day: DutyDay) -> list[str]:
         if a is not None:
             out.append(_("Zalyotchik %(name)s bugun guruhi bilan oddiy navbatda turibdi (jazo hisobiga o‘tmaydi).") % values)
         elif not cadet.is_active or cadet.duty_exempt:
-            out.append(_("Zalyotchik %(name)s faol emasligi (yoki naryaddan ozodligi) uchun bugun qo‘yilmadi.") % values)
+            out.append(_("Zalyotchik %(name)s faol emas yoki naryadga chiqmaydi (lavozimda) — bugun qo‘yilmadi.") % values)
         elif o.cadet_id in absent:
             out.append(_("Zalyotchik %(name)s sababli holatda bo‘lgani uchun bugun qo‘yilmadi.") % values)
         elif o.cadet_id in yesterday:
@@ -309,7 +331,15 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
         out.append(
             Candidate(by_id[s.cadet_id], s.week_count, s.total, s.post_count, s.last_day, best=(i == 0))
         )
+    sick = {
+        ab.cadet_id: ab for ab in Absence.objects.filter(
+            reason_type=Absence.Reason.SICK, start_date__lte=duty_day.date, end_date__gte=duty_day.date, cadet_id__in=pick.excluded
+        )
+    }
     for cid, reason in pick.excluded.items():
+        if cid in sick:  # 17-bosqich: kasallar ro'yxatidagi kursant — sababi “Kasal” (tavsifsiz)
+            out.append(Candidate(by_id[cid], excluded=sick_text(sick[cid])))
+            continue
         out.append(Candidate(by_id[cid], excluded=_(reason)))  # algoritm sababi — joriy tilda (i18n_data.ENGINE_TEXTS)
     for c in exempt:
         out.append(Candidate(c, excluded=exempt_text(c)))
@@ -321,8 +351,14 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
     return out
 
 
+def sick_text(absence: Absence) -> str:
+    return _("Kasal: %(start)s–%(end)s (kasallar ro‘yxatida).") % {
+        "start": f"{absence.start_date:%d.%m}", "end": f"{absence.end_date:%d.%m}",
+    }
+
+
 def exempt_text(cadet: Cadet) -> str:
-    return _("naryaddan ozod — %(position)s") % {"position": cadet.duty_position}
+    return _("%(position)s — naryadga chiqmaydi") % {"position": cadet.duty_position}
 
 
 def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet) -> str | None:
@@ -334,7 +370,7 @@ def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet) -> str | 
     if not cadet.is_active:
         return _("%(name)s faol emas (%(reason)s).") % {"name": cadet.short_name, "reason": cadet.deactivation_reason}
     if cadet.duty_exempt:
-        return _("%(name)s naryaddan ozod (%(position)s) — sutkalik naryadga qo‘yilmaydi.") % {
+        return _("%(name)s — %(position)s, sutkalik naryadga qo‘yilmaydi.") % {
             "name": cadet.short_name, "position": cadet.duty_position,
         }
     if cadet.gender != post.gender:
@@ -366,6 +402,8 @@ def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet) -> str | 
             "name": cadet.short_name, "day": f"{yesterday:%d.%m}",
         }
     absence = Absence.objects.filter(cadet=cadet, start_date__lte=duty_day.date, end_date__gte=duty_day.date).first()
+    if absence is not None and absence.reason_type == Absence.Reason.SICK:
+        return sick_text(absence)
     if absence is not None:
         return _("%(name)s sababli yo‘q: %(reason)s (%(start)s–%(end)s).") % {
             "name": cadet.short_name, "reason": absence.get_reason_type_display().lower(),

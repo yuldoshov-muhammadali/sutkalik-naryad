@@ -27,7 +27,7 @@ from naryad.models import (
 )
 from naryad.services import ServiceError
 
-from .conftest import INITIAL_ROTATION
+from .conftest import INITIAL_ROTATION, exempt_words
 
 PASSWORD = "Kuchli-parol-2026"
 SUNDAY = dt.date(2026, 9, 13)
@@ -183,9 +183,9 @@ def test_manual_placement_of_exempt_is_rejected(admin):
     slot = PostSlot.objects.get(post__code="noj1", position=1)
     candidates = days.replacement_candidates(draft, slot)
     excluded = {c.cadet.pk: c.excluded for c in candidates if c.excluded}
-    assert "naryaddan ozod" in excluded[exempt.pk] and exempt.duty_position in excluded[exempt.pk]
+    assert "naryadga chiqmaydi" in excluded[exempt.pk] and exempt.duty_position in excluded[exempt.pk]  # 16-bosqich: “ozod” yo‘q
     assert all(not c.cadet.duty_exempt for c in candidates if not c.excluded)
-    with pytest.raises(ServiceError, match="naryaddan ozod"):
+    with pytest.raises(ServiceError, match="sutkalik naryadga qo‘yilmaydi"):
         days.replace_cadet(SUNDAY, slot.pk, exempt.pk, "sababli", "", admin, draft.version)
 
 
@@ -200,7 +200,7 @@ def test_exempt_in_draft_blocks_approval(admin, client):
         days.approve(SUNDAY, admin, draft.version)
     client.force_login(admin)
     html = client.get(reverse("day_detail", args=[SUNDAY.isoformat()])).content.decode()
-    assert "naryaddan ozod" in html
+    assert "BI-525 guruh komandiri o‘rinbosari, naryadga chiqmaydi" in html and not exempt_words(html)
 
 
 def test_unexempted_cadet_goes_first(admin):
@@ -269,9 +269,10 @@ def test_cadet_list_badge_filter_and_summary(admin, client):
     html = client.get(reverse("cadet_list")).content.decode()
     for code, n in EXPECTED_ON_DUTY.items():
         assert f'data-testid="on-duty-{code}">{n}' in html
-    assert "78" in html and "(9 ozod)" in html
-    filtered = client.get(reverse("cadet_list"), {"holat": "ozod"})
-    assert filtered.context["count"] == 9
+    assert "78" in html and "(9 lavozimda)" in html and not exempt_words(html)  # 16-bosqich
+    assert "Naryadga chiqmaydi" in html  # filtr nomi
+    assert client.get(reverse("cadet_list"), {"holat": "lavozimda"}).context["count"] == 9
+    assert client.get(reverse("cadet_list"), {"holat": "ozod"}).context["count"] == 9  # eski havolalar
     assert client.get(reverse("cadet_list"), {"holat": "naryadga", "jins": "M"}).context["count"] == 78
 
 

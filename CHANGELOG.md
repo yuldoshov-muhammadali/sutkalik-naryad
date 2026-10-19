@@ -1,6 +1,155 @@
-# O‘zgarishlar tarixi
+# E-NARYAD — o‘zgarishlar tarixi
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar: [SemVer](https://semver.org/).
+
+## [1.11.0] — 2026-10-19
+
+20-bosqich: komandir zalyot kiritadi, zalyot hisobi, sinov ma’lumotlarini to‘liq tozalash (CLAUDE.md 68- va 69-bandlar). Zalyot qoidalari va generator o‘zgarmagan: zalyotchi bo‘lmasa natija bayt-bayt avvalgidek (84 sutkalik etalon xesh).
+
+### Qo‘shildi — komandir zalyoti
+- **Guruh komandiri** “Guruh zalyotlari” (`/mening-guruhim/zalyotlar/`) va “Zalyot kiritish” orqali faqat o‘z guruhining o‘g‘il, faol, naryadga chiqadigan kursantiga zalyot kiritadi.
+  - Saqlashdan oldin tasdiqlash sahifasi: “X (BI-525) ga N ta jazo naryadi kiritiladi. Davom etasizmi?”.
+  - Zalyot darhol faol bo‘ladi.
+- **Cheklovlar** (serverda; Sozlamalarda o‘zgaradi):
+  - komandir uchun 1–3 ta jazo naryadi (admin uchun 1–10 qoladi);
+  - tanbeh sanasi kelajakda emas va 30 kundan eski emas;
+  - bir kunda 5 ta kiritish;
+  - boshqa guruh kursanti id’si — 404, service darajasida 403;
+  - bir xil kursant + sana + sabab 1 daqiqa ichida takrorlanmaydi.
+- Komandir zalyotni tahrirlay va bekor qila olmaydi (403).
+- Komandir o‘z guruhining zalyotlarini va hisobini (zalyotchilar, jami / o‘tildi / qoldi) ko‘radi. “Mening guruhim”da belgi: “Zalyotchi: 3 tadan 1 tasi o‘tildi”.
+- **`PenaltyEntry`** — har bir kiritish alohida (kim, qachon, nechta); migratsiya 0018 mavjud zalyotlarni to‘ldiradi. `Penalty.reviewed_at` / `reviewed_by`.
+
+### Qo‘shildi — admin
+- **Zalyotchiklar ro‘yxati:** “Kim kiritdi” va qachon; komandir kiritgan yozuvlarda “Yangi” belgisi; “Ko‘rib chiqildi” tugmasi (zalyotni o‘zgartirmaydi).
+- **Bosh sahifa banneri:** “Komandirlar kiritgan 2 ta yangi zalyot ko‘rib chiqilmagan” va “Ko‘rib chiqildi” tugmasi.
+- **Tahrirlash** (`/zalyotchiklar/<id>/tahrirlash/`): sabab, izoh, sana va soni; kursant o‘zgarmaydi. Soni allaqachon o‘tilganidan kam bo‘lmaydi. Jurnalga eski → yangi qiymatlar yoziladi (`penalty_edit`, `penalty_review`).
+- **Zalyot hisobi** (`/zalyotchiklar/hisob/`):
+  - guruhlar, kursantlar va “kim kiritdi” bo‘yicha jadvallar;
+  - davr (tanbeh sanasi) va guruh filtri;
+  - Excel: “Guruhlar”, “Kursantlar”, “Kim kiritdi” varaqlari.
+
+### Qo‘shildi — sinov ma’lumotlarini tozalash
+- `naryad/cleanup.py`, sahifa `/sozlamalar/tozalash/` (Sozlamalarda havola, faqat admin) va buyruq `python manage.py clear_test_data [--dry-run]`.
+  - **Ko‘rib chiqish:** nima o‘chishi (import qilingan / platformada tuzilgan sutkalar), kursantlar bo‘yicha “oldin → keyin”.
+  - **Tasdiqlash:** ikki so‘z — “TOZALASH”, so‘ng “HAMMASI NOL”.
+  - **Avtomatik zaxira** `zaxira_YYYY-MM-DD_HH-MM-SS.json.gz`: muvaffaqiyatsiz bo‘lsa o‘chirish boshlanmaydi; yuklab olish tugmasi bor.
+  - Bitta tranzaksiya; ikkinchi marta o‘chirmaydi. Jurnalda faqat “Sinov ma’lumotlari tozalandi” qoladi.
+  - O‘chadi: haftalar, sutkalar, naryadlar, guruh → joy taqsimotlari, e’lon qilingan naryadlar, zalyotlar, jurnal.
+  - Qoladi: kursantlar, akkauntlar, sozlamalar, boshlang‘ich taqsimot, sababli holatlar, kasallar.
+- Tozalashdan keyin birinchi sutka bo‘sh tarixdan boshlang‘ich taqsimot bo‘yicha tuziladi; test qilingan.
+- `scripts/simulate_weeks.py --komandirlar` — 6 ta komandir kiritgan zalyotchi bilan 12 hafta.
+- Testlar: `tests/test_commander_penalties.py` (21), `tests/test_clear_data.py` (14); ruxsatlar auditi yangilandi — jami 590. `scripts/screenshots_v21.py`, `docs/skrinshotlar/v1.11/`.
+
+## [1.10.0] — 2026-10-19
+
+19-bosqich: guruh komandiri roli va “Mening guruhim” paneli — faqat ko‘rish (CLAUDE.md 67-band). Algoritm, qoidalar va PDF shakli o‘zgarmagan.
+
+### Qo‘shildi
+- **Uchinchi rol `commander` (Guruh komandiri)**, migratsiya 0017. Mavjud foydalanuvchilarga tegilmagan.
+  - Akkaunt guruh komandiri lavozimidagi faol kursantga bog‘lanadi. Lavozim “… guruh komandiri” bilan tugashi kerak; o‘rinbosar, starshina, pisar va kaptyorchik mos kelmaydi.
+  - Guruh kursantning guruhidan olinadi. Har guruhga bitta faol komandir akkaunti. Noto‘g‘ri kursantga berishda boshqaruv panelida xato chiqadi.
+- **Akkauntlar:**
+  - `create_cadet_accounts` va boshqaruv panelidagi yangi amal “Akkaunt yaratish (Excel)” guruh komandirlariga rolni avtomatik beradi;
+  - Excel’da “Rol” ustuni;
+  - foydalanuvchilar ro‘yxatida “Vaqtinchalik parol berish (Excel)” — parolni tiklash, birinchi kirishda almashtirish majburiy.
+- **“Mening guruhim”** (`/mening-guruhim/`):
+  - faqat o‘z guruhi, familiya bo‘yicha tartib va qidiruv;
+  - har kursant uchun navbatdagi va oxirgi tasdiqlangan naryadi;
+  - holat: “Hozir naryadda”, “Kasal: 15.10–20.10” yoki “Naryadga chiqmaydi”;
+  - jonli sonlar: “Hozir naryadda: 3 kishi”, “Kasal: 1 kishi” (HTMX, 60 soniya);
+  - kursant sahifasi — navbatdagi va oxirgi naryadlar;
+  - haftalik ko‘rinish: joriy va keyingi hafta jadvali, telefonda qulay;
+  - faqat tasdiqlangan sutkalar.
+- **Bosh sahifa:** komandirda “Mening naryadim” o‘rnida “Mening guruhim” kartochkasi. Kursant imkoniyatlari saqlanadi: tasdiqlangan naryadlar, PDF, eslatma, “Mening tarixim”.
+- **Xavfsizlik:**
+  - guruh doirasi bitta joyda (`naryad/group_scope.py`);
+  - boshqa guruh kursantining id’si — 404;
+  - komandirga hujjat rasmlari, admin sahifalari va barcha o‘zgartiruvchi POST’lar — 403;
+  - kasallik tavsifi, hujjat, sabablar, zalyot va lavozim matni ko‘rinmaydi;
+  - lavozimdan bo‘shagan komandir “Mening guruhim”ni ko‘rmaydi.
+- `tests/test_commander.py` (26 test). Ruxsatlar auditi komandir roli bilan yangilandi, `docs/05-rollar.md` uch ustunli. `scripts/screenshots_v20.py`, `docs/skrinshotlar/v1.10/`.
+
+## [1.9.0] — 2026-10-19
+
+18-bosqich: platforma nomi **E-NARYAD** va kasallik hujjatlari (CLAUDE.md 65- va 66-bandlar). Algoritm, qoidalar va PDF naryad shakli o‘zgarmagan.
+
+### O‘zgardi — platforma nomi
+- Yangi nom **E-NARYAD** (tarjima qilinmaydi) bitta joyda: `settings.SITE_NAME`. Shablonlar uni `platform_name` kontekst o‘zgaruvchisidan, 500 sahifasi `{% site_name %}` tegidan oladi.
+  - `site_name` nomi ishlatilmadi: Django kirish sahifasi uni o‘zining sayt nomi bilan almashtiradi.
+- Nom almashtirilgan joylar:
+  - brauzer tab nomi (`… — E-NARYAD`) va yuqori panel;
+  - kirish sahifasi va kurs boshlig‘i banneri;
+  - 403/404/500 sahifalari;
+  - boshqaruv paneli sarlavhalari va ilova nomi;
+  - akkauntlar Excel faylining sarlavhasi;
+  - README, CLAUDE.md, qo‘llanma, qisqa yo‘riqnoma (PDF qayta yasaldi), CHANGELOG sarlavhasi.
+- “2-kurs” nomdan olib tashlandi, lekin “Bojxona instituti · 2-kurs” izohi va haftalarda qoladi.
+- PDF naryad shakli o‘zgarmagan. Faqat metama’lumotda `Creator: E-NARYAD`; `Title` avvalgidek.
+- Ichki nomlar o‘zgarmagan: `naryad` paketi, migratsiyalar, baza, URL’lar, Docker/Railway.
+
+### Qo‘shildi — kasallik hujjatlari
+- `SickDocument` modeli (migratsiya 0016): UUID kalit, tur (kasallik varaqasi / tibbiy punkt ma’lumotnomasi / boshqa), izoh, JPEG rasm va kichik rasm — ma’lumotlar bazasida (`BinaryField`). Ro‘yxat so‘rovlarida baytlar yuklanmaydi (`defer`).
+- **Yuklash** (faqat admin):
+  - kasallik yozuviga ko‘pi bilan 5 ta rasm, har biri ≤ 8 MB;
+  - turi mazmuni bo‘yicha tekshiriladi (Pillow): JPEG, PNG, WEBP; HEIC uchun aniq xabar;
+  - EXIF orientatsiya qo‘llanadi, metama’lumot (GPS) o‘chadi, ≤ 2000 px, sifat 85, kichik rasm 360 px;
+  - almashtirish va o‘chirish (tasdiq bilan) bor.
+- **Jurnal:** `doc_add`, `doc_replace`, `doc_delete` — hujjat turi va yozuv sanalari, rasm mazmuni yozilmaydi. Kasallik yozuvi o‘chirilsa, rasmlari ham o‘chadi (jurnalda soni).
+- **Himoyalangan ko‘rish** `/kasal/<id>/hujjat/<UUID>/` (`?kichik=1`):
+  - admin va kursantning o‘zi ko‘radi; boshqa kursantga 403, kirmagan odam kirish sahifasiga yo‘naltiriladi;
+  - sarlavhalar: `Cache-Control: private, no-store`, `nosniff`, `X-Robots-Tag: noindex`.
+- **Interfeys:**
+  - Kasallar ro‘yxatida “📎 2 · Hujjatlar” yoki nozik “Hujjat yo‘q” belgisi;
+  - yozuv sahifasida galereya (CSS `:target` bilan kattalashtirish, JavaScript yo‘q, CSP o‘zgarmagan) va telefon kamerasidan yuklash (`accept="image/*"`);
+  - kursant kartochkasida “Kasallik hujjatlari — Hujjatlaringiz: 2 ta” (faqat ko‘rish, tavsifsiz), bosh sahifadagi kasallik yozuvida havola.
+- Ruxsat `documents.own` (kursant — faqat o‘zinikini ko‘rish).
+- Testlar: `tests/test_documents.py` (24), `tests/test_branding.py` (7), ruxsatlar auditi yangilandi — jami 519. `scripts/screenshots_v19.py`, `docs/skrinshotlar/v1.9/`.
+
+## [1.8.0] — 2026-10-19
+
+17-bosqich: kasallar ro‘yxati (CLAUDE.md 64-band). Algoritm, dvigatel, PDF shakli va dizayn o‘zgarmagan: kasal kursant mavjud sababli holat (`Absence`, sabab “kasal”) orqali chetlatiladi. 84 sutkalik etalon xesh avvalgidek.
+
+### Qo‘shildi
+- **“Kasallar ro‘yxati” bo‘limi** (faqat admin, menyuda “Sababli holatlar” yonida).
+  - Jadval ustunlari: F.I.Sh., guruh, kasallik (qisqa tavsif), qachondan beri, muddati, holat (davom etmoqda / tugagan / kelajakda), kim kiritdi va qachon.
+  - Filtrlar: “Hozir kasallar” yoki “Hammasi”, guruh bo‘yicha.
+  - Qo‘shish formasi: kursantni qidirib tanlash (100 kishidan), tavsif, boshlanish va tugash sanasi — hammasi majburiy. Ustma-ust yozuv kiritilmaydi.
+  - Tahrirlash: tavsif va sanalar; boshlangan yozuvda boshlanish sanasi o‘zgarmaydi (36-band).
+  - Tugmalar: “Muddatni uzaytirish”, “Sog‘ayib qaytdi” (muddat bugungi sutkada tugaydi), hali boshlanmagan yozuvni o‘chirish.
+  - Har amal jurnalga yoziladi: `sick_add`, `sick_edit`, `sick_extend`, `sick_recover`, `sick_delete`.
+- `Absence.illness` maydoni (kasallik tavsifi, faqat admin ko‘radi). Migratsiya 0015. Ruxsat `sick.manage` (faqat admin).
+- **Kursant bosh sahifasi:** kasallik davrida “Mening navbatdagi naryadim” o‘rnida “Siz kasallar ro‘yxatidasiz: 15.10 dan 20.10 gacha” chiqadi, tavsifsiz. Boshqa kursantlar, sutka sahifasi va PDF’da kasallik belgisi yo‘q.
+- **Almashtirish oynasi:** kasal kursantni tanlab bo‘lmaydi, sababi “Kasal: 16.10–19.10 (kasallar ro‘yxatida)” deb ko‘rsatiladi.
+- **Qoralamada kasal kursant:** sariq ogohlantirish va shu o‘ringa “Almashtirish” tugmasi. Sutka tasdiqlanmaydi (32-band).
+- **Tasdiqlangan sutkaga to‘g‘ri kelgan kasallik:** ro‘yxat o‘zgarmaydi. Kiritishda va sutka sahifasida admin ogohlantiriladi: “… sutkada naryadda, u tasdiqlangan. Almashtirish uchun avval tasdiqni bekor qiling.”
+- “Sababli holatlar” sahifasida kasallik yozuvlari tavsifi va “Kasallar ro‘yxatida tahrirlash” havolasi bilan ko‘rinadi.
+- `tests/test_sick.py` (20 test) va ruxsatlar auditi yangilandi (jami 484). `scripts/screenshots_v18.py`, `docs/skrinshotlar/v1.8/`.
+
+## [1.7.0] — 2026-10-18
+
+16-bosqich: kursant ko‘rinishi kengaydi, sababli holat eslatmasi, “ozod” yozuvi olib tashlandi (CLAUDE.md 63-band).
+Algoritm, generator, PDF shakli va hisoblashlar o‘zgarmagan: 84 sutkalik etalon xesh avvalgidek.
+
+### O‘zgardi
+- **Kursant tasdiqlangan ro‘yxatlarni yana ko‘radi** (14-bosqichdagi cheklov bekor qilindi, 60-band):
+  - menyuga “Tasdiqlangan naryadlar” qaytdi; ro‘yxatda kursant turgan sutkalar “Siz naryaddasiz” belgisi bilan;
+  - sutka sahifasi faqat o‘qish uchun: joylar bo‘yicha guruhlangan (joy, lavozim, F.I.Sh., guruh), kursantning o‘z o‘rni ajratilgan (“Siz”);
+  - oldingi/keyingi havolalari faqat tasdiqlangan sutkalarga olib boradi;
+  - tasdiqlangan sutka PDF’i va chop etish (o‘zbekcha, shakl o‘zgarmagan); hafta PDF’ida faqat tasdiqlangan sutkalar.
+- **Kursantga yopiq (403, serverda tekshiriladi):** qoralama va tuzilmagan sutka sahifasi, qoralama PDF’i va chop etish, jurnal, boshqa kursantlarning kartochkasi, statistika va Excel, sababli holatlar, zalyotchiklar, kursantlar ro‘yxati, haftalar, almashtirish oynasi.
+  - Kursant sahifasida tugmalar, “qo‘lda” (✎) belgisi, “Tasdiqlagan” qatori, jurnal havolasi yo‘q.
+  - Jazo (zalyot) naryadi oddiy posbon bo‘lib ko‘rinadi.
+- **“Ozod” yozuvi olib tashlandi** (uch tilda): guruh jadvallari, statistika, kursantlar ro‘yxati, kartochka, almashtirish oynasi, ogohlantirishlar va xabarlar.
+  - Uning o‘rnida lavozim yozuvi: Kurs starshinasi, Guruh komandiri, Kurs pisari, Kaptyorchik.
+  - Filtr va ustun “Naryadga chiqmaydi” deb nomlandi (platforma va Django boshqaruv paneli). `?holat=ozod` eski havolalari ishlaydi, yangisi `?holat=lavozimda`.
+  - `duty_exempt`, generator qoidalari va hisoblashlar o‘zgarmagan. Migratsiya 0014 faqat maydon nomini o‘zgartiradi, SQL o‘zgarishi yo‘q.
+  - Jurnaldagi eski yozuvlar o‘zgarmagan.
+
+### Qo‘shildi
+- `templates/partials/duty_reason_notice.html`: qayta ishlatiladigan sababli holat eslatmasi (sariq blok, uch tilda). U kursant bosh sahifasida, “Tasdiqlangan naryadlar” va sutka sahifasida chiqadi, admin sahifalarida yo‘q. Keyingi bosqichda guruh komandiri paneliga ham qo‘yiladi.
+- `tests/test_cadet_roster.py` (14 test), ruxsatlar auditi va mavjud testlar 16-bosqichga moslandi (jami 464).
+- `scripts/screenshots_v17.py`, `docs/skrinshotlar/v1.7/`.
 
 ## [1.6.1] — 2026-10-15
 

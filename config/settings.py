@@ -111,6 +111,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# Platforma nomi (18-bosqich, CLAUDE.md 65-band): hamma tilda bir xil, tarjima qilinmaydi.
+# Ko'rinadigan joylar uni shu yerdan oladi (kontekst protsessori `site_name`, `{% site_name %}` tegi).
+SITE_NAME = "E-NARYAD"
+
+# “Sinov ma'lumotlarini tozalash” oldidan avtomatik zaxira (20-bosqich). Railway'da disk vaqtinchalik — darhol yuklab olinadi.
+BACKUP_DIR = Path(os.environ.get("DJANGO_BACKUP_DIR", BASE_DIR / "data" / "zaxira"))
+
 LANGUAGE_CODE = "uz"
 # Uch til (13-bosqich): o'zbekcha asosiy. Til faqat foydalanuvchi tanlovi bilan o'zgaradi (naryad/i18n.py)
 LANGUAGES = [("uz", "O‘zbekcha"), ("ru", "Русский"), ("en", "English")]

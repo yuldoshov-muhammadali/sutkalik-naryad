@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Haftalik ko‘rinish" %}{% endblock %}
+{% block content %}
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}"><a href="{% url 'group_overview' %}" class="hover:underline">{% translate "Mening guruhim" %}</a> / {% translate "Haftalik ko‘rinish" %}</nav>
+<h1 class="text-xl font-semibold sm:text-2xl">{% translate "Haftalik ko‘rinish" %}</h1>
+<p class="text-sm text-slate-600">{% translate "Joriy va keyingi 2-kurs haftasi. Katakda — joy; faqat tasdiqlangan sutkalar (hali tasdiqlanmagan kunlar bo‘sh)." %}</p>
+{% for w in weeks %}
+<section class="mt-5" aria-label="{{ w.title }}" data-testid="week-{{ forloop.counter }}">
+  <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% if forloop.first %}{% translate "Joriy hafta" %}{% else %}{% translate "Keyingi hafta" %}{% endif %} · <span class="normal-case">{{ w.title }}</span></h2>
+  <div class="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+    <table class="min-w-full border-separate border-spacing-0 text-xs">
+      <thead class="text-slate-600">
+        <tr>
+          <th scope="col" class="sticky left-0 z-10 border-b border-r border-slate-200 bg-slate-50 px-2 py-2 text-left font-medium">{% translate "Kursant" %}</th>
+          {% for d, wd in w.labels %}<th scope="col" class="border-b border-slate-200 px-1.5 py-2 text-center font-medium {% if d == today %}bg-gold-50{% else %}bg-slate-50{% endif %}">{{ wd }}<span class="block font-normal text-slate-500">{{ d|date:"d.m" }}</span>{% if d not in w.approved_days %}<span class="block font-normal text-slate-400" title="{% translate "hali tasdiqlanmagan" %}">·</span>{% endif %}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in w.rows %}
+        <tr>
+          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-2 py-1.5 text-left font-medium">{{ row.cadet.short_name }}</th>
+          {% for c in row.cells %}<td class="border-b border-slate-100 px-1 py-1.5 text-center {% if c %}bg-brand-50 font-semibold text-brand-900{% endif %}">{% if c %}<span class="whitespace-nowrap" title="{% translate c.a.post_slot.post.name %} · {{ c.a.post_slot.get_role_display }}">{{ c.short }}</span>{% endif %}</td>{% endfor %}
+        </tr>
+        {% endfor %}
+        <tr class="text-slate-500"><th scope="row" class="sticky left-0 bg-slate-50 px-2 py-1.5 text-left font-medium">{% translate "Jami" %}</th>{% for n in w.count %}<td class="bg-slate-50 px-1 py-1.5 text-center tabular-nums">{{ n|default:"" }}</td>{% endfor %}</tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

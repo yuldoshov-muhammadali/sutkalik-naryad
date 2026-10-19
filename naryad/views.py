@@ -30,12 +30,22 @@ def home_status(request):
 
 def home_context(request) -> tuple[str, dict]:
     role = perms.user_role(request.user)
-    if role == perms.CADET:
-        return "naryad/home_cadet.html", {"data": cadet_dashboard(request.user), "fmt_day": fmt_day}
+    if role in perms.CADETS:
+        context = {"data": cadet_dashboard(request.user), "fmt_day": fmt_day}
+        if role == perms.COMMANDER:  # 19-bosqich: “Mening naryadim” o'rnida “Mening guruhim” kartochkasi
+            from .group_scope import group_summary
+
+            context["group"] = group_summary(request.user)
+        return "naryad/home_cadet.html", context
     data = staff_dashboard(request.user)
     fairness = stats.fairness_all(stats.Period()) if perms.can(request.user, "history.all") else []
     banner = approval_banner() if perms.can(request.user, "day.approve") else None
-    return "naryad/home_staff.html", {"data": data, "fairness": fairness, "banner": banner}
+    new_penalties = 0
+    if perms.can(request.user, "penalty.manage"):
+        from .penalties import unreviewed
+
+        new_penalties = unreviewed().count()
+    return "naryad/home_staff.html", {"data": data, "fairness": fairness, "banner": banner, "new_penalties": new_penalties}
 
 
 class LoginView(auth_views.LoginView):

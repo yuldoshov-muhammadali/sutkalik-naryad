@@ -44,7 +44,7 @@ from .cadets import (
     set_exempt,
 )
 from .importers import EXPECTED_COMPOSITION, EXPECTED_TOTAL
-from .models import Assignment, Cadet, ChangeLog, DutyDay, Gender, StudyGroup
+from .models import Absence, Assignment, Cadet, ChangeLog, DutyDay, Gender, SickDocument, StudyGroup
 
 SESSION_KEY = "cadet_import"
 
@@ -98,7 +98,7 @@ def cadet_list(request):
         qs = qs.filter(is_active=False)
     elif status == "naryadga":
         qs = qs.filter(is_active=True, duty_exempt=False)
-    elif status == "ozod":
+    elif status in ("lavozimda", "ozod"):  # "ozod" — eski havolalar uchun
         qs = qs.filter(duty_exempt=True)
     if q:
         qs = qs.filter(last_name__icontains=q)  # familiya bo‘yicha qidiruv
@@ -205,14 +205,14 @@ def cadet_exempt(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = ExemptForm(request.POST)
     if not cadet.is_active:
-        messages.error(request, _("Faol bo‘lmagan kursantni naryaddan ozod qilib bo‘lmaydi — u baribir naryadga tushmaydi."))
+        messages.error(request, _("Faol bo‘lmagan kursantni “naryadga chiqmaydi” deb belgilab bo‘lmaydi — u baribir naryadga tushmaydi."))
     elif exempt_blocker(cadet):
         messages.error(request, exempt_blocker(cadet))
     elif form.is_valid():
         set_exempt(cadet, form.cleaned_data["position"], form.cleaned_data["reason"], request.user)
         messages.success(
             request,
-            _("%(name)s naryaddan ozod qilindi (%(position)s). Tarixi saqlanadi.")
+            _("%(name)s endi naryadga chiqmaydi (%(position)s). Tarixi saqlanadi.")
             % {"name": cadet.full_name, "position": cadet.duty_position},
         )
         for day in open_drafts_with(cadet):
@@ -223,7 +223,7 @@ def cadet_exempt(request, pk):
             )
     else:
         errors = "; ".join(e for errs in form.errors.values() for e in errs)
-        messages.error(request, _("Ozod qilinmadi: %(errors)s") % {"errors": errors})
+        messages.error(request, _("Belgilanmadi: %(errors)s") % {"errors": errors})
     return redirect("cadet_detail", pk=cadet.pk)
 
 
@@ -233,7 +233,7 @@ def cadet_unexempt(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = UnexemptForm(request.POST)
     if not cadet.duty_exempt:
-        messages.info(request, _("Kursant naryaddan ozod emas."))
+        messages.info(request, _("Kursant “naryadga chiqmaydi” deb belgilanmagan."))
     elif form.is_valid():
         clear_exempt(cadet, form.cleaned_data["reason"], request.user)
         messages.success(
@@ -287,8 +287,19 @@ def cadet_detail(request, pk):
         "log": ChangeLog.objects.filter(cadet=cadet).select_related("user")[:20] if is_admin else [],
         "account": getattr(cadet, "user", None) if is_admin else None,
         "comparison": stats.cadet_comparison(cadet),
+        "sick_docs": sick_documents(cadet),
     }
     return render(request, "naryad/cadets/detail.html", context)
+
+
+def sick_documents(cadet: Cadet) -> list[dict]:
+    """Kasallik hujjatlari (18-bosqich): faqat hujjati bor kasallik yozuvlari, sanalar bilan — tavsifsiz.
+    Kartochkani faqat admin yoki kursantning o'zi ochadi (yuqoridagi tekshiruv), rasm URL'i alohida tekshiriladi."""
+    docs: dict[int, list] = {}
+    for d in SickDocument.objects.filter(absence__cadet=cadet).order_by("created_at"):
+        docs.setdefault(d.absence_id, []).append(d)
+    absences = Absence.objects.filter(pk__in=docs).order_by("-start_date")
+    return [{"absence": a, "docs": docs[a.pk]} for a in absences]
 
 
 @perms.role_required("history.own")

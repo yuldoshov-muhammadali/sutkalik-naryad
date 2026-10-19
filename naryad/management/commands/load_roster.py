@@ -44,7 +44,7 @@ class Command(BaseCommand):
         )
         if report.exempt:
             self.stdout.write("")
-            self.stdout.write(f"Naryaddan ozod ({len(report.exempt)}):")
+            self.stdout.write(f"Naryadga chiqmaydi — lavozimda ({len(report.exempt)}):")
             for line in report.exempt:
                 self.stdout.write(f"  {line}")
 

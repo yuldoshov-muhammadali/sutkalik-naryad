@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Zalyotni tahrirlash" %}{% endblock %}
+{% block content %}
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}"><a href="{% url 'penalty_list' %}" class="hover:underline">{% translate "Zalyotchiklar" %}</a> / {{ penalty.cadet.short_name }}</nav>
+<h1 class="text-xl font-semibold sm:text-2xl">{{ penalty.cadet.full_name }} <span class="text-base font-normal text-slate-500">{{ penalty.cadet.group.code }}</span></h1>
+<p class="mt-1 text-sm text-slate-600">{% blocktranslate with served=penalty.served total=penalty.count %}O‘tildi: {{ served }} / {{ total }}. Kursant o‘zgarmaydi; soni allaqachon o‘tilganidan kam bo‘lmaydi.{% endblocktranslate %}</p>
+{% if penalty.is_active %}
+<section class="mt-4 max-w-xl rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  {% if form.non_field_errors %}<div class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+  <form method="post" class="space-y-3" novalidate data-testid="penalty-edit-form">{% csrf_token %}
+    {% for field in form %}<label class="block text-sm font-medium">{{ field.label }} * {{ field }}{% for e in field.errors %}<span class="mt-1 block text-sm font-normal text-red-700">{{ e }}</span>{% endfor %}</label>{% endfor %}
+    <button type="submit" class="min-h-[44px] rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900">{% translate "Saqlash" %}</button>
+  </form>
+</section>
+{% endif %}
+<section class="mt-5 max-w-xl" aria-labelledby="entries-title">
+  <h2 id="entries-title" class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Kiritishlar" %}</h2>
+  <ul class="space-y-2">{% for e in entries %}
+    <li class="rounded-xl bg-white px-4 py-3 text-sm shadow-sm ring-1 ring-slate-200"><p class="font-medium">+{{ e.count }} · {{ e.get_reason_type_display }} · {% blocktranslate with d=e.order_date|date:"d.m.Y" %}tanbeh {{ d }}{% endblocktranslate %}</p>
+      <p class="text-xs text-slate-500">{% translate "Kim kiritdi" %}: {{ e.created_by.get_full_name|default:e.created_by.username|default:"—" }}{% if e.by_commander %} ({% translate "guruh komandiri" %}){% endif %} · {{ e.created_at|date:"d.m.Y H:i" }}</p>
+      <p class="text-slate-700">{{ e.note }}</p></li>
+  {% endfor %}</ul>
+</section>
+{% endblock %}

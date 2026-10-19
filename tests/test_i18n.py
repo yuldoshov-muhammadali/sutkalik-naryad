@@ -107,7 +107,7 @@ LANGUAGE_NAMES = ["O‘zbekcha", "Русский", "English", "Sh, Ch, G‘, O�
 
 
 def leftovers(text: str, lang: str) -> list[str]:
-    for s in data_strings() + LANGUAGE_NAMES:
+    for s in data_strings() + LANGUAGE_NAMES + ["E-NARYAD"]:  # platforma nomi tarjima qilinmaydi (18-bosqich)
         text = text.replace(s, " ")
     words = re.findall(r"[A-Za-zʻ‘’'-]+", text)
     found = []
@@ -119,7 +119,7 @@ def leftovers(text: str, lang: str) -> list[str]:
 
 
 MAIN_PAGES = ["home", "week_list", "day_detail:approved", "day_detail:draft", "day_log", "cadet_list", "cadet_detail:other",
-              "absence_list", "penalty_list", "stats", "approved_days", "password_change", "cadet_create", "cadet_import"]
+              "absence_list", "sick_list", "sick_create", "penalty_list", "stats", "approved_days", "password_change", "cadet_create", "cadet_import"]
 
 
 @pytest.mark.parametrize("lang", ["ru", "en"])
@@ -179,7 +179,7 @@ def test_default_is_uzbek_even_if_browser_says_russian(client, db):
 def test_admin_panel_ignores_browser_language(client, world):
     client.force_login(world["admin"])
     body = client.get("/admin/", HTTP_ACCEPT_LANGUAGE="ru").content.decode()
-    assert "Sutkalik naryad" in body and "Администрирование" not in body
+    assert "E-NARYAD — boshqaruv paneli" in body and "Администрирование" not in body
 
 
 def test_choice_persists_across_logout_and_devices(client, world):

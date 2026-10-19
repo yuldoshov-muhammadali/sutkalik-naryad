@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Zalyot kiritish" %}{% endblock %}
+{% block content %}
+<nav class="crumbs mb-3 text-sm text-slate-500" aria-label="{% translate "Yo‘l" %}"><a href="{% url 'group_penalties' %}" class="hover:underline">{% translate "Guruh zalyotlari" %}</a> / {% translate "Zalyot kiritish" %}</nav>
+<h1 class="text-xl font-semibold sm:text-2xl">{% translate "Zalyot kiritish" %} <span class="text-base font-normal text-slate-500">{{ group.code }}</span></h1>
+<p class="mt-1 text-sm text-slate-600">{% translate "Navbatdan tashqari (jazo) naryadi: faqat 1-NO‘J yoki 1-Yotoqxonada posbon. Faqat o‘z guruhingizning o‘g‘il, faol, naryadga chiqadigan kursanti. Kiritilgan zalyot darhol faol bo‘ladi; tahrirlash va bekor qilish — faqat kurs boshlig‘i." %}</p>
+<section class="mt-4 max-w-xl rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+  {% if form.non_field_errors %}<div class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+  <form method="post" class="space-y-3" novalidate data-testid="commander-penalty-form">
+    {% csrf_token %}
+    {% for field in form %}
+    <label class="block text-sm font-medium">{{ field.label }} *
+      {{ field }}
+      {% if field.name == 'count' %}<span class="mt-1 block text-xs font-normal text-slate-500">{% blocktranslate with n=form.count.field.max_value %}1 dan {{ n }} gacha{% endblocktranslate %}</span>{% endif %}
+      {% for e in field.errors %}<span class="mt-1 block text-sm font-normal text-red-700">{{ e }}</span>{% endfor %}
+    </label>
+    {% endfor %}
+    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <a href="{% url 'group_penalties' %}" class="inline-flex min-h-[44px] items-center justify-center rounded-lg px-4 text-sm font-semibold text-slate-600 ring-1 ring-slate-300">{% translate "Orqaga" %}</a>
+      <button type="submit" class="min-h-[44px] rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-900">{% translate "Davom etish" %}</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -7,6 +7,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
 from django.db import models
+from django.http import HttpResponse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _lazy
 from django.utils.translation import ngettext
 
@@ -46,8 +48,23 @@ class UserAdmin(BaseUserAdmin):
     autocomplete_fields = ("cadet",)
     fieldsets = BaseUserAdmin.fieldsets + ((_lazy("Naryad platformasi"), {"fields": ("role", "cadet", "must_change_password")}),)
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        (_lazy("Naryad platformasi"), {"fields": ("role", "cadet", "must_change_password")}),
+        (_lazy("Naryad platformasi"), {
+            "fields": ("role", "cadet", "must_change_password"),
+            "description": _lazy("“Guruh komandiri” roli faqat guruh komandiri lavozimidagi kursantga beriladi; guruh kursantning guruhidan olinadi, har guruhga bitta faol komandir."),
+        }),
     )
+    actions = ["reset_temp_passwords"]
+
+    @admin.action(description=_lazy("Vaqtinchalik parol berish (Excel)"))
+    def reset_temp_passwords(self, request, queryset):
+        """Parolni tiklash (kursant va komandir): yangi vaqtinchalik parol, birinchi kirishda almashtirish majburiy."""
+        from .accounts import accounts_xlsx_bytes, reset_passwords
+
+        accounts = reset_passwords(queryset.exclude(role="admin").filter(is_superuser=False))
+        if not accounts:
+            self.message_user(request, _lazy("Kursantga bog‘langan akkaunt tanlanmadi."), level="warning")
+            return None
+        return _xlsx_response(accounts_xlsx_bytes(accounts, timezone.localdate()), "parollar")
 
 
 # ---------------------------------------------------------------------------
@@ -82,6 +99,13 @@ class StudyGroupAdmin(admin.ModelAdmin):
         return False
 
 
+def _xlsx_response(content: bytes, prefix: str) -> HttpResponse:
+    response = HttpResponse(content, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f'attachment; filename="{prefix}_{timezone.localdate():%Y-%m-%d}.xlsx"'
+    response["Cache-Control"] = "private, no-store"  # ochiq parollar
+    return response
+
+
 @admin.register(Cadet)
 class CadetAdmin(admin.ModelAdmin):
     list_display = ("short_name", "fio", "group", "gender", "list_number", "is_active", "duty_exempt", "duty_position")
@@ -89,14 +113,24 @@ class CadetAdmin(admin.ModelAdmin):
     search_fields = ("last_name", "first_name", "patronymic", "short_name")
     # Naryaddan ozod belgisi faqat kursant kartochkasidan, sabab bilan o'zgartiriladi (jurnalga yoziladi)
     readonly_fields = ("deactivated_at", "duty_exempt", "duty_position", "created_at", "updated_at")
+    actions = ["create_accounts"]
+
+    @admin.action(description=_lazy("Akkaunt yaratish (Excel) — guruh komandirlariga rol avtomatik"))
+    def create_accounts(self, request, queryset):
+        from .accounts import accounts_xlsx_bytes, create_cadet_accounts
+
+        report = create_cadet_accounts(None, cadets=queryset)
+        if not report.created:
+            self.message_user(request, _lazy("Yangi akkaunt yaratilmadi: tanlanganlarning akkaunti bor yoki faol emas."), level="warning")
+            return None
+        return _xlsx_response(accounts_xlsx_bytes(report.created, timezone.localdate()), "akkauntlar")
     fieldsets = (
         (None, {"fields": ("group", "list_number", "last_name", "first_name", "patronymic", "gender", "short_name")}),
         (_lazy("Faollik"), {"fields": ("is_active", "deactivation_reason", "deactivated_at")}),
-        (_lazy("Naryaddan ozod"), {"fields": ("duty_exempt", "duty_position"),
-                            "description": _lazy("Kursant kartochkasidagi “Naryaddan ozod qilish” / “Naryadga qaytarish” orqali o‘zgartiriladi.")}),
+        (_lazy("Naryadga chiqmaydi (lavozim)"), {"fields": ("duty_exempt", "duty_position"),
+                            "description": _lazy("Kursant kartochkasidagi “Naryadga chiqmaydi deb belgilash” / “Naryadga qaytarish” orqali o‘zgartiriladi.")}),
         (_lazy("Tizim"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
-    actions = None
 
     @admin.display(description=_lazy("F.I.Sh."))
     def fio(self, obj):
@@ -262,10 +296,10 @@ class AssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(Absence)
 class AbsenceAdmin(admin.ModelAdmin):
-    list_display = ("cadet", "start_date", "end_date", "reason_type", "note", "created_by")
+    list_display = ("cadet", "start_date", "end_date", "reason_type", "illness", "note", "created_by")
     list_filter = ("reason_type", "cadet__group", "cadet__gender")
     date_hierarchy = "start_date"
-    search_fields = ("cadet__last_name", "cadet__first_name", "note")
+    search_fields = ("cadet__last_name", "cadet__first_name", "note", "illness")
     autocomplete_fields = ("cadet",)
     readonly_fields = ("created_by", "created_at")
 
@@ -289,7 +323,7 @@ class PenaltyAdmin(ReadOnlyAdminMixin, admin.ModelAdmin):
 
     list_display = ("cadet", "reason_type", "order_date", "count", "status", "created_by", "created_at")
     list_filter = ("status", "reason_type")
-    search_fields = ("cadet__last_name", "cadet__first_name", "note")
+    search_fields = ("cadet__last_name", "cadet__first_name", "note", "illness")
 
 
 class InitialRotationFormSet(forms.BaseInlineFormSet):
@@ -339,8 +373,15 @@ class PrepNoteInline(admin.StackedInline):
 @admin.register(Setting)
 class SettingAdmin(admin.ModelAdmin):
     list_display = ("__str__", "recipient_name", "course_head_name", "course_number", "approval_lead_hours", "updated_at")
-    readonly_fields = ("updated_by", "updated_at")
+    readonly_fields = ("updated_by", "updated_at", "test_data_link")
     inlines = [InitialRotationInline, PrepNoteInline]
+
+    @admin.display(description=_lazy("Sinov ma’lumotlarini tozalash"))
+    def test_data_link(self, obj):
+        from django.urls import reverse
+        from django.utils.html import format_html
+
+        return format_html('<a href="{}">{}</a>', reverse("clear_test_data"), _lazy("Ko‘rib chiqish va tozalash →"))
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         # Har bir joy uchun eslatma qatori bo'lsin (yangi joy qo'shilsa ham)

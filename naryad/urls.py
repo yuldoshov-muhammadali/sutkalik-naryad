@@ -1,6 +1,16 @@
 from django.urls import path
 
-from . import i18n, views, views_cadets, views_days, views_penalties, views_stats
+from . import (
+    i18n,
+    views,
+    views_cadets,
+    views_cleanup,
+    views_days,
+    views_group,
+    views_penalties,
+    views_sick,
+    views_stats,
+)
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -19,9 +29,16 @@ urlpatterns = [
     path("kursantlar/<int:pk>/tahrirlash/", views_cadets.cadet_edit, name="cadet_edit"),
     path("kursantlar/<int:pk>/faolsizlantirish/", views_cadets.cadet_deactivate, name="cadet_deactivate"),
     path("kursantlar/<int:pk>/faollashtirish/", views_cadets.cadet_activate, name="cadet_activate"),
-    path("kursantlar/<int:pk>/ozod-qilish/", views_cadets.cadet_exempt, name="cadet_exempt"),
+    path("kursantlar/<int:pk>/naryadga-chiqmaydi/", views_cadets.cadet_exempt, name="cadet_exempt"),
     path("kursantlar/<int:pk>/naryadga-qaytarish/", views_cadets.cadet_unexempt, name="cadet_unexempt"),
     path("mening-tarixim/", views_cadets.my_card, name="my_card"),
+    # Mening guruhim — guruh komandiri, faqat ko'rish (19-bosqich)
+    path("mening-guruhim/", views_group.group_overview, name="group_overview"),
+    path("mening-guruhim/holat/", views_group.group_status, name="group_status"),
+    path("mening-guruhim/hafta/", views_group.group_week, name="group_week"),
+    path("mening-guruhim/kursant/<int:pk>/", views_group.group_cadet, name="group_cadet"),
+    path("mening-guruhim/zalyotlar/", views_group.group_penalties, name="group_penalties"),
+    path("mening-guruhim/zalyot/", views_group.group_penalty_add, name="group_penalty_add"),
     # Haftalar, sutka, sababli holatlar (7-bosqich)
     path("haftalar/", views_days.week_list, name="week_list"),
     path("haftalar/ochish/", views_days.week_open, name="week_open"),
@@ -41,9 +58,30 @@ urlpatterns = [
     path("sababli/", views_days.absence_list, name="absence_list"),
     path("sababli/<int:pk>/tugatish/", views_days.absence_end, name="absence_end"),
     path("sababli/<int:pk>/ochirish/", views_days.absence_delete, name="absence_delete"),
+    # Kasallar ro'yxati (17-bosqich)
+    path("kasallar/", views_sick.sick_list, name="sick_list"),
+    path("kasallar/qoshish/", views_sick.sick_create, name="sick_create"),
+    path("kasallar/<int:pk>/", views_sick.sick_edit, name="sick_edit"),
+    path("kasallar/<int:pk>/uzaytirish/", views_sick.sick_extend, name="sick_extend"),
+    path("kasallar/<int:pk>/sogaydi/", views_sick.sick_recover, name="sick_recover"),
+    path("kasallar/<int:pk>/ochirish/", views_sick.sick_delete, name="sick_delete"),
+    # Kasallik hujjatlari (18-bosqich): ko'rish faqat ruxsat tekshiruvi bilan, UUID orqali
+    path("kasallar/<int:pk>/hujjat/", views_sick.doc_upload, name="sick_doc_upload"),
+    path("kasallar/<int:pk>/hujjat/<uuid:doc_id>/almashtirish/", views_sick.doc_replace, name="sick_doc_replace"),
+    path("kasallar/<int:pk>/hujjat/<uuid:doc_id>/ochirish/", views_sick.doc_delete, name="sick_doc_delete"),
+    path("kasal/<int:pk>/hujjat/<uuid:doc_id>/", views_sick.doc_view, name="sick_doc"),
     # Zalyotchiklar — navbatdan tashqari jazo naryadi (15-bosqich)
+    # Sinov ma'lumotlarini tozalash (20-bosqich) — faqat admin
+    path("sozlamalar/tozalash/", views_cleanup.clear_preview, name="clear_test_data"),
+    path("sozlamalar/tozalash/bajarish/", views_cleanup.clear_run, name="clear_test_data_run"),
+    path("sozlamalar/tozalash/zaxira/<str:name>/", views_cleanup.backup_download, name="backup_download"),
     path("zalyotchiklar/", views_penalties.penalty_list, name="penalty_list"),
     path("zalyotchiklar/<int:pk>/bekor-qilish/", views_penalties.penalty_cancel, name="penalty_cancel"),
+    path("zalyotchiklar/<int:pk>/tahrirlash/", views_penalties.penalty_edit, name="penalty_edit"),
+    path("zalyotchiklar/<int:pk>/korib-chiqildi/", views_penalties.penalty_review, name="penalty_review"),
+    path("zalyotchiklar/korib-chiqildi/", views_penalties.penalty_review_all, name="penalty_review_all"),
+    path("zalyotchiklar/hisob/", views_penalties.penalty_ledger, name="penalty_ledger"),
+    path("zalyotchiklar/hisob/excel/", views_penalties.penalty_ledger_excel, name="penalty_ledger_excel"),
     # Statistika va adolat (9-bosqich)
     path("statistika/", views_stats.stats_page, name="stats"),
     path("statistika/excel/", views_stats.stats_excel, name="stats_excel"),

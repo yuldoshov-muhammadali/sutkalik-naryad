@@ -295,7 +295,7 @@ def exempt_blocker(cadet: Cadet) -> str | None:
     if penalty is not None:
         return _(
             "%(name)s faol zalyotchik (%(count)s ta jazo naryadi) — avval zalyot bajarilishi yoki bekor qilinishi kerak, "
-            "keyin naryaddan ozod qilinadi."
+            "keyin “naryadga chiqmaydi” deb belgilanadi."
         ) % {"name": cadet.short_name, "count": penalty.count}
     return None
 
