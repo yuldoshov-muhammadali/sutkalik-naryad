@@ -137,7 +137,8 @@ def test_generator_never_picks_exempt_in_12_weeks(admin):
         DutyWeek.objects.create(start_date=start, created_by=admin)
         for i in range(7):
             day = generate_and_approve(start + dt.timedelta(days=i), admin)
-            assert not day.warnings, (day.date, day.warnings)  # bo'sh o'rin yo'q
+            # bo'sh o'rin yo'q (21-bosqich: QOIDA A yumshatilgani haqidagi ogohlantirish bo'lishi mumkin)
+            assert not [w for w in day.warnings if "bo‘sh qoldi" in w], (day.date, day.warnings)
     assigned = Assignment.objects.filter(duty_day__status=DutyDay.Status.APPROVED)
     assert assigned.count() == 84 * 20
     assert not assigned.filter(cadet_id__in=exempt_ids).exists()
@@ -183,7 +184,7 @@ def test_manual_placement_of_exempt_is_rejected(admin):
     slot = PostSlot.objects.get(post__code="noj1", position=1)
     candidates = days.replacement_candidates(draft, slot)
     excluded = {c.cadet.pk: c.excluded for c in candidates if c.excluded}
-    assert "naryadga chiqmaydi" in excluded[exempt.pk] and exempt.duty_position in excluded[exempt.pk]  # 16-bosqich: “ozod” yo‘q
+    assert excluded[exempt.pk] == "Guruh komandiri (lavozimda)"  # 21-bosqich (5a): faqat lavozim nomi
     assert all(not c.cadet.duty_exempt for c in candidates if not c.excluded)
     with pytest.raises(ServiceError, match="sutkalik naryadga qo‘yilmaydi"):
         days.replace_cadet(SUNDAY, slot.pk, exempt.pk, "sababli", "", admin, draft.version)
@@ -200,7 +201,7 @@ def test_exempt_in_draft_blocks_approval(admin, client):
         days.approve(SUNDAY, admin, draft.version)
     client.force_login(admin)
     html = client.get(reverse("day_detail", args=[SUNDAY.isoformat()])).content.decode()
-    assert "BI-525 guruh komandiri o‘rinbosari, naryadga chiqmaydi" in html and not exempt_words(html)
+    assert "BI-525 guruh komandiri o‘rinbosari (lavozimda)" in html and not exempt_words(html)
 
 
 def test_unexempted_cadet_goes_first(admin):
@@ -270,8 +271,11 @@ def test_cadet_list_badge_filter_and_summary(admin, client):
     for code, n in EXPECTED_ON_DUTY.items():
         assert f'data-testid="on-duty-{code}">{n}' in html
     assert "78" in html and "(9 lavozimda)" in html and not exempt_words(html)  # 16-bosqich
-    assert "Naryadga chiqmaydi" in html  # filtr nomi
+    assert "Lavozim" in html and "Lavozimsiz" in html  # 21-bosqich: “Lavozim” filtri
     assert client.get(reverse("cadet_list"), {"holat": "lavozimda"}).context["count"] == 9
+    counts = {code: client.get(reverse("cadet_list"), {"lavozim": code}).context["count"]
+              for code in ("komandir", "starshina", "pisar", "kaptyor", "yoq")}
+    assert counts == {"komandir": 6, "starshina": 1, "pisar": 1, "kaptyor": 1, "yoq": 100 - 9}
     assert client.get(reverse("cadet_list"), {"holat": "ozod"}).context["count"] == 9  # eski havolalar
     assert client.get(reverse("cadet_list"), {"holat": "naryadga", "jins": "M"}).context["count"] == 78
 

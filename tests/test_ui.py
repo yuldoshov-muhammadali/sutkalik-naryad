@@ -125,8 +125,8 @@ def test_roles_doc_matches_permission_table():
         row = next((line for line in text.splitlines() if f"`{action}`" in line), None)
         assert row is not None, f"docs/05-rollar.md da {action} yo‘q"
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
-        marks = cells[-3:]  # admin, kursant, guruh komandiri (19-bosqich)
-        assert marks == ["✅" if r in roles else "—" for r in (perms.ADMIN, perms.CADET, perms.COMMANDER)], action
+        marks = cells[-4:]  # admin, kadir, kursant, guruh komandiri (22-bosqich)
+        assert marks == ["✅" if r in roles else "—" for r in (perms.ADMIN, perms.KADIR, perms.CADET, perms.COMMANDER)], action
 
 
 def test_menu_depends_on_role(client, users):
@@ -381,10 +381,11 @@ def test_admin_can_unblock_login_and_force_password_change(client, users):
     assert "must_change_password" in body
 
 
-def test_only_three_roles_exist():
+def test_only_four_roles_exist():
     from naryad.models import UserRole
 
-    assert set(UserRole.values) == {"admin", "cadet", "commander"}  # 19-bosqich: guruh komandiri
-    assert set(perms.ROLE_TITLES) == {"admin", "cadet", "commander"}
+    four = {"admin", "kadir", "cadet", "commander"}  # 19-bosqich: guruh komandiri; 22-bosqich: kadir
+    assert set(UserRole.values) == four
+    assert set(perms.ROLE_TITLES) == four
     for action, (_, roles) in perms.PERMISSIONS.items():
-        assert roles <= {"admin", "cadet", "commander"}, action
+        assert roles <= four, action

@@ -20,10 +20,10 @@
         {% for c in cadets %}
         <tr class="hover:bg-slate-50 {% if not c.is_active %}text-slate-400{% endif %}">
           <td class="px-4 py-2"><a href="{% url 'cadet_detail' c.pk %}" class="font-medium text-brand-900 hover:underline">{{ c.full_name }}</a></td>
-          <td class="px-3 py-2">{{ c.short_name }}{% if c.duty_exempt %}<span class="block text-xs text-indigo-700">{{ c.duty_position }}</span>{% endif %}</td>
+          <td class="px-3 py-2">{{ c.short_name }}{% if c.duty_exempt %}<span class="block text-xs text-indigo-700">{{ c.position_label }}</span>{% endif %}</td>
           <td class="px-3 py-2">{{ c.group.code }}</td>
           <td class="px-3 py-2">{{ c.get_gender_display }}</td>
-          <td class="px-3 py-2">{% if c.is_active %}<span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{% translate "faol" %}</span>{% else %}<span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-600" title="{{ c.deactivation_reason }}">{% translate "faol emas" %}</span>{% endif %}{% if c.duty_exempt %} <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800" title="{{ c.duty_position }}">{% translate "naryadga chiqmaydi" %}</span>{% endif %}</td>
+          <td class="px-3 py-2">{% if c.is_active %}<span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{% translate "faol" %}</span>{% else %}<span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-600" title="{{ c.deactivation_reason }}">{% translate "faol emas" %}</span>{% endif %}</td>
           <td class="px-4 py-2 text-right tabular-nums">{{ c.duty_count }}</td>
         </tr>
         {% endfor %}
@@ -39,7 +39,7 @@
         <span class="min-w-0">
           <span class="block font-medium">{{ c.full_name }}</span>
           <span class="block text-xs text-slate-500">{{ c.short_name }} · {{ c.group.code }} · {{ c.get_gender_display }}{% if not c.is_active %} · <span class="font-semibold">{% translate "faol emas" %}</span>{% endif %}</span>
-          {% if c.duty_exempt %}<span class="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800">{{ c.duty_position }}</span>{% endif %}
+          {% if c.duty_exempt %}<span class="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800">{{ c.position_label }}</span>{% endif %}
         </span>
         <span class="shrink-0 text-right">
           <span class="block text-lg font-semibold tabular-nums">{{ c.duty_count }}</span>

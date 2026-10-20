@@ -2,6 +2,58 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar: [SemVer](https://semver.org/).
 
+## [1.13.1] — 2026-10-20
+
+### O‘zgardi
+- **Kadir** kursant kartochkasida endi “Faolsizlantirish…”, “Qayta faollashtirish”, “Lavozim belgilash…” va “Lavozimni olib tashlash…” tugmalarini ko‘rmaydi. Yangi ruxsat `cadets.status` — faqat admin (to‘g‘ridan-to‘g‘ri POST — 403). Kartochka, tarix, “Tahrirlash” va kursant qo‘shish kadirda qoladi.
+
+## [1.13.0] — 2026-10-20
+
+22-bosqich: “Kadir” roli (CLAUDE.md 71-band). Algoritm va qoidalar o‘zgarmagan.
+
+### Qo‘shildi
+- **To‘rtinchi rol `kadir`** (migratsiya 0020; rol ro‘yxatida “Kadir (hamma amal, boshqaruv panelisiz)”): admin bilan bir xil barcha amallar — hafta ochish, sutka tuzish / tuzatish / tasdiqlash / qayta ochish, kursantlar va akkauntlar, sababli holatlar, kasallar ro‘yxati, zalyotchiklar, statistika, jurnal, PDF.
+- **Faqat shular yopiq:** Django boshqaruv paneli (`/admin/`), Sozlamalar va sinov ma’lumotlarini tozalash. Menyuda “Boshqaruv paneli” ko‘rinmaydi; `/admin/` kirish sahifasiga yo‘naltiradi, tozalash — 403.
+- Kursantga bog‘lash shart emas. Jurnalda va zalyotchiklar ro‘yxatida “kadir” sifatida ko‘rinadi.
+- `docs/05-rollar.md`: ruxsatlar jadvali 4 ustunli (`tests/test_ui.py` bilan tekshiriladi), atamalar lug‘ati (uz/ru/en).
+- Testlar: `tests/test_kadir.py` (8): har sahifa (admin sahifalari — 200, panel/Sozlamalar/tozalash yopiq), menyu, to‘liq ish oqimi (almashtirish, tasdiqlash, qayta ochish, zalyot, kursant qo‘shish), uch til, rol validatsiyasi.
+
+## [1.12.0] — 2026-10-20
+
+21-bosqich: joylar navbati va og‘ir joylar (CLAUDE.md 70-band). Algoritm o‘zgardi, lekin sozlama o‘chiq bo‘lsa natija bayt-bayt avvalgidek (84 sutkalik etalon xesh, eski algoritm testlari o‘zgarmagan).
+
+### Qo‘shildi — algoritm
+- **Sozlama** “Joylar navbati va og‘ir joylar (21-bosqich)” (standart — yoqilgan) va **og‘ir joylar ro‘yxati** (standart: 1-NO‘J va 1-Yotoqxona; Qizlar yotoqxonasi kirmaydi). Migratsiya 0019. O‘zgartirish jurnalga yoziladi, faqat keyingi sutkalarga ta’sir qiladi.
+- **QOIDA A:** haftada (yakshanba 18:00 – yakshanba 18:00) kursant ko‘pi bilan bitta og‘ir joyda; yengil joylar (Markaz, 2-NO‘J, O‘quv, Patrul) mumkin. Faqat guruhda kishi yetmasa yumshatiladi — adminga sariq ogohlantirish “Guruhda kishi yetmagani uchun X bu hafta ikkinchi marta og‘ir joyga qo‘yildi” (kursantga ko‘rinmaydi).
+- **QOIDA B:** kecha turgan kursantni generator hech qachon qo‘ymaydi (jazo naryadi ham). Faqat admin almashtirish oynasida qo‘ya oladi:
+  - “dam olmagan” belgisi va qizil ogohlantirish “Bu kursant kecha naryadda bo‘lgan, dam olmagan”;
+  - sabab majburiy va tasdiq belgisi;
+  - jurnalda alohida yozuv “Dam olmagan kursant qo‘yildi”;
+  - sutka sahifasida “dam olmagan” belgisi (faqat admin). Komandir va kursant — 403.
+- **Yangi saralash kaliti** (o‘g‘il bolalar joylari): 3-marta/hafta faqat iloji bo‘lmasa → QOIDA A → oxirgi naryadi shu joy (lavozimidan qat’i nazar — Nekmurodov F holati) → haftadagi soni → 5 ta katta joy tsikli → jami (eng kami + 1 teng) → og‘ir joylar soni → shu joyda → aniq jami → oxirgi sana → tasodif. Faqat oddiy naryadlar hisoblanadi; qizlar — eski kalit.
+
+### Qo‘shildi — ko‘rinish
+- Almashtirish oynasi: ogohlantirishlar (taqiq emas) “shu hafta og‘ir joyda turgan”, “oxirgi marta shu joyda”.
+- Sutka sahifasi (admin): “Tanlash tushuntirishi” jadvali — haftada, jami, og‘ir joylar va belgilar (“shu hafta og‘ir joyda turgan”, “oxirgi marta shu joyda”, “tsiklda bu joy bor”); “Joylar navbati” sariq bloki.
+- Statistika: “Og‘ir joylar” ustuni (Excel’da ham), adolat belgisida “og‘ir joy farqi”; Excel “Adolat” varag‘ida “Og‘ir joylar farqi”.
+- Kursant kartochkasi (admin): “Og‘ir joylar: N marta” va joriy tsikl (1-NO‘J ✓, 2-NO‘J ✓, 1-Yotoqxona –, O‘quv binosi –, Patrul ✓).
+
+### O‘zgardi — 5a: “ozod / naryadga chiqmaydi” yozuvi butunlay olib tashlandi
+- Kursantlar ro‘yxati, kartochka, statistika, Excel, filtrlar, “Mening guruhim”, almashtirish oynasi, sutka ogohlantirishlari va boshqaruv paneli: faqat lavozim nomi — Guruh komandiri / Kurs starshinasi / Kurs pisari / Kaptyorchik (uz/ru/en).
+- Filtr va ustun “Lavozim”: Hammasi / Guruh komandiri / Kurs starshinasi / Kurs pisari / Kaptyorchik / Lavozimsiz (sahifada `?lavozim=…`, boshqaruv panelida ham).
+- Kartochka tugmalari: “Lavozim belgilash…” / “Lavozimni olib tashlash…”; jurnal: “Lavozim belgilandi” / “Lavozim olib tashlandi”. Boshqaruv panelidagi belgi yordam matni: “Lavozimi sababli naryad navbatiga kirmaydi”. `duty_exempt` mantiqi o‘zgarmagan.
+
+### Simulyatsiya
+- `python scripts/simulate_weeks.py --joylar` — bazasiz, 12 hafta, eski → yangi (natija `docs/02-algoritm.md` 3a-bo‘limida): QOIDA A buzilishlari 60 → 9 (hammasi majburiy va ogohlantirilgan, faqat 11–12 kishilik guruhlarda), “shu joy ketma-ket” 19 → 1, ketma-ket kun 0, haftada 3 marta 0, bo‘sh o‘rin 0.
+
+### Testlar
+- `tests/test_post_rotation.py` (32): sozlama o‘chiq — bir xil natija; QOIDA A ikki tomonga, yengil joylar, barcha guruhlar; QOIDA B (jazo naryadi bilan), admin sabab + tasdiq, jurnal, sutka belgisi, komandir/kursant 403; Nekmurodov holati; YuP-125; 3-marta; tsikl; og‘ir joylar muvozanati; uch til; Excel/PDF’da “ozod” yo‘q; 9 lavozimdagi nomzod emas; qizlar o‘zgarmagan.
+- 16-bosqich testlari yangi talabga moslandi (endi “naryadga chiqmaydi” ham taqiqlangan so‘z). SQL so‘rovlar chegarasi bosh sahifa, statistika va kartochkada +1 (og‘ir joylar sozlamasi). Jami: 622 (SQLite va PostgreSQL).
+- `scripts/screenshots_v22.py`, `docs/skrinshotlar/v1.12/`.
+
+### Ma’lum cheklov
+- Platforma simulyatsiyasida (`--komandirlar`: 22% sutkada tasodifiy qo‘lda almashtirish va ataylab qo‘lda ko‘p qo‘yiladigan kursant) jami farqi eski tartibda 1–2, yangisida 2–3 (BI-325 va BI-425 da 3). Sabab: jami soni kalitda 6-o‘ringa tushdi, qo‘lda qo‘yishlar sekinroq tekislanadi. Ochiq savol — CLAUDE.md 70-band.
+
 ## [1.11.0] — 2026-10-19
 
 20-bosqich: komandir zalyot kiritadi, zalyot hisobi, sinov ma’lumotlarini to‘liq tozalash (CLAUDE.md 68- va 69-bandlar). Zalyot qoidalari va generator o‘zgarmagan: zalyotchi bo‘lmasa natija bayt-bayt avvalgidek (84 sutkalik etalon xesh).

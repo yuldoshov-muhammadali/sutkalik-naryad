@@ -11,6 +11,11 @@ qoralamasini (DayResult) qaytaradi. Natija to'liq deterministik.
 Zalyotchiklar (15-bosqich): faol zalyotchiklar jazo o'rinlariga (1-NO‘J va 1-Yotoqxona, posbon)
 oddiy to'ldirishdan OLDIN qo'yiladi. Jazo naryadlari adolat hisobiga kirmaydi. Zalyotchik
 berilmasa, natija avvalgidek (bayt-bayt) qoladi.
+
+Joylar navbati (21-bosqich): `rotation=PostRotation(...)` berilsa — QOIDA A (haftada bitta og'ir joy),
+oxirgi joy takrorlanmasin, 5 ta katta joy tsikli va og'ir joylar muvozanati saralash kalitiga kiradi.
+`rotation=None` (standart) bo'lsa, natija avvalgidek (bayt-bayt). Kecha turgan kursant (jazo naryadi ham)
+generator tomonidan HECH QACHON qo'yilmaydi — ikkala holatda ham.
 """
 
 from __future__ import annotations
@@ -19,6 +24,7 @@ import datetime as dt
 import hashlib
 import itertools
 from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import replace
 
 from .config import (
     DUTY_START_TIME,
@@ -30,6 +36,7 @@ from .config import (
     POSTS,
     POSTS_BY_CODE,
     ROTATION_CHAIN,
+    PostRotation,
 )
 from .models import (
     FEMALE,
@@ -129,13 +136,26 @@ def _tiebreak(day: dt.date, cadet_id: int) -> str:
     return hashlib.sha256(f"{day.isoformat()}|{cadet_id}".encode()).hexdigest()
 
 
-def score_candidate(cadet: Cadet, post_code: str, day: dt.date, history: History) -> CandidateScore:
-    """CLAUDE.md 4-D saralash kalitining qiymatlari."""
+def current_cycle(records: Sequence[Record], cycle_posts: Sequence[str]) -> tuple[str, ...]:
+    """Joriy tsiklda turgan katta joylar (tartib bilan). Hammasida turgach tsikl qaytadan boshlanadi."""
+    seen: list[str] = []
+    for r in records:
+        if r.post in cycle_posts and r.post not in seen:
+            seen.append(r.post)
+            if len(seen) == len(cycle_posts):
+                seen = []
+    return tuple(seen)
+
+
+def score_candidate(
+    cadet: Cadet, post_code: str, day: dt.date, history: History, rotation: PostRotation | None = None
+) -> CandidateScore:
+    """CLAUDE.md 4-D saralash kalitining qiymatlari (21-bosqich: `rotation` berilsa — yangi kalit qiymatlari ham)."""
     recs = history.of(cadet.id)
     this_week = week_start(day)
     last = recs[-1] if recs else None
     last_is_same = last is not None and last.post == post_code
-    return CandidateScore(
+    score = CandidateScore(
         cadet_id=cadet.id,
         week_count=sum(1 for r in recs if week_start(r.day) == this_week),
         total=len(recs),
@@ -144,6 +164,20 @@ def score_candidate(cadet: Cadet, post_code: str, day: dt.date, history: History
         post_count=sum(1 for r in recs if r.post == post_code),
         last_day=last.day if last else None,
         tiebreak=_tiebreak(day, cadet.id),
+    )
+    if rotation is None:
+        return score
+    hard = set(rotation.hard_posts)
+    cycle = current_cycle(recs, rotation.cycle_posts)
+    return replace(
+        score,
+        rotation=True,
+        hard_post=post_code in hard,
+        week_hard=sum(1 for r in recs if r.post in hard and week_start(r.day) == this_week),
+        hard_count=sum(1 for r in recs if r.post in hard),
+        cycle=cycle,
+        cycle_repeat=post_code in rotation.cycle_posts and post_code in cycle,
+        total_band=score.total,
     )
 
 
@@ -242,6 +276,7 @@ def pick_cadets(
     absences: Iterable[Absence] = (),
     taken: Iterable[int] = (),
     offenders: Iterable[int] = (),
+    rotation: PostRotation | None = None,
 ) -> PickResult:
     """Hovuzdan `need` ta kursant tanlaydi.
 
@@ -253,6 +288,11 @@ def pick_cadets(
     Saralash kaliti (CLAUDE.md 4-D): haftadagi soni → jami (+1 jarima, agar oxirgi
     naryadi shu joy bo'lsa) → oxirgi joyi shu joymi → shu joydagi soni → oxirgi
     naryad sanasi (uzoq dam olgan oldin) → deterministik tasodif.
+
+    Joylar navbati yoqilgan bo'lsa (`rotation`, 21-bosqich) kalit: haftada 3-marta (faqat iloji bo'lmasa) →
+    QOIDA A (og'ir joy + shu hafta og'ir joyda turgan) → oxirgi naryadi shu joy (lavozimidan qat'i nazar) →
+    haftadagi soni → tsiklda bu joy bor → jami (guruhdagi eng kami + 1 teng hisoblanadi) → og'ir joylar soni
+    (og'ir joyda) → shu joydagi soni → aniq jami → oxirgi naryad sanasi → deterministik tasodif.
     """
     absences = list(absences)
     taken = set(taken)
@@ -273,8 +313,11 @@ def pick_cadets(
         elif cadet.id in offenders:
             excluded[cadet.id] = EXCLUDED_OFFENDER
         else:
-            eligible.append(score_candidate(cadet, post_code, day, history))
+            eligible.append(score_candidate(cadet, post_code, day, history, rotation))
 
+    if rotation is not None and eligible:
+        band = min(s.total for s in eligible) + 1
+        eligible = [replace(s, total_band=max(s.total, band)) for s in eligible]
     ranking = tuple(sorted(eligible, key=lambda s: s.sort_key))
     chosen = tuple(s.cadet_id for s in ranking[:need])
     return PickResult(chosen=chosen, ranking=ranking, excluded=excluded)
@@ -356,7 +399,7 @@ def place_offenders(
         cadet = cadets_by_id.get(o.cadet_id)
         name = cadet.display_name if cadet is not None else f"#{o.cadet_id}"
         if cadet is None or not cadet.active or cadet.gender != MALE:
-            warnings.append(f"Zalyotchik {name} faol emasligi (yoki naryaddan ozodligi) uchun bugun qo‘yilmadi.")
+            warnings.append(f"Zalyotchik {name} faol emasligi (yoki lavozimdaligi) uchun bugun qo‘yilmadi.")
             continue
         if _is_absent(cadet.id, day, absences):
             warnings.append(f"Zalyotchik {name} sababli holatda bo‘lgani uchun bugun qo‘yilmadi.")
@@ -386,6 +429,7 @@ def generate_day(
     initial_rotation: Mapping[str, str] | None = None,
     offenders: Sequence[Offender] = (),
     penalty_per_post: int = PENALTY_PER_POST_DEFAULT,
+    rotation: PostRotation | None = None,
 ) -> DayResult:
     """Bitta sutka qoralamasini tuzadi.
 
@@ -394,7 +438,8 @@ def generate_day(
     - Qizlar yotoqxonasi: 13 qizning umumiy navbatidan;
     - bir kursant bir sutkada faqat bitta o'rinda;
     - nomzod yetmasa o'rin bo'sh qoladi va ogohlantirish yoziladi;
-    - faol zalyotchiklar (bo'lsa) avval jazo o'rinlariga qo'yiladi, shu joy guruhi shuncha kam beradi.
+    - faol zalyotchiklar (bo'lsa) avval jazo o'rinlariga qo'yiladi, shu joy guruhi shuncha kam beradi;
+    - `rotation` (21-bosqich) faqat o'g'il bolalar joylariga ta'sir qiladi; Qizlar yotoqxonasi — eski kalit.
     """
     absences = list(absences)
     hist = History(history, before=day)
@@ -427,8 +472,15 @@ def generate_day(
         free_slots = [s for s in post.slots if (post_code, s.position) not in assignments]
         # Faol zalyotchik oddiy navbatda faqat 1-NO‘J / 1-Yotoqxonada (o'z guruhi bilan) tura oladi
         barred = () if post_code in PENALTY_POSTS else active_offenders
-        pick = pick_cadets(pool, post_code, len(free_slots), day, hist, absences, taken, barred)
+        rules = rotation if group is not None else None
+        pick = pick_cadets(pool, post_code, len(free_slots), day, hist, absences, taken, barred, rules)
         picks[post_code] = pick
+        for s in pick.ranking[: len(pick.chosen)]:
+            if s.hard_conflict:  # QOIDA A yumshatildi: o'rin bo'sh qolmasin
+                warnings.append(
+                    f"Guruhda kishi yetmagani uchun {by_id[s.cadet_id].display_name} bu hafta ikkinchi marta og‘ir joyga qo‘yildi"
+                    f" ({post.name})."
+                )
         taken.update(pick.chosen)
         for slot, cid in assign_roles(pick.chosen, free_slots, hist):
             assignments[(post_code, slot.position)] = Assignment(slot=slot, cadet_id=cid, group=by_id[cid].group)

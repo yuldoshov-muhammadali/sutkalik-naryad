@@ -45,7 +45,7 @@
 {# ---------------------------------------------------------------- Adolat #}
 <section class="mt-6" aria-labelledby="fair-title">
   <h2 id="fair-title" class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Adolat ko‘rsatkichi (guruh kesimida)" %}</h2>
-  <p class="mb-2 text-xs text-slate-500">{% translate "Jami naryadlar bo‘yicha: yashil — farq (max − min) ≤ 1, sariq — 2, qizil — 3 va undan ko‘p. Faqat naryadga chiqadiganlar hisobga olinadi (faol emaslar va naryadga chiqmaydigan lavozimdagilar — kurs starshinasi, guruh komandirlari, kurs pisari, kaptyorchik — kirmaydi)." %}</p>
+  <p class="mb-2 text-xs text-slate-500">{% translate "Jami naryadlar bo‘yicha: yashil — farq (max − min) ≤ 1, sariq — 2, qizil — 3 va undan ko‘p. Faqat naryad navbatidagilar hisobga olinadi (faol emaslar va lavozimdagilar — kurs starshinasi, guruh komandirlari, kurs pisari, kaptyorchik — kirmaydi)." %}</p>
   <ul class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
     {% for f in fairness %}
     <li class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200" data-pool="{{ f.pool }}">
@@ -85,6 +85,7 @@
           {% for p in posts %}<th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium" title="{% translate p.name %}">{{ p.short }}</th>{% endfor %}
           {% for r in roles %}<th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-sky-50 px-2 py-2 text-center font-medium">{{ r }}</th>{% endfor %}
           <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-100 px-2 py-2 text-center font-semibold">{% translate "Jami" %}</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-amber-50 px-2 py-2 text-center font-medium" title="{{ hard_title }}">{% translate "Og‘ir joylar" %}</th>
           <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">{% translate "Shu haftada" %}</th>
           <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium">{% translate "Oxirgi naryad" %}</th>
           <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-gold-50 px-2 py-2 text-center font-medium" title="{% translate "Navbatdan tashqari (jazo) naryadlari — adolat hisobiga kirmaydi" %}">{% translate "Jazo naryadlari" %}</th>
@@ -93,10 +94,11 @@
       <tbody>
         {% for t in boys %}
         <tr>
-          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-3 py-1.5 text-left font-medium"><a href="{% url 'cadet_detail' t.row.cadet.pk %}" class="hover:underline">{{ t.row.cadet.short_name }}</a>{% if not t.row.cadet.is_active %} <span class="text-xs font-normal text-slate-400">{% translate "(faol emas)" %}</span>{% elif t.row.cadet.duty_exempt %} <span class="text-xs font-normal text-indigo-700" data-testid="position-label">{{ t.row.cadet.duty_position }}</span>{% endif %}</th>
+          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-3 py-1.5 text-left font-medium"><a href="{% url 'cadet_detail' t.row.cadet.pk %}" class="hover:underline">{{ t.row.cadet.short_name }}</a>{% if not t.row.cadet.is_active %} <span class="text-xs font-normal text-slate-400">{% translate "(faol emas)" %}</span>{% elif t.row.cadet.duty_exempt %} <span class="text-xs font-normal text-indigo-700" data-testid="position-label">{{ t.row.cadet.position_label }}</span>{% endif %}</th>
           {% for c in t.posts %}<td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" style="{{ c.style }}">{{ c.value|default:"·" }}</td>{% endfor %}
           {% for c in t.roles %}<td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" style="{{ c.style }}">{{ c.value|default:"·" }}</td>{% endfor %}
           <td class="border-b border-slate-100 px-2 py-1.5 text-center font-semibold tabular-nums" style="{{ t.total.style }}">{{ t.total.value }}</td>
+          <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" data-testid="hard-count">{{ t.row.hard|default:"·" }}</td>
           <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums">{{ t.row.this_week }}</td>
           <td class="whitespace-nowrap border-b border-slate-100 px-2 py-1.5 text-center tabular-nums text-slate-600">{{ t.row.last_date|date:"d.m.Y"|default:"—" }}</td>
           <td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums{% if t.row.penalty %} font-semibold text-gold-800{% endif %}" data-testid="penalty-count">{{ t.row.penalty|default:"·" }}</td>
@@ -133,7 +135,7 @@
       <tbody>
         {% for t in girls %}
         <tr>
-          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-3 py-1.5 text-left font-medium"><a href="{% url 'cadet_detail' t.row.cadet.pk %}" class="hover:underline">{{ t.row.cadet.short_name }}</a>{% if not t.row.cadet.is_active %} <span class="text-xs font-normal text-slate-400">{% translate "(faol emas)" %}</span>{% elif t.row.cadet.duty_exempt %} <span class="text-xs font-normal text-indigo-700" data-testid="position-label">{{ t.row.cadet.duty_position }}</span>{% endif %}</th>
+          <th scope="row" class="sticky left-0 z-10 whitespace-nowrap border-b border-r border-slate-100 bg-white px-3 py-1.5 text-left font-medium"><a href="{% url 'cadet_detail' t.row.cadet.pk %}" class="hover:underline">{{ t.row.cadet.short_name }}</a>{% if not t.row.cadet.is_active %} <span class="text-xs font-normal text-slate-400">{% translate "(faol emas)" %}</span>{% elif t.row.cadet.duty_exempt %} <span class="text-xs font-normal text-indigo-700" data-testid="position-label">{{ t.row.cadet.position_label }}</span>{% endif %}</th>
           <td class="whitespace-nowrap border-b border-slate-100 px-2 py-1.5 text-center text-slate-600">{{ t.row.cadet.group.code }}</td>
           {% for c in t.roles %}<td class="border-b border-slate-100 px-2 py-1.5 text-center tabular-nums" style="{{ c.style }}">{{ c.value|default:"·" }}</td>{% endfor %}
           <td class="border-b border-slate-100 px-2 py-1.5 text-center font-semibold tabular-nums" style="{{ t.total.style }}">{{ t.total.value }}</td>
@@ -170,7 +172,7 @@
           <th scope="col" class="sticky left-0 top-0 z-30 border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium">{% translate "Guruh" %}</th>
           {% for p in posts %}<th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium" title="{% translate p.name %}">{{ p.short }}</th>{% endfor %}
           <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-100 px-2 py-2 text-center font-semibold">{% translate "Sutkalar" %}</th>
-          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium" title="{% translate "Faol, naryadga chiqmaydigan lavozimdagilarsiz" %}">{% translate "Naryadga chiqadi" %}</th>
+          <th scope="col" class="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-2 py-2 text-center font-medium" title="{% translate "Faol, lavozimdagilarsiz" %}">{% translate "Naryadga chiqadi" %}</th>
           <th scope="col" class="sticky top-0 z-20 min-w-[11rem] border-b border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium">{% translate "1 o‘g‘ilga o‘rtacha naryad" %}</th>
         </tr>
       </thead>
@@ -197,7 +199,7 @@
     Aylanish to‘g‘ri ishlasa, har guruh har joyni deyarli teng marta beradi. Joy guruhga biriktiriladi, shuning uchun
     <b>kursanti kam guruhda bir o‘g‘ilga ko‘proq naryad to‘g‘ri keladi</b> — bu qabul qilingan qoida (adolat guruh ichida o‘lchanadi, CLAUDE.md 4-B.5).
     {% endblocktranslate %}
-    {% translate "O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi (naryadga chiqmaydigan komandirlar va kurs lavozimlari kirmaydi)." %}
+    {% translate "O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi (lavozimdagi komandirlar va kurs lavozimlari kirmaydi)." %}
   </p>
 </section>
 

@@ -69,12 +69,66 @@ Har nomzod uchun quyidagi kortej hisoblanadi va **kichigi oldin** tanlanadi:
 
 Teng bo‘lsa — tanlanish tartibidagi birinchi variant. Kursant o‘rinlardan kam bo‘lsa, yuqori lavozimlar (navbatchi, yordamchi) birinchi to‘ldiriladi, oxirgi posbon o‘rinlari bo‘sh qoladi.
 
+## 3a. Joylar navbati va og‘ir joylar (21-bosqich, 1.12.0)
+
+Sozlamalarda **“Joylar navbati va og‘ir joylar (21-bosqich)”** (standart — yoqilgan). Yoqilgan bo‘lsa, `services.generate_draft`
+algoritmga `PostRotation(hard_posts=…)` beradi; o‘chiq bo‘lsa `rotation=None` — yuqoridagi eski kalit, natija **bayt-bayt** avvalgidek
+(84 sutkalik etalon xesh, `tests/test_penalties.py`). Qizlar yotoqxonasi har doim eski kalit bilan.
+
+**Og‘ir joylar** — Sozlamalarda (standart: 1-NO‘J va 1-sonli kursantlar yotoqxonasi). Faqat **oddiy** naryadlar hisoblanadi:
+jazo naryadlari QOIDA A, tsikl va og‘ir joylar soniga kirmaydi (QOIDA B esa ularga ham tegishli).
+
+- **QOIDA A.** 2-kurs haftasida (yakshanba 18:00 – yakshanba 18:00) kursant ko‘pi bilan **bitta** og‘ir joyda turadi: 1-NO‘J da turgan
+  bo‘lsa — o‘sha haftada 1-Yotoqxonaga ham, 1-NO‘J ga ham qayta qo‘yilmaydi (va aksincha). Yengil joylar (Markaz, 2-NO‘J, O‘quv, Patrul)
+  mumkin. Guruhda kishi yetmasa (o‘rin bo‘sh qolmasin) yumshatiladi va adminga sariq ogohlantirish chiqadi:
+  “Guruhda kishi yetmagani uchun X bu hafta ikkinchi marta og‘ir joyga qo‘yildi”. Kursantga ko‘rsatilmaydi.
+- **QOIDA B.** Kecha naryadda bo‘lgan kursantni generator **hech qachon** qo‘ymaydi (jazo naryadi ham). Faqat admin almashtirish
+  oynasida qo‘ya oladi: “dam olmagan” belgisi, qizil ogohlantirish, sabab majburiy, tasdiq belgisi; jurnalda alohida `no_rest` yozuvi,
+  sutka sahifasida “dam olmagan” belgisi. Komandir va kursant — 403. Sozlama o‘chiq bo‘lsa — admin ham qo‘ya olmaydi (eski xatti-harakat).
+
+**Yangi saralash kaliti** (birinchi farq hal qiladi):
+
+| № | Kalit | Ma’nosi |
+|---|---|---|
+| 1 | `uchinchi_marta` | Shu haftada 2 marta turgan — faqat boshqa iloj bo‘lmasa |
+| 2 | `QOIDA A` | Og‘ir joy va shu hafta og‘ir joyda turgan — orqaga |
+| 3 | `oxirgisi_shu_joy` | Oxirgi naryadi shu joy (lavozimidan qat’i nazar) — orqaga |
+| 4 | `haftadagi_soni` | Shu haftada necha marta |
+| 5 | `tsikl` | 5 ta katta joy (1-NO‘J, 2-NO‘J, 1-Yotoqxona, O‘quv, Patrul; Markaz kirmaydi): hammasida turmaguncha bittasi takrorlanmaydi, keyin tsikl qaytadan |
+| 6 | `jami (±1)` | Jami naryadlar; guruhdagi eng kami va eng kami + 1 teng hisoblanadi |
+| 7 | `og‘ir_soni` | Og‘ir joyda — og‘ir joylarda kam turgan oldin |
+| 8 | `shu_joyda_soni` | Shu joyda necha marta |
+| 9 | `jami` | Aniq jami |
+| 10 | `oxirgi_sana` | Uzoq dam olgan oldin |
+| 11 | `tasodif` | Deterministik |
+
+Lavozimlar (`assign_roles`) tanlangandan keyin taqsimlanadi va tanlovga ta’sir qilmaydi. Qat’iy cheklovlar o‘zgarmagan
+(faol emas, sababli, kasal, lavozimdagilar; bir sutkada bitta o‘rin; nomzod bo‘lsa o‘rin bo‘sh qolmaydi).
+
+**Simulyatsiya** (`python scripts/simulate_weeks.py --joylar`, bazasiz): 12 hafta, haftalar orasida 14 kun, naryadga chiqadigan
+o‘g‘il bolalar 11/12/12/14/16/13, eski → yangi.
+
+| Guruh | 2 og‘ir/hafta | shu joy ketma-ket | 3 marta/hafta | ketma-ket kun | “avval hamma 1 marta” | tanlash tartibi* | jami farqi | og‘ir joy farqi | bo‘sh o‘rin |
+|---|---|---|---|---|---|---|---|---|---|
+| YuP-125 (11) | 17 → 5 | 0 → 1 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 7 | 1 → 2 | 2 → 2 | 0 → 0 |
+| BI-225 (12) | 14 → 3 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 6 | 1 → 2 | 2 → 1 | 0 → 0 |
+| BI-325 (12) | 14 → 1 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 4 | 1 → 2 | 2 → 1 | 0 → 0 |
+| BI-425 (14) | 4 → 0 | 8 → 0 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 12 | 2 → 2 | 3 → 2 | 0 → 0 |
+| BI-525 (16) | 4 → 0 | 11 → 0 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 17 | 1 → 2 | 3 → 1 | 0 → 0 |
+| BI-625 (13) | 7 → 0 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 7 | 1 → 2 | 2 → 1 | 0 → 0 |
+
+- “2 og‘ir/hafta” — haftadagi ikkinchi (va keyingi) og‘ir joylar; yangi tartibda hammasi majburiy (guruhda kishi yetmagan) va
+  ogohlantirilgan. Asosan guruh shu hafta 1-NO‘J ni ikki marta (1- va 7-sutka) olgan haftalarda: 4 + 4 + 3 = 11 og‘ir o‘rin.
+- “Jami farqi” 1 → 2: QOIDA A va “oxirgi joy” jami sondan oldin turadi; ±1 bag‘rikenglik shuni ataylab ruxsat beradi.
+- “Tanlash tartibi*” — tanlash paytida shu haftada hali turmagan nomzod “oxirgi naryadi shu joy” sababli keyinroqqa
+  qolgan holatlar (3-o‘rin 4-o‘rindan oldin). Hafta yakunida hamma bir martadan turgan (“avval hamma 1 marta” — 0).
+
 ## 4. Qat’iy cheklovlar
 
-- **Naryaddan ozod kursantlar** (komandirlar va kurs lavozimlari, CLAUDE.md 2-bo‘lim) nomzodlar hovuziga umuman kirmaydi: `services.engine_cadets()` ularni algoritmga bermaydi, almashtirish oynasida ular “naryaddan ozod — lavozimi” sababi bilan tanlab bo‘lmaydigan qilib ko‘rsatiladi. Algoritmning o‘zi (`naryad/engine/`) va saralash kaliti o‘zgarmagan.
+- **Lavozimdagi kursantlar** (guruh komandiri, kurs starshinasi, kurs pisari, kaptyorchik — CLAUDE.md 2-bo‘lim) nomzodlar hovuziga umuman kirmaydi: `services.engine_cadets()` ularni algoritmga bermaydi, almashtirish oynasida ular faqat lavozim nomi bilan (“Guruh komandiri (lavozimda)”) tanlab bo‘lmaydigan qilib ko‘rsatiladi. Algoritmning o‘zi (`naryad/engine/`) va saralash kaliti o‘zgarmagan.
 - Faol emas va sababli (kasal, ta’til) kursantlar olinmaydi.
 - Bir kursant bir sutkada faqat bitta o‘rinda.
-- **Kecha naryadda bo‘lgan kursant bugun olinmaydi.** Boshqa odam qolmasa ham olinmaydi: o‘rin **bo‘sh** qoladi va ogohlantirish chiqadi, o‘rnini admin qo‘lda to‘ldiradi.
+- **Kecha naryadda bo‘lgan kursant bugun olinmaydi** (QOIDA B; jazo naryadi ham). Boshqa odam qolmasa ham generator olmaydi: o‘rin **bo‘sh** qoladi va ogohlantirish chiqadi, o‘rnini admin qo‘lda to‘ldiradi.
 
 > ⚠️ **Qoida o‘zgarishi.** CLAUDE.md 4-D da avval “boshqa odam qolmasa — ogohlantirish bilan olinadi” deyilgan edi. 2-bosqich topshirig‘iga ko‘ra endi o‘rin bo‘sh qoldiriladi. CLAUDE.md 4-D va 10-bo‘lim (13-band) shunga moslab yangilandi.
 

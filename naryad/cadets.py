@@ -258,7 +258,7 @@ def activate(cadet: Cadet, user) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Naryaddan ozod qilish (komandirlar, kurs lavozimlari) — CLAUDE.md 10-bo'lim, 56-band
+# Lavozim belgilash (komandirlar, kurs lavozimlari) — CLAUDE.md 10-bo'lim, 56-band
 # ---------------------------------------------------------------------------
 
 
@@ -290,19 +290,19 @@ class UnexemptForm(forms.Form):
 
 
 def exempt_blocker(cadet: Cadet) -> str | None:
-    """Faol zalyoti bor kursantni naryaddan ozod qilib bo'lmaydi (1.6.0 ochiq savoli, CLAUDE.md 62-band)."""
+    """Faol zalyoti bor kursantga lavozim belgilab bo'lmaydi (1.6.0 ochiq savoli, CLAUDE.md 62-band)."""
     penalty = Penalty.objects.filter(cadet=cadet, status=Penalty.Status.ACTIVE).first()
     if penalty is not None:
         return _(
             "%(name)s faol zalyotchik (%(count)s ta jazo naryadi) — avval zalyot bajarilishi yoki bekor qilinishi kerak, "
-            "keyin “naryadga chiqmaydi” deb belgilanadi."
+            "keyin lavozim belgilanadi."
         ) % {"name": cadet.short_name, "count": penalty.count}
     return None
 
 
 @transaction.atomic
 def set_exempt(cadet: Cadet, position: str, reason: str, user) -> None:
-    """Naryaddan ozod: kursant faol qoladi (akkaunti ishlaydi), faqat naryadga qo'yilmaydi."""
+    """Lavozim: kursant faol qoladi (akkaunti ishlaydi), faqat naryadga qo'yilmaydi."""
     blocker = exempt_blocker(cadet)
     if blocker:
         raise ValueError(blocker)

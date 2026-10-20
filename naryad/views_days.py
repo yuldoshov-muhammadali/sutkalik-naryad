@@ -18,7 +18,7 @@ from . import absences as absence_service
 from . import days, i18n, services
 from . import permissions as perms
 from .dashboard import current_duty_date, fmt_day
-from .models import Absence, Assignment, ChangeLog, DutyDay, DutyWeek, PostSlot
+from .models import Absence, Assignment, ChangeLog, DutyDay, DutyWeek, Gender, PostSlot, Setting
 
 
 def parse_date(value: str) -> dt.date:
@@ -172,6 +172,9 @@ def day_detail(request, date):
         context["reopen_blocker"] = days.reopen_blocker(duty_day) if duty_day and duty_day.is_approved else None
         context["delete_blocker"] = days.delete_blocker(duty_day) if duty_day and not duty_day.is_approved else None
         context["has_log"] = ChangeLog.objects.filter(day_date=date).exists()
+        # 21-bosqich: joylar navbati — sariq ogohlantirishlar va tushuntirish jadvali (faqat admin)
+        context["rotation_notices"] = days.rotation_notices(duty_day)
+        context["explanations"] = days.explanations(duty_day)
     return render(request, "naryad/days/day.html", context)
 
 
@@ -203,6 +206,7 @@ def day_replace(request, date, slot_id):
             days.replace_cadet(
                 date, slot.pk, new_cadet, request.POST.get("reason", ""), request.POST.get("note", ""),
                 request.user, request.POST.get("version"),
+                no_rest_reason=request.POST.get("no_rest_reason", ""), no_rest_confirm=request.POST.get("no_rest_confirm") == "1",
             )
         except services.ServiceError as exc:
             error = str(exc)
@@ -211,11 +215,15 @@ def day_replace(request, date, slot_id):
             messages.success(request, _("%(slot)s: almashtirildi.") % {"slot": _(slot.print_label)})
             return htmx_redirect(request, day_url(date))
     current = duty_day.assignments.filter(post_slot=slot).select_related("cadet").first()
+    candidates = days.replacement_candidates(duty_day, slot) if not duty_day.is_approved else []
     context = {
         "duty_day": duty_day,
         "slot": slot,
         "current": current,
-        "candidates": days.replacement_candidates(duty_day, slot) if not duty_day.is_approved else [],
+        "candidates": candidates,
+        "no_rest_ids": {str(c.cadet.pk) for c in candidates if c.no_rest},
+        "no_rest_warning": days.NO_REST_WARNING,
+        "rotation_on": slot.post.gender == Gender.MALE and Setting.load().post_rotation_enabled,
         "reasons": days.CHANGE_REASONS,
         "error": error,
         "posted": request.POST if request.method == "POST" else {},

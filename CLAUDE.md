@@ -26,7 +26,7 @@ Jami 100 kursant: 87 o‘g‘il, 13 qiz. 6 guruh.
 
 To‘liq ro‘yxat: `2-KURS ROYXATI.doc` (jins faylda yozilmagan; qizlar: Abduvaliyeva, Shamsiddinova, Abdullayeva, Karimova, Quvatova, Mamirova, Zoirova, Baxtiyorova, Panjiyeva, Azizova, Maxmudova, Muxammadiyeva, Ordabaeva).
 
-**Naryaddan ozod (komandirlar va kurs lavozimlari)** — sutkalik naryadga umuman qo‘yilmaydi (10-bo‘lim, 56-band):
+**Lavozimdagilar (komandirlar va kurs lavozimlari)** — sutkalik naryad navbatiga umuman kirmaydi (10-bo‘lim, 56- va 70-bandlar; sahifalarda faqat lavozim nomi):
 
 | Guruh | Kursant | Lavozimi |
 |---|---|---|
@@ -75,7 +75,7 @@ Jami: 17 o‘g‘il + 3 qiz = 20 kishi (tasdiqlangan).
 - Bir hafta ichida guruhdagi hamma kursant kamida bir marta turmaguncha hech kim ikkinchi marta tushmaydi.
 - Hamma bir martadan turib bo‘lgach: kim qaysi joyga kamroq tushgan bo‘lsa, o‘sha joyga o‘sha qo‘yiladi. Bir kursant qayta-qayta bitta joyga tushmasligi kerak.
 - Adolat hisobi har bir guruh kesimida yuritiladi (87 kishi bo‘yicha emas), chunki guruhlarda o‘g‘il bolalar soni har xil.
-- **Naryaddan ozod kursantlar** (komandirlar va kurs lavozimlari, 2-bo‘lim) nomzodlar hovuziga umuman kirmaydi: generator ularni tanlamaydi, qo‘lda ham qo‘yib bo‘lmaydi, qoralamada bo‘lsa — qizil ogohlantirish va tasdiqlab bo‘lmaydi. Ozod kursant faol qoladi (akkaunti ishlaydi). Adolat (min/max/o‘rtacha, ±1 ulushi) va “bir o‘g‘ilga o‘rtacha naryad” faqat naryadga chiqadiganlar bo‘yicha hisoblanadi; ozodning o‘tmishdagi naryadlari tarixda qoladi. Algoritm qoidalari o‘zgarmaydi.
+- **Lavozimdagi kursantlar** (komandirlar va kurs lavozimlari, 2-bo‘lim) nomzodlar hovuziga umuman kirmaydi: generator ularni tanlamaydi, qo‘lda ham qo‘yib bo‘lmaydi, qoralamada bo‘lsa — qizil ogohlantirish va tasdiqlab bo‘lmaydi. Ozod kursant faol qoladi (akkaunti ishlaydi). Adolat (min/max/o‘rtacha, ±1 ulushi) va “bir o‘g‘ilga o‘rtacha naryad” faqat naryadga chiqadiganlar bo‘yicha hisoblanadi; ozodning o‘tmishdagi naryadlari tarixda qoladi. Algoritm qoidalari o‘zgarmaydi.
 
 ### C. Qizlar
 
@@ -84,6 +84,10 @@ Jami: 17 o‘g‘il + 3 qiz = 20 kishi (tasdiqlangan).
 - Navbatchi va posbon lavozimlari ham tarix bo‘yicha almashib turadi.
 
 ### D. Tavsiya etilgan saralash kaliti (guruh ichida)
+
+> 21-bosqichdan (1.12.0) Sozlamalarda **“Joylar navbati va og‘ir joylar”** yoqilgan bo‘lsa (standart), o‘g‘il bolalar joylari uchun
+> boshqa kalit ishlaydi: QOIDA A (haftada bitta og‘ir joy), oxirgi joy takrorlanmaydi, 5 ta katta joy tsikli — 10-bo‘lim, 70-band va
+> `docs/02-algoritm.md` 3a-bo‘lim. Quyidagi kalit — sozlama o‘chiq bo‘lganda (bayt-bayt) va qizlar uchun.
 
 1. Shu haftada necha marta turgan (kam oldin, qat’iy).
 2. Jami naryadlar soni (+1 jarima, agar oxirgi naryadi ham shu joy bo‘lsa).
@@ -404,3 +408,19 @@ Javoblar o‘zbek tilida, lotin yozuvida. Kod ichidagi nomlar inglizcha, izohlar
       - bitta tranzaksiya. Izi mos kelmasa yoki o‘chiradigan narsa qolmagan bo‘lsa — rad.
     - **Tiklash:** `migrate` → `flush --no-input` → `loaddata zaxira_….json.gz`.
     - **Tozalashdan keyin** navbat zanjiri `InitialRotation` dan boshlanadi (Sozlamalarda ko‘rinadi va o‘zgaradi). Birinchi sutka ochilgan haftada bo‘sh tarixdan tuziladi (14-band).
+70. **Joylar navbati va og‘ir joylar (21-bosqich, 1.12.0):**
+    - **Sozlama** `Setting.post_rotation_enabled` (standart — yoqilgan) va `Setting.hard_posts` (standart `noj1`, `yotoq1`; faqat o‘g‘il bolalar joylari). O‘chiq bo‘lsa `generate_day(rotation=None)` — natija bayt-bayt avvalgidek (84 sutkalik etalon xesh). Yoqish/o‘chirish jurnalga (`post_rotation`) yoziladi va faqat keyin tuziladigan sutkalarga ta’sir qiladi.
+    - **QOIDA A:** 2-kurs haftasida kursant ko‘pi bilan bitta og‘ir joyda; yengil joylar mumkin; barcha guruhlar. Faqat guruhda kishi yetmasa yumshatiladi (o‘rin bo‘sh qolmasin) — adminga sariq ogohlantirish (`days.rotation_notices`, kursantga ko‘rinmaydi).
+    - **QOIDA B:** kecha turgan kursantni generator hech qachon qo‘ymaydi (jazo naryadi ham). Faqat admin almashtirish oynasida: “dam olmagan” belgisi, qizil ogohlantirish, sabab (`no_rest_reason`) majburiy va tasdiq (`no_rest_confirm`). `Assignment.no_rest`, jurnalda alohida `no_rest` yozuvi, sutka sahifasida “dam olmagan” belgisi. Komandir va kursant — 403. Sozlama o‘chiq bo‘lsa admin ham qo‘ya olmaydi.
+    - **Kalit** (`CandidateScore.sort_key`, `rotation=True`): 3-marta/hafta (faqat iloji bo‘lmasa) → QOIDA A → oxirgi naryadi shu joy (lavozimidan qat’i nazar) → haftadagi soni → tsikl (5 ta katta joy, Markaz kirmaydi) → jami (eng kami + 1 teng) → og‘ir joylar soni (og‘ir joyda) → shu joyda → aniq jami → oxirgi sana → tasodif. Faqat oddiy naryadlar hisoblanadi. `assign_roles` tanlovdan keyin. Qizlar — eski kalit.
+    - **Ko‘rinish:** almashtirish oynasida ogohlantirishlar (taqiq emas): “shu hafta og‘ir joyda turgan”, “oxirgi marta shu joyda”; sutka sahifasida “Tanlash tushuntirishi” jadvali (admin); statistika va Excel’da “Og‘ir joylar” ustuni va adolat belgisida og‘ir joylar farqi; kursant kartochkasida (admin) “Og‘ir joylar: N marta” va joriy tsikl.
+    - **5a — “ozod / naryadga chiqmaydi” yozuvi butunlay olib tashlandi** (uch tilda, HTML/Excel/PDF): faqat lavozim nomi — Guruh komandiri / Kurs starshinasi / Kurs pisari / Kaptyorchik (`Cadet.position_label`; boshqa lavozim — o‘z matni). Filtr va ustun “Lavozim” (`?lavozim=komandir|starshina|pisar|kaptyor|yoq`; eski `?holat=lavozimda` ham ishlaydi). `duty_exempt` mantiqi o‘zgarmagan; admin formasida belgi yordam matni “Lavozimi sababli naryad navbatiga kirmaydi” bilan qoladi (faqat o‘qish — o‘zgartirish kartochkadan, sabab bilan).
+    - **Simulyatsiya:** `python scripts/simulate_weeks.py --joylar` (bazasiz, eski → yangi). Testlar: `tests/test_post_rotation.py`.
+    - **Ochiq savol (1.12.0):** platforma simulyatsiyasida qo‘lda almashtirishlar bilan jami farqi 3 gacha yetadi (eski tartibda 1–2). Taklif: “jami ≥ guruhdagi eng kami + 2” bo‘lsa, tsikldan oldin orqaga surish (sinovda farq 1–2 ga qaytdi, QOIDA A buzilishlari 9 → 8). Qaror kutilmoqda; hozir kalit topshiriqdagidek.
+71. **“Kadir” roli (22-bosqich, 1.13.0):**
+    - To‘rtinchi rol `kadir` (`UserRole.KADIR`, migratsiya 0020): kurs xodimi — admin bilan **bir xil barcha amallar** (`permissions.STAFF` = admin + kadir): hafta ochish, sutka tuzish / tuzatish / tasdiqlash / qayta ochish, kursantlar va akkauntlar, sababli holatlar, kasallar ro‘yxati va hujjatlari, zalyotchiklar (admin qoidalari: komandir cheklovlari yo‘q), statistika, jurnal, PDF.
+    - **Yopiq:** Django boshqaruv paneli (`/admin/` — `admin_panel`), Sozlamalar (joylar navbati, boshlang‘ich taqsimot, tayyorgarlik eslatmalari, zalyot chegaralari) va sinov ma’lumotlarini tozalash (`settings.manage`). Menyuda “Boshqaruv paneli” ko‘rinmaydi; `/admin/` — kirish sahifasiga, tozalash — 403. `is_staff` va model huquqlari faqat admin/superuser’da qoladi.
+    - Kursantga bog‘lash shart emas; akkauntni faqat admin boshqaruv panelida yaratadi (rol ro‘yxatida “Kadir (hamma amal, boshqaruv panelisiz)”). Jurnalda va zalyotchiklar ro‘yxatida o‘z nomi bilan (“kadir”) ko‘rinadi.
+    - **1.13.1:** kursant kartochkasidagi “Faolsizlantirish / Qayta faollashtirish” va “Lavozim belgilash / olib tashlash” — yangi ruxsat `cadets.status`, faqat admin. Kadir kartochkada bu tugmalarni ko‘rmaydi, POST — 403; “Tahrirlash” va kursant qo‘shish qoladi.
+    - Ruxsat jadvali `docs/05-rollar.md` da 4 ustun (admin, kadir, kursant, guruh komandiri); `tests/test_kadir.py` (8).
+    - **Ochiq savol:** rol nomi foydalanuvchi yozgan “Kadir” bo‘yicha qo‘yildi (kadrlar bo‘limi xodimi — “Kadr” bo‘lishi mumkin). Sozlamalar va tozalashni kadirga ochish kerak bo‘lsa — `settings.manage` ga `KADIR` qo‘shiladi.

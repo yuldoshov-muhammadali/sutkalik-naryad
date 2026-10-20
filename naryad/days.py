@@ -16,11 +16,12 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
 from django.utils.translation import ngettext
 
-from naryad.engine.allocator import History, pick_cadets
+from naryad.engine.allocator import EXCLUDED_YESTERDAY, History, pick_cadets, score_candidate
 from naryad.engine.config import PENALTY_POSTS, ROTATION_CHAIN
 from naryad.engine.models import ROLE_TITLES
 
 from . import penalties, services
+from . import permissions as perms
 from .models import (
     Absence,
     Assignment,
@@ -35,6 +36,7 @@ from .models import (
     Post,
     PostSlot,
     PublishedDuty,
+    Setting,
 )
 from .services import ServiceError, StaleError, check_version
 
@@ -156,8 +158,8 @@ def day_issues(duty_day: DutyDay) -> list[Issue]:
             }))
         elif a.cadet.duty_exempt:
             issues.append(
-                Issue("exempt", _("%(name)s (%(slot)s) — %(position)s, naryadga chiqmaydi — almashtiring yoki qayta tuzing.") % {
-                    "name": a.cadet.short_name, "slot": _(a.post_slot.print_label), "position": a.cadet.duty_position,
+                Issue("exempt", _("%(name)s (%(slot)s) — %(position)s (lavozimda) — almashtiring yoki qayta tuzing.") % {
+                    "name": a.cadet.short_name, "slot": _(a.post_slot.print_label), "position": a.cadet.position_label,
                 })
             )
         elif a.kind == Assignment.Kind.PENALTY and a.penalty_id in cancelled:
@@ -224,13 +226,95 @@ def penalty_notices(duty_day: DutyDay) -> list[str]:
         if a is not None:
             out.append(_("Zalyotchik %(name)s bugun guruhi bilan oddiy navbatda turibdi (jazo hisobiga o‘tmaydi).") % values)
         elif not cadet.is_active or cadet.duty_exempt:
-            out.append(_("Zalyotchik %(name)s faol emas yoki naryadga chiqmaydi (lavozimda) — bugun qo‘yilmadi.") % values)
+            out.append(_("Zalyotchik %(name)s faol emas yoki lavozimda — bugun qo‘yilmadi.") % values)
         elif o.cadet_id in absent:
             out.append(_("Zalyotchik %(name)s sababli holatda bo‘lgani uchun bugun qo‘yilmadi.") % values)
         elif o.cadet_id in yesterday:
             out.append(_("Zalyotchik %(name)s kecha turgani uchun bugun qo‘yilmadi.") % values)
         else:
             out.append(_("Zalyotchik %(name)s: bugun jazo o‘rni qolmadi — keyingi sutkaga qoldi.") % values)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 21-bosqich: joylar navbati — admin uchun ogohlantirishlar va tushuntirish jadvali
+# ---------------------------------------------------------------------------
+
+
+def rotation_notices(duty_day: DutyDay | None) -> list[str]:
+    """Sariq ogohlantirishlar (faqat admin, kursantga ko'rsatilmaydi), joriy tilda:
+    QOIDA A yumshatilgan (shu hafta ikkinchi og'ir joy) va “dam olmagan” kursantlar (QOIDA B istisnosi)."""
+    if duty_day is None:
+        return []
+    out = []
+    rows = duty_day.assignments.select_related("cadet", "post_slot__post").order_by("post_slot__post__display_order", "post_slot__position")
+    for a in rows:
+        if a.no_rest:
+            out.append(_("%(name)s (%(slot)s): kecha naryadda bo‘lgan — dam olmagan (admin qo‘ydi).") % {
+                "name": a.cadet.short_name, "slot": _(a.post_slot.print_label),
+            })
+    rotation = Setting.load().post_rotation()
+    if rotation is None or not rotation.hard_posts:
+        return out
+    start = services.week_start(duty_day.date)
+    hard_rows = [a for a in rows if a.kind == Assignment.Kind.NORMAL and a.post_slot.post.code in rotation.hard_posts]
+    earlier = set(
+        Assignment.objects.filter(
+            cadet_id__in=[a.cadet_id for a in hard_rows], kind=Assignment.Kind.NORMAL,
+            post_slot__post__code__in=rotation.hard_posts, duty_day__status=DutyDay.Status.APPROVED,
+            duty_day__date__gte=start, duty_day__date__lt=duty_day.date,
+        ).values_list("cadet_id", flat=True)
+    )
+    for a in hard_rows:
+        if a.cadet_id not in earlier:
+            continue
+        values = {"name": a.cadet.short_name, "post": _(a.post_slot.post.name)}
+        if a.source == Assignment.Source.AUTO:
+            out.append(_("Guruhda kishi yetmagani uchun %(name)s bu hafta ikkinchi marta og‘ir joyga qo‘yildi (%(post)s).") % values)
+        else:
+            out.append(_("%(name)s bu hafta ikkinchi marta og‘ir joyda (%(post)s) — qo‘lda qo‘yilgan.") % values)
+    return out
+
+
+@dataclass
+class Explanation:
+    post: Post
+    slot: PostSlot
+    cadet: Cadet
+    score: object  # engine CandidateScore
+    no_rest: bool = False
+
+    @property
+    def tags(self) -> list[str]:
+        s = self.score
+        tags = []
+        if s.hard_conflict:
+            tags.append(_("shu hafta og‘ir joyda turgan"))
+        if s.last_is_same_post:
+            tags.append(_("oxirgi marta shu joyda"))
+        if s.cycle_repeat:
+            tags.append(_("tsiklda bu joy bor"))
+        if s.third_time:
+            tags.append(_("haftada 3-marta"))
+        if self.no_rest:
+            tags.append(_("dam olmagan"))
+        return tags
+
+
+def explanations(duty_day: DutyDay | None) -> list[Explanation]:
+    """Tushuntirish jadvali (admin): har o'g'il joyidagi oddiy naryad uchun saralash kaliti qiymatlari —
+    tarix shu sutkadan oldingi tasdiqlangan sutkalar. Joylar navbati o'chiq bo'lsa — bo'sh."""
+    rotation = Setting.load().post_rotation()
+    if duty_day is None or rotation is None:
+        return []
+    history = History(services.approved_history(before=duty_day.date), before=duty_day.date)
+    out = []
+    rows = duty_day.assignments.filter(kind=Assignment.Kind.NORMAL, post_slot__post__gender=Gender.MALE).select_related(
+        "cadet__group", "post_slot__post"
+    ).order_by("post_slot__post__display_order", "post_slot__position")
+    for a in rows:
+        score = score_candidate(services.to_engine_cadet(a.cadet), a.post_slot.post.code, duty_day.date, history, rotation)
+        out.append(Explanation(a.post_slot.post, a.post_slot, a.cadet, score, a.no_rest))
     return out
 
 
@@ -278,6 +362,20 @@ class Candidate:
     excluded: str = ""  # bo'sh bo'lmasa — nega tanlab bo'lmaydi
     best: bool = False
     offender: bool = False  # faol zalyotchik (jazo o'rniga qo'yiladi)
+    # 21-bosqich: joylar navbati belgilari (ogohlantirish, taqiq emas) va “dam olmagan” (faqat admin, sabab + tasdiq)
+    no_rest: bool = False
+    hard_conflict: bool = False  # shu hafta og'ir joyda turgan (og'ir joyga)
+    last_same: bool = False  # oxirgi marta shu joyda
+    cycle_has: bool = False  # tsiklda bu joy bor
+    hard_count: int | None = None
+
+
+def candidate_from_score(cadet: Cadet, s, **extra) -> Candidate:
+    return Candidate(
+        cadet, s.week_count, s.total, s.post_count, s.last_day,
+        hard_conflict=s.hard_conflict, last_same=s.rotation and s.last_is_same_post, cycle_has=s.cycle_repeat,
+        hard_count=s.hard_count if s.rotation else None, **extra,
+    )
 
 
 def candidate_pool(duty_day: DutyDay, slot: PostSlot) -> list[Cadet]:
@@ -316,6 +414,7 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
     )
     history = History(services.approved_history(before=duty_day.date), before=duty_day.date)
     barred = () if slot.post.code in PENALTY_POSTS else penalties.active_offender_ids()
+    rotation = Setting.load().post_rotation() if slot.post.gender == Gender.MALE else None
     pick = pick_cadets(
         [services.to_engine_cadet(c) for c in pool],
         slot.post.code,
@@ -325,12 +424,18 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
         services.engine_absences(duty_day.date),
         taken,
         barred,
+        rotation,
     )
     out = [c for c in offenders_first if not c.excluded]
     for i, s in enumerate(pick.ranking):
-        out.append(
-            Candidate(by_id[s.cadet_id], s.week_count, s.total, s.post_count, s.last_day, best=(i == 0))
-        )
+        out.append(candidate_from_score(by_id[s.cadet_id], s, best=(i == 0)))
+    if rotation is not None:
+        # QOIDA B: kecha turgan kursantni generator qo'ymaydi; admin — faqat shu oynada, sabab va tasdiq bilan
+        for cid, reason in list(pick.excluded.items()):
+            if reason == EXCLUDED_YESTERDAY and replacement_error(duty_day, slot, by_id[cid], allow_no_rest=True) is None:
+                del pick.excluded[cid]
+                s = score_candidate(services.to_engine_cadet(by_id[cid]), slot.post.code, duty_day.date, history, rotation)
+                out.append(candidate_from_score(by_id[cid], s, no_rest=True))
     sick = {
         ab.cadet_id: ab for ab in Absence.objects.filter(
             reason_type=Absence.Reason.SICK, start_date__lte=duty_day.date, end_date__gte=duty_day.date, cadet_id__in=pick.excluded
@@ -344,7 +449,7 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
     for c in exempt:
         out.append(Candidate(c, excluded=exempt_text(c)))
     out += [c for c in offenders_first if c.excluded]
-    if out and not out[0].excluded:
+    if out and not out[0].excluded and not out[0].no_rest:
         for c in out:
             c.best = False
         out[0].best = True
@@ -358,11 +463,24 @@ def sick_text(absence: Absence) -> str:
 
 
 def exempt_text(cadet: Cadet) -> str:
-    return _("%(position)s — naryadga chiqmaydi") % {"position": cadet.duty_position}
+    """Lavozimdagi kursant — faqat lavozim nomi (21-bosqich, 5a)."""
+    return _("%(position)s (lavozimda)") % {"position": cadet.position_label}
 
 
-def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet) -> str | None:
-    """Qoidani buzadigan almashtirish bo'lsa — o'zbekcha sababi."""
+def rested_error(duty_day: DutyDay, cadet: Cadet) -> str | None:
+    yesterday = duty_day.date - dt.timedelta(days=1)
+    if Assignment.objects.filter(duty_day__date=yesterday, cadet=cadet).exists():
+        return _("%(name)s kecha (%(day)s) naryadda bo‘lgan — ketma-ket ikki sutka turmaydi.") % {
+            "name": cadet.short_name, "day": f"{yesterday:%d.%m}",
+        }
+    return None
+
+
+def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet, allow_no_rest: bool = False) -> str | None:
+    """Qoidani buzadigan almashtirish bo'lsa — sababi (joriy tilda).
+
+    allow_no_rest — 21-bosqich: admin “dam olmagan” (kecha turgan) kursantni sabab va tasdiq bilan qo'ya oladi.
+    """
     post = slot.post
     current = Assignment.objects.filter(duty_day=duty_day, post_slot=slot).first()
     if current is not None and current.cadet_id == cadet.pk:
@@ -371,7 +489,7 @@ def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet) -> str | 
         return _("%(name)s faol emas (%(reason)s).") % {"name": cadet.short_name, "reason": cadet.deactivation_reason}
     if cadet.duty_exempt:
         return _("%(name)s — %(position)s, sutkalik naryadga qo‘yilmaydi.") % {
-            "name": cadet.short_name, "position": cadet.duty_position,
+            "name": cadet.short_name, "position": cadet.position_label,
         }
     if cadet.gender != post.gender:
         if post.gender == Gender.FEMALE:
@@ -396,11 +514,8 @@ def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet) -> str | 
         return _("%(name)s shu sutkada boshqa o‘rinda turibdi: %(slot)s.") % {
             "name": cadet.short_name, "slot": _(other.post_slot.print_label),
         }
-    yesterday = duty_day.date - dt.timedelta(days=1)
-    if Assignment.objects.filter(duty_day__date=yesterday, cadet=cadet).exists():
-        return _("%(name)s kecha (%(day)s) naryadda bo‘lgan — ketma-ket ikki sutka turmaydi.") % {
-            "name": cadet.short_name, "day": f"{yesterday:%d.%m}",
-        }
+    if not allow_no_rest and (error := rested_error(duty_day, cadet)):
+        return error
     absence = Absence.objects.filter(cadet=cadet, start_date__lte=duty_day.date, end_date__gte=duty_day.date).first()
     if absence is not None and absence.reason_type == Absence.Reason.SICK:
         return sick_text(absence)
@@ -432,15 +547,32 @@ def bump(duty_day: DutyDay) -> None:
     duty_day.save(update_fields=["version"])
 
 
+NO_REST_WARNING = _lazy("Bu kursant kecha naryadda bo‘lgan, dam olmagan")
+
+
+def no_rest_allowed(user) -> bool:
+    """QOIDA B istisnosi: faqat admin va faqat joylar navbati yoqilgan bo'lsa (o'chiq — eski xatti-harakat)."""
+    return perms.can(user, "day.edit") and Setting.load().post_rotation_enabled
+
+
 @transaction.atomic
-def replace_cadet(date: dt.date, slot_id: int, new_cadet_id: int, reason_code: str, note: str, user, expected_version) -> Assignment:
+def replace_cadet(
+    date: dt.date, slot_id: int, new_cadet_id: int, reason_code: str, note: str, user, expected_version,
+    no_rest_reason: str = "", no_rest_confirm: bool = False,
+) -> Assignment:
     duty_day = lock_draft(date, expected_version)
     reason = reason_text(reason_code, note)
     slot = PostSlot.objects.select_related("post").get(pk=slot_id)
     cadet = Cadet.objects.select_related("group").get(pk=new_cadet_id)
-    error = replacement_error(duty_day, slot, cadet)
+    error = replacement_error(duty_day, slot, cadet, allow_no_rest=no_rest_allowed(user))
     if error:
         raise ServiceError(error)
+    no_rest = rested_error(duty_day, cadet) is not None
+    no_rest_reason = (no_rest_reason or "").strip()
+    if no_rest and not no_rest_reason:
+        raise ServiceError(_("%(warning)s — sababini yozing (majburiy).") % {"warning": NO_REST_WARNING})
+    if no_rest and not no_rest_confirm:
+        raise ServiceError(_("%(warning)s — qo‘yishni tasdiqlang.") % {"warning": NO_REST_WARNING})
 
     current = Assignment.objects.filter(duty_day=duty_day, post_slot=slot).select_related("cadet").first()
     old_cadet = current.cadet if current else None
@@ -452,7 +584,7 @@ def replace_cadet(date: dt.date, slot_id: int, new_cadet_id: int, reason_code: s
         current.delete()
     assignment = Assignment.objects.create(
         duty_day=duty_day, post_slot=slot, cadet=cadet, group=cadet.group, source=Assignment.Source.MANUAL,
-        kind=Assignment.Kind.PENALTY if penalty else Assignment.Kind.NORMAL, penalty=penalty,
+        kind=Assignment.Kind.PENALTY if penalty else Assignment.Kind.NORMAL, penalty=penalty, no_rest=no_rest,
     )
 
     if old_cadet is not None and reason_code in ABSENCE_REASONS:
@@ -479,6 +611,12 @@ def replace_cadet(date: dt.date, slot_id: int, new_cadet_id: int, reason_code: s
         details=(f"{old_cadet.short_name} → {cadet.short_name}" if old_cadet else f"Bo‘sh o‘ringa {cadet.short_name}")
         + f" ({slot.print_label})",
     )
+    if no_rest:  # alohida jurnal yozuvi (saqlanadigan matn — o'zbekcha)
+        ChangeLog.objects.create(
+            duty_day=duty_day, action=ChangeLog.Action.NO_REST, post_slot=slot, new_cadet=cadet, user=user,
+            reason=no_rest_reason,
+            details=f"{cadet.short_name} kecha ({date - dt.timedelta(days=1):%d.%m.%Y}) naryadda bo‘lgan — dam olmagan ({slot.print_label})",
+        )
     bump(duty_day)
     return assignment
 
@@ -501,10 +639,12 @@ def swap_slots(date: dt.date, slot_a_id: int, slot_b_id: int, reason_code: str, 
     if Assignment.Kind.PENALTY in (a.kind, b.kind):
         raise ServiceError(_("Jazo naryadidagi zalyotchik faqat posbon bo‘ladi — uning lavozimini almashtirib bo‘lmaydi."))
     slot_a, slot_b = a.post_slot, b.post_slot
-    data = [(slot_b, a.cadet, a.group), (slot_a, b.cadet, b.group)]
+    data = [(slot_b, a.cadet, a.group, a.no_rest), (slot_a, b.cadet, b.group, b.no_rest)]
     Assignment.objects.filter(pk__in=[a.pk, b.pk]).delete()
-    for slot, cadet, group in data:
-        Assignment.objects.create(duty_day=duty_day, post_slot=slot, cadet=cadet, group=group, source=Assignment.Source.MANUAL)
+    for slot, cadet, group, no_rest in data:
+        Assignment.objects.create(
+            duty_day=duty_day, post_slot=slot, cadet=cadet, group=group, source=Assignment.Source.MANUAL, no_rest=no_rest
+        )
     ChangeLog.objects.create(
         duty_day=duty_day,
         action=ChangeLog.Action.SWAP,

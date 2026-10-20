@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sutkalik-naryad 1.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 03:12+0500\n"
+"POT-Creation-Date: 2026-10-20 23:52+0500\n"
 "PO-Revision-Date: 2026-10-14 12:00+0500\n"
 "Last-Translator: Sutkalik naryad jamoasi\n"
 "Language-Team: English\n"
@@ -58,11 +58,13 @@ msgstr "Duty roster platform"
 msgid ""
 "“Guruh komandiri” roli faqat guruh komandiri lavozimidagi kursantga "
 "beriladi; guruh kursantning guruhidan olinadi, har guruhga bitta faol "
-"komandir."
+"komandir. “Kadir” roli — admin bilan bir xil amallar, lekin boshqaruv paneli "
+"va Sozlamalarsiz (kursantga bog‘lash shart emas)."
 msgstr ""
 "The “Group commander” role is given only to a cadet holding the group "
 "commander position; the group is taken from the cadet’s group, one active "
-"commander per group."
+"commander per group. The “Kadir” role has the same actions as the admin, but "
+"no admin panel and no Settings (linking to a cadet is not required)."
 
 msgid "Vaqtinchalik parol berish (Excel)"
 msgstr "Issue temporary password (Excel)"
@@ -76,6 +78,13 @@ msgstr "male"
 msgid "qiz"
 msgstr "female"
 
+msgctxt "kursant lavozimi"
+msgid "Lavozim"
+msgstr "Position"
+
+msgid "Lavozimsiz"
+msgstr "No position"
+
 msgid "Akkaunt yaratish (Excel) — guruh komandirlariga rol avtomatik"
 msgstr "Create accounts (Excel) — group commanders get the role automatically"
 
@@ -88,15 +97,10 @@ msgstr ""
 msgid "Faollik"
 msgstr "Activity status"
 
-msgid "Naryadga chiqmaydi (lavozim)"
-msgstr "Not on the duty roster (position)"
-
 msgid ""
-"Kursant kartochkasidagi “Naryadga chiqmaydi deb belgilash” / “Naryadga "
-"qaytarish” orqali o‘zgartiriladi."
-msgstr ""
-"Changed via “Mark as not on the duty roster” / “Return to duty” on the cadet "
-"card."
+"Kursant kartochkasidagi “Lavozim belgilash” / “Lavozimni olib tashlash” "
+"orqali o‘zgartiriladi."
+msgstr "Changed on the cadet card via “Assign position” / “Remove position”."
 
 msgid "Tizim"
 msgstr "System"
@@ -136,6 +140,30 @@ msgid ""
 msgstr ""
 "Initial group → post distribution (used for the first duty day only when the "
 "database has no approved history)"
+
+msgid "og‘ir joylar"
+msgstr "hard posts"
+
+msgid ""
+"Bir haftada kursant ko‘pi bilan bittasida turadi. Qizlar yotoqxonasi "
+"kirmaydi."
+msgstr ""
+"A cadet stands at most one of them per week. The female dormitory is not "
+"included."
+
+msgid "Joylar navbati va og‘ir joylar (21-bosqich)"
+msgstr "Post rotation and hard posts (stage 21)"
+
+msgid ""
+"Haftada (yakshanba 18:00 – yakshanba 18:00) kursant ko‘pi bilan bitta og‘ir "
+"joyda turadi; oxirgi marta turgan joyiga qayta qo‘yilmaydi; 5 ta katta "
+"joyning hammasida turmaguncha bittasi takrorlanmaydi. Kecha naryadda bo‘lgan "
+"kursantni generator hech qachon qo‘ymaydi. O‘chiq bo‘lsa — avvalgi tartib."
+msgstr ""
+"Within a week (Sunday 18:00 – Sunday 18:00) a cadet stands at most one hard "
+"post; he is not put again at the post he stood last; until he has stood all "
+"5 big posts, none of them repeats. The generator never assigns a cadet who "
+"was on duty yesterday. When off — the previous order."
 
 msgid "Sinov ma’lumotlarini tozalash"
 msgstr "Clear test data"
@@ -366,12 +394,10 @@ msgstr "e.g. relieved of position (order)"
 #, python-format
 msgid ""
 "%(name)s faol zalyotchik (%(count)s ta jazo naryadi) — avval zalyot "
-"bajarilishi yoki bekor qilinishi kerak, keyin “naryadga chiqmaydi” deb "
-"belgilanadi."
+"bajarilishi yoki bekor qilinishi kerak, keyin lavozim belgilanadi."
 msgstr ""
 "%(name)s is an active offender (%(count)s extra duties): the penalty must "
-"first be served or cancelled, then the cadet can be marked as “not on the "
-"duty roster”."
+"first be completed or cancelled, then the position can be assigned."
 
 msgid "Zaxira bo‘sh chiqdi."
 msgstr "The backup turned out empty."
@@ -523,10 +549,10 @@ msgstr "%(name)s (%(slot)s) is inactive — replace or regenerate."
 
 #, python-format
 msgid ""
-"%(name)s (%(slot)s) — %(position)s, naryadga chiqmaydi — almashtiring yoki "
-"qayta tuzing."
+"%(name)s (%(slot)s) — %(position)s (lavozimda) — almashtiring yoki qayta "
+"tuzing."
 msgstr ""
-"%(name)s (%(slot)s) — %(position)s, not on the duty roster — replace or "
+"%(name)s (%(slot)s) — %(position)s (holds a position) — replace or "
 "regenerate."
 
 #, python-format
@@ -561,12 +587,9 @@ msgstr ""
 "as extra duty)."
 
 #, python-format
-msgid ""
-"Zalyotchik %(name)s faol emas yoki naryadga chiqmaydi (lavozimda) — bugun "
-"qo‘yilmadi."
+msgid "Zalyotchik %(name)s faol emas yoki lavozimda — bugun qo‘yilmadi."
 msgstr ""
-"Offender %(name)s is inactive or not on the duty roster (position) — not "
-"assigned today."
+"Offender %(name)s is inactive or holds a position — not assigned today."
 
 #, python-format
 msgid "Zalyotchik %(name)s sababli holatda bo‘lgani uchun bugun qo‘yilmadi."
@@ -582,6 +605,43 @@ msgid "Zalyotchik %(name)s: bugun jazo o‘rni qolmadi — keyingi sutkaga qoldi
 msgstr ""
 "Offender %(name)s: no extra-duty slot left today — carried over to the next "
 "duty day."
+
+#, python-format
+msgid ""
+"%(name)s (%(slot)s): kecha naryadda bo‘lgan — dam olmagan (admin qo‘ydi)."
+msgstr ""
+"%(name)s (%(slot)s): was on duty yesterday — no rest after duty (set by the "
+"admin)."
+
+#, python-format
+msgid ""
+"Guruhda kishi yetmagani uchun %(name)s bu hafta ikkinchi marta og‘ir joyga "
+"qo‘yildi (%(post)s)."
+msgstr ""
+"Because the group is short of people, %(name)s was put on a hard post for "
+"the second time this week (%(post)s)."
+
+#, python-format
+msgid ""
+"%(name)s bu hafta ikkinchi marta og‘ir joyda (%(post)s) — qo‘lda qo‘yilgan."
+msgstr ""
+"%(name)s is on a hard post for the second time this week (%(post)s) — placed "
+"manually."
+
+msgid "shu hafta og‘ir joyda turgan"
+msgstr "already on a hard post this week"
+
+msgid "oxirgi marta shu joyda"
+msgstr "last time at this post"
+
+msgid "tsiklda bu joy bor"
+msgstr "post already in the cycle"
+
+msgid "haftada 3-marta"
+msgstr "3rd time this week"
+
+msgid "dam olmagan"
+msgstr "no rest"
 
 msgid "Bu sana ochilgan 2-kurs haftasiga tegishli emas."
 msgstr "This date does not belong to an open 2nd-year week."
@@ -599,8 +659,13 @@ msgid "Kasal: %(start)s–%(end)s (kasallar ro‘yxatida)."
 msgstr "Sick: %(start)s–%(end)s (on the sick list)."
 
 #, python-format
-msgid "%(position)s — naryadga chiqmaydi"
-msgstr "%(position)s — not on the duty roster"
+msgid "%(position)s (lavozimda)"
+msgstr "%(position)s (holds a position)"
+
+#, python-format
+msgid ""
+"%(name)s kecha (%(day)s) naryadda bo‘lgan — ketma-ket ikki sutka turmaydi."
+msgstr "%(name)s was on duty yesterday (%(day)s) — no two duty days in a row."
 
 msgid "Bu kursant allaqachon shu o‘rinda."
 msgstr "This cadet is already in this slot."
@@ -645,11 +710,6 @@ msgid "%(name)s shu sutkada boshqa o‘rinda turibdi: %(slot)s."
 msgstr "%(name)s is already in another slot on this duty day: %(slot)s."
 
 #, python-format
-msgid ""
-"%(name)s kecha (%(day)s) naryadda bo‘lgan — ketma-ket ikki sutka turmaydi."
-msgstr "%(name)s was on duty yesterday (%(day)s) — no two duty days in a row."
-
-#, python-format
 msgid "%(name)s sababli yo‘q: %(reason)s (%(start)s–%(end)s)."
 msgstr ""
 "%(name)s is absent for an excused reason: %(reason)s (%(start)s–%(end)s)."
@@ -664,6 +724,17 @@ msgid ""
 msgstr ""
 "The duty day is approved and cannot be changed. If necessary, the admin can "
 "revoke the approval."
+
+msgid "Bu kursant kecha naryadda bo‘lgan, dam olmagan"
+msgstr "This cadet was on duty yesterday and has not rested"
+
+#, python-format
+msgid "%(warning)s — sababini yozing (majburiy)."
+msgstr "%(warning)s — enter the reason (required)."
+
+#, python-format
+msgid "%(warning)s — qo‘yishni tasdiqlang."
+msgstr "%(warning)s — confirm the assignment."
 
 msgid "Ikki xil qatorni tanlang."
 msgstr "Select two different rows."
@@ -849,6 +920,9 @@ msgstr "Cadet (view only)"
 msgid "Guruh komandiri (o‘z guruhini ko‘rish)"
 msgstr "Group commander (view own group)"
 
+msgid "Kadir (hamma amal, boshqaruv panelisiz)"
+msgstr "Kadir (all actions, no admin panel)"
+
 msgid "rol"
 msgstr "role"
 
@@ -925,6 +999,18 @@ msgstr "group"
 msgid "guruhlar"
 msgstr "groups"
 
+msgid "Guruh komandiri"
+msgstr "Group commander"
+
+msgid "Kurs starshinasi"
+msgstr "Course senior cadet"
+
+msgid "Kurs pisari"
+msgstr "Course clerk"
+
+msgid "Kaptyorchik"
+msgstr "Storekeeper"
+
 msgid "familiya"
 msgstr "last name"
 
@@ -953,8 +1039,11 @@ msgstr "deactivated at"
 msgid "faolsizlantirish sababi"
 msgstr "deactivation reason"
 
-msgid "naryadga chiqmaydi"
-msgstr "not on the duty roster"
+msgid "lavozimda"
+msgstr "holds a position"
+
+msgid "Lavozimi sababli naryad navbatiga kirmaydi"
+msgstr "Not in the duty rotation because of the position"
 
 msgid "lavozimi"
 msgstr "role"
@@ -1303,11 +1392,11 @@ msgstr "Cadet reactivated"
 msgid "Kursant Excel’dan import qilindi"
 msgstr "Cadet imported from Excel"
 
-msgid "Naryadga chiqmaydi deb belgilandi"
-msgstr "Marked as not on the duty roster"
+msgid "Lavozim belgilandi"
+msgstr "Position assigned"
 
-msgid "Naryadga qaytarildi"
-msgstr "Returned to duty"
+msgid "Lavozim olib tashlandi"
+msgstr "Position removed"
 
 msgid "Sababli holat kiritildi"
 msgstr "Excused absence entered"
@@ -1362,6 +1451,12 @@ msgstr "Penalty reviewed"
 
 msgid "Sinov ma’lumotlari tozalandi"
 msgstr "Test data cleared"
+
+msgid "Dam olmagan kursant qo‘yildi"
+msgstr "Cadet without rest assigned"
+
+msgid "Joylar navbati sozlamasi o‘zgartirildi"
+msgstr "Post rotation setting changed"
 
 msgid "Sutka o‘chirilsa ham jurnal saqlanadi (8-bosqich)."
 msgstr "The log is kept even if the duty day is deleted (stage 8)."
@@ -1453,6 +1548,14 @@ msgstr "reprimand date at most this many days old (commander)"
 msgid "komandir bir kunda kirita oladigan zalyotlar"
 msgstr "penalties a commander can enter per day"
 
+msgid ""
+"Yoqilgan: haftada bitta og‘ir joy, oxirgi joy takrorlanmaydi, 5 ta katta joy "
+"navbati. O‘chiq: avvalgi tartib. Faqat keyingi tuziladigan sutkalarga ta’sir "
+"qiladi."
+msgstr ""
+"On: one hard post per week, the last post is not repeated, rotation of the 5 "
+"big posts. Off: the previous order. Affects only duty days generated later."
+
 msgid "kim o‘zgartirdi"
 msgstr "modified by"
 
@@ -1525,10 +1628,9 @@ msgid "%(name)s faol emas — zalyotchik qilib bo‘lmaydi."
 msgstr "%(name)s is inactive and cannot be made an offender."
 
 #, python-format
-msgid ""
-"%(name)s — %(position)s, naryadga chiqmaydi — avval bu belgini olib tashlang."
+msgid "%(name)s — %(position)s (lavozimda) — avval lavozimni olib tashlang."
 msgstr ""
-"%(name)s — %(position)s, not on the duty roster — remove this mark first."
+"%(name)s — %(position)s (holds a position) — remove the position first."
 
 msgid "Faqat o‘z guruhingiz kursantiga zalyot kiritasiz."
 msgstr "You can only enter a penalty for a cadet of your own group."
@@ -1591,8 +1693,8 @@ msgstr "Cancellation reason"
 msgid "Jazo naryadlari soni (jami)"
 msgstr "Extra duties (total)"
 
-msgid "Guruh komandiri"
-msgstr "Group commander"
+msgid "Kadir"
+msgstr "Kadir"
 
 msgid "Bosh sahifa (rolga qarab)"
 msgstr "Home page (depends on role)"
@@ -1667,6 +1769,11 @@ msgstr "View the cadet list (filter, search)"
 msgid ""
 "Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar"
 msgstr "Add, edit and deactivate cadets, Excel import, accounts"
+
+msgid ""
+"Kursantni faolsizlantirish / qayta faollashtirish va lavozim belgilash / "
+"olib tashlash"
+msgstr "Deactivate / reactivate a cadet and assign / remove a position"
 
 msgid "Sozlamalar, boshlang‘ich taqsimot va sinov ma’lumotlarini tozalash"
 msgstr "Settings, initial rotation and clearing test data"
@@ -1934,17 +2041,15 @@ msgid "%(name)s qayta faollashtirildi."
 msgstr "%(name)s has been reactivated."
 
 msgid ""
-"Faol bo‘lmagan kursantni “naryadga chiqmaydi” deb belgilab bo‘lmaydi — u "
-"baribir naryadga tushmaydi."
+"Faol bo‘lmagan kursantga lavozim belgilab bo‘lmaydi — u baribir naryadga "
+"tushmaydi."
 msgstr ""
-"An inactive cadet cannot be marked as “not on the duty roster” — they are "
-"not assigned anyway."
+"A position cannot be assigned to an inactive cadet — they are not put on "
+"duty anyway."
 
 #, python-format
-msgid "%(name)s endi naryadga chiqmaydi (%(position)s). Tarixi saqlanadi."
-msgstr ""
-"%(name)s is no longer on the duty roster (%(position)s). Their history is "
-"kept."
+msgid "%(name)s: lavozim belgilandi (%(position)s). Tarixi saqlanadi."
+msgstr "%(name)s: position assigned (%(position)s). Their history is kept."
 
 #, python-format
 msgid ""
@@ -1958,16 +2063,16 @@ msgstr ""
 msgid "Belgilanmadi: %(errors)s"
 msgstr "Not marked: %(errors)s"
 
-msgid "Kursant “naryadga chiqmaydi” deb belgilanmagan."
-msgstr "The cadet is not marked as “not on the duty roster”."
+msgid "Kursantga lavozim belgilanmagan."
+msgstr "The cadet has no position."
 
 #, python-format
 msgid ""
-"%(name)s naryadga qaytarildi. Algoritm uni haftalik va jami hisob bo‘yicha "
-"avtomatik oldinga qo‘yadi."
+"%(name)s: lavozim olib tashlandi. Algoritm uni haftalik va jami hisob "
+"bo‘yicha avtomatik oldinga qo‘yadi."
 msgstr ""
-"%(name)s has been returned to duty. The algorithm will automatically move "
-"them up based on weekly and total counts."
+"%(name)s: position removed. The algorithm will automatically move them "
+"forward by weekly and total counts."
 
 #, python-format
 msgid "Qaytarilmadi: %(errors)s"
@@ -2327,14 +2432,6 @@ msgstr "Inactive"
 
 #, python-format
 msgid ""
-"<b>%(position)s.</b> Sutkalik naryadga qo‘yilmaydi va adolat hisobiga "
-"kirmaydi; avvalgi naryadlari tarixda saqlanadi."
-msgstr ""
-"<b>%(position)s.</b> Not assigned to the daily duty and not counted in "
-"fairness; earlier duties stay in the history."
-
-#, python-format
-msgid ""
 "Faolsizlantirilgan: %(d)s — %(reason)s. Generatorga tushmaydi, tarixi "
 "saqlanadi."
 msgstr ""
@@ -2364,8 +2461,8 @@ msgstr ""
 msgid "Faolsizlantirish"
 msgstr "Deactivate"
 
-msgid "Naryadga qaytarish…"
-msgstr "Return to duty…"
+msgid "Lavozimni olib tashlash…"
+msgstr "Remove position…"
 
 msgid ""
 "Lavozimdan bo‘shagan bo‘lsa, kursant yana naryadga tushadi. Algoritm uni "
@@ -2374,21 +2471,21 @@ msgstr ""
 "Once relieved of the role, the cadet is assigned to duty again. The "
 "algorithm automatically prioritises them based on weekly and total counts."
 
-msgid "Naryadga qaytarish"
-msgstr "Return to duty"
+msgid "Lavozimni olib tashlash"
+msgstr "Remove position"
 
-msgid "Naryadga chiqmaydi deb belgilash…"
-msgstr "Mark as not on the duty roster…"
+msgid "Lavozim belgilash…"
+msgstr "Assign position…"
 
 msgid ""
-"Komandirlar va kurs lavozimlari: kursant faol qoladi (tizimga kiradi), faqat "
-"sutkalik naryadga qo‘yilmaydi."
+"Guruh komandiri, kurs starshinasi, kurs pisari, kaptyorchik: kursant faol "
+"qoladi (tizimga kiradi)."
 msgstr ""
-"Commanders and course roles: the cadet stays active (can sign in) but is not "
-"assigned to the daily duty roster."
+"Group commander, course senior cadet, course clerk, storekeeper: the cadet "
+"stays active (can sign in)."
 
-msgid "Naryadga chiqmaydi deb belgilash"
-msgstr "Mark as not on the duty roster"
+msgid "Lavozim belgilash"
+msgstr "Assign position"
 
 msgid "Qayta faollashtirish"
 msgstr "Reactivate"
@@ -2407,6 +2504,18 @@ msgstr "By post"
 
 msgid "Lavozimlar bo‘yicha"
 msgstr "By role"
+
+msgid "Joylar navbati"
+msgstr "Post rotation"
+
+#, python-format
+msgid "Og‘ir joylar: <b>%(n)s</b> marta"
+msgid_plural "Og‘ir joylar: <b>%(n)s</b> marta"
+msgstr[0] "Hard posts: <b>%(n)s</b> time"
+msgstr[1] "Hard posts: <b>%(n)s</b> times"
+
+msgid "Joriy tsikl (5 ta katta joy; hammasida turgach qaytadan boshlanadi):"
+msgstr "Current cycle (5 big posts; starts again after all of them):"
 
 #, python-format
 msgid ""
@@ -2430,12 +2539,13 @@ msgstr "Group average"
 msgid "Farq"
 msgstr "Difference"
 
+#, python-format
 msgid ""
-"Naryadga chiqmaydi (lavozimda) — o‘rtacha faqat naryadga chiqadiganlar "
-"bo‘yicha; bu kursant adolat hisobiga kirmaydi."
+"%(position)s — o‘rtacha faqat navbatdagilar bo‘yicha; bu kursant adolat "
+"hisobiga kirmaydi."
 msgstr ""
-"Not on the duty roster (position) — the average covers only cadets on duty; "
-"this cadet is not counted in fairness."
+"%(position)s — the average covers only cadets in the rotation; this cadet is "
+"not counted for fairness."
 
 msgid "O‘rtachadan ko‘proq — keyingi sutkalarda algoritm kamroq tanlaydi."
 msgstr ""
@@ -2622,9 +2732,8 @@ msgstr "By group (active cadets)"
 msgid "Kutilgan"
 msgstr "Expected"
 
-msgid "Faol o‘g‘il bolalar, naryadga chiqmaydigan lavozimdagilarsiz"
-msgstr ""
-"Active male cadets, excluding those in positions (not on the duty roster)"
+msgid "Faol o‘g‘il bolalar, lavozimdagilarsiz"
+msgstr "Active male cadets, excluding those holding positions"
 
 msgid "Naryadga chiqadi"
 msgstr "On duty"
@@ -2652,9 +2761,6 @@ msgstr "All"
 
 msgid "Barcha holatlar"
 msgstr "All statuses"
-
-msgid "Naryadga chiqmaydi"
-msgstr "Not on the duty roster"
 
 msgid "Qidirish"
 msgstr "Search"
@@ -2704,6 +2810,15 @@ msgstr ""
 "cadet of this post's group (regular duty) can be placed."
 
 msgid ""
+"Nomzodlar joylar navbati kaliti bo‘yicha saralangan: avval shu hafta og‘ir "
+"joyda turmagan va oxirgi marta bu joyda bo‘lmagan, keyin shu haftada kam "
+"turgan, tsiklda bu joy yo‘q, jami kam. Eng munosibi — birinchi."
+msgstr ""
+"Candidates are sorted by the post rotation key: first those not on a hard "
+"post this week and not at this post last time, then fewer duties this week, "
+"this post not in the cycle, fewer in total. The most suitable comes first."
+
+msgid ""
 "Nomzodlar algoritm kaliti bo‘yicha saralangan: avval shu haftada kam turgan, "
 "keyin jami kam, shu joyda kam, uzoq dam olgan. Eng munosibi — birinchi."
 msgstr ""
@@ -2726,6 +2841,16 @@ msgstr ""
 
 msgid "Nomzod yo‘q."
 msgstr "No candidates."
+
+msgid "Nega dam olmagan kursant qo‘yilmoqda? (majburiy)"
+msgstr "Why is a cadet without rest being assigned? (required)"
+
+msgid ""
+"Tasdiqlayman: kursant ketma-ket ikkinchi sutka turadi. Bu jurnalga alohida "
+"yoziladi."
+msgstr ""
+"I confirm: the cadet stands a second duty day in a row. This is logged "
+"separately."
 
 msgid ""
 "“Kasal” yoki “Ta’til” tanlansa, almashtirilgan kursantga shu sutka uchun "
@@ -2887,6 +3012,32 @@ msgstr "— empty —"
 
 msgid "Kursant qo‘yish"
 msgstr "Assign cadet"
+
+msgid "Tanlash tushuntirishi (joylar navbati)"
+msgstr "Selection explanation (post rotation)"
+
+msgid ""
+"Saralash kaliti: haftada 3-marta (faqat iloji bo‘lmasa) → og‘ir joy va shu "
+"hafta og‘ir joyda turgan → oxirgi marta shu joyda → haftadagi soni → tsiklda "
+"bu joy bor → jami (eng kami + 1 teng) → og‘ir joylar → shu joyda → oxirgi "
+"naryad."
+msgstr ""
+"Sort key: 3rd time this week (only if unavoidable) → hard post and already "
+"on a hard post this week → last time at this post → count this week → post "
+"already in the cycle → total (minimum + 1 counts as equal) → hard posts → at "
+"this post → last duty."
+
+msgid "Joy"
+msgstr "Post"
+
+msgid "Haftada"
+msgstr "This week"
+
+msgid "Og‘ir joylar"
+msgstr "Hard posts"
+
+msgid "Belgilar"
+msgstr "Marks"
 
 #, python-format
 msgid "Jurnal %(d)s"
@@ -3243,12 +3394,11 @@ msgstr "Will remain"
 
 msgid ""
 "Kursantlar, guruhlar, joylar, foydalanuvchilar va akkauntlar, sozlamalar, "
-"boshlang‘ich taqsimot, lavozim va “naryadga chiqmaydi” belgilari, sababli "
-"holatlar va kasallar ro‘yxati (hujjatlari bilan)."
+"boshlang‘ich taqsimot, lavozimlar, sababli holatlar va kasallar ro‘yxati "
+"(hujjatlari bilan)."
 msgstr ""
 "Cadets, groups, posts, users and accounts, settings, the initial rotation, "
-"positions and “not on the duty roster” marks, excused absences and the sick "
-"list (with documents)."
+"positions, excused absences and the sick list (with documents)."
 
 msgid "Kursantlar bo‘yicha turgan soni (oldin → keyin)"
 msgstr "Duties per cadet (before → after)"
@@ -3409,6 +3559,10 @@ msgid "farq %(diff)s"
 msgstr "difference %(diff)s"
 
 #, python-format
+msgid "og‘ir joy farqi %(diff)s"
+msgstr "hard-post difference %(diff)s"
+
+#, python-format
 msgid "Ketma-ket ikki naryadi bir joyga tushgan: %(n)s ta holat"
 msgid_plural "Ketma-ket ikki naryadi bir joyga tushgan: %(n)s ta holat"
 msgstr[0] "Two consecutive duties at the same post: %(n)s case"
@@ -3462,14 +3616,14 @@ msgstr "Fairness indicator (by group)"
 
 msgid ""
 "Jami naryadlar bo‘yicha: yashil — farq (max − min) ≤ 1, sariq — 2, qizil — 3 "
-"va undan ko‘p. Faqat naryadga chiqadiganlar hisobga olinadi (faol emaslar va "
-"naryadga chiqmaydigan lavozimdagilar — kurs starshinasi, guruh komandirlari, "
-"kurs pisari, kaptyorchik — kirmaydi)."
+"va undan ko‘p. Faqat naryad navbatidagilar hisobga olinadi (faol emaslar va "
+"lavozimdagilar — kurs starshinasi, guruh komandirlari, kurs pisari, "
+"kaptyorchik — kirmaydi)."
 msgstr ""
 "Based on total duties: green — difference (max − min) ≤ 1, yellow — 2, red — "
-"3 or more. Only cadets on the duty roster are counted (inactive cadets and "
-"those in positions — course senior cadet, group commanders, course clerk, "
-"storekeeper — are excluded)."
+"3 or more. Only cadets in the duty rotation are counted (inactive cadets and "
+"those holding positions — course senior cadet, group commanders, course "
+"clerk, storekeeper — are excluded)."
 
 msgid "min"
 msgstr "min"
@@ -3557,8 +3711,8 @@ msgstr "No female cadet was duty officer on two consecutive duties."
 msgid "Guruhlar kesimi: guruh × joy (necha sutka bergan)"
 msgstr "By group: group × post (duty days served)"
 
-msgid "Faol, naryadga chiqmaydigan lavozimdagilarsiz"
-msgstr "Active, excluding those in positions (not on the duty roster)"
+msgid "Faol, lavozimdagilarsiz"
+msgstr "Active, excluding those holding positions"
 
 msgid "1 o‘g‘ilga o‘rtacha naryad"
 msgstr "Average duties per male cadet"
@@ -3575,11 +3729,11 @@ msgstr ""
 "(fairness is measured within a group, CLAUDE.md 4-B.5)."
 
 msgid ""
-"O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi (naryadga "
-"chiqmaydigan komandirlar va kurs lavozimlari kirmaydi)."
+"O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi "
+"(lavozimdagi komandirlar va kurs lavozimlari kirmaydi)."
 msgstr ""
-"The average is divided only by the number of male cadets on the duty roster "
-"(commanders and course positions are excluded)."
+"The average is divided only by the number of male cadets in the duty "
+"rotation (commanders and course positions are excluded)."
 
 msgid "Qo‘lda tuzatishlar nazorati"
 msgstr "Manual corrections review"

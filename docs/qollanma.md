@@ -80,6 +80,16 @@ Kerakli qatordagi **Almashtirish** tugmasini bosing.
 
 Qo‘lda qo‘yilgan kursant yonida ✎ belgisi turadi.
 
+**Joylar navbati (21-bosqich, Sozlamalarda yoqiladi).** Oynada ogohlantirishlar chiqadi (taqiq emas): *shu hafta og‘ir joyda turgan*,
+*oxirgi marta shu joyda*. Kecha naryadda bo‘lgan kursantni generator hech qachon qo‘ymaydi; kerak bo‘lsa, faqat admin shu oynada
+**dam olmagan** belgili kursantni tanlaydi — qizil ogohlantirish chiqadi, sabab yozish va tasdiqlash majburiy. Bu jurnalga alohida
+yoziladi, sutka sahifasida “dam olmagan” belgisi turadi. Sutka sahifasidagi **Tanlash tushuntirishi** jadvali har kursant nega
+tanlanganini ko‘rsatadi.
+
+| Dam olmagan kursant | Tanlash tushuntirishi |
+|---|---|
+| ![Dam olmagan kursant](skrinshotlar/v1.12/almashtirish-dam-olmagan.png) | ![Tushuntirish jadvali](skrinshotlar/v1.12/sutka-tushuntirish-jadvali.png) |
+
 Bitta joy ichida ikki kursantning lavozimini almashtirish uchun **Lavozimlarni almashtirish** tugmasi bor.
 
 Boshqa amallar:
@@ -118,11 +128,11 @@ Sutka sahifasidagi **Jurnal** tugmasi shu sutkadagi barcha amallarni vaqt tartib
 - **Faolsizlantirish** (sabab bilan): kursant o‘chirilmaydi, tarixi qoladi, lekin naryadga tushmaydi va tizimga kira olmaydi;
 - **Excel import:** avval ko‘rib chiqish, keyin tasdiqlash. Shablon sahifada; fayl ≤ 2 MB, faqat `.xlsx`.
 
-- **Naryaddan ozod qilish** (komandirlar, kurs starshinasi, pisar, kaptyorchik): kursant kartochkasida **Naryaddan ozod qilish…** — lavozim va sabab majburiy.
-  - Kursant faol qoladi va tizimga kiradi, faqat sutkalik naryadga qo‘yilmaydi.
-  - Ro‘yxatda “ozod” belgisi bor, filtr: *Naryaddan ozod* / *Naryadga chiqadi*.
-  - Lavozimdan bo‘shasa — **Naryadga qaytarish…**. Algoritm uni hisob bo‘yicha o‘zi oldinga qo‘yadi.
-- Guruhlar jadvalidagi **“Naryadga chiqadi”** ustuni — ozodlarsiz o‘g‘il bolalar soni (jami 78).
+- **Lavozim belgilash** (guruh komandiri, kurs starshinasi, kurs pisari, kaptyorchik): kursant kartochkasida **Lavozim belgilash…** — lavozim va sabab majburiy.
+  - Kursant faol qoladi va tizimga kiradi, faqat sutkalik naryad navbatiga kirmaydi.
+  - Ro‘yxatda faqat lavozim nomi ko‘rinadi; filtr **Lavozim**: Hammasi / Guruh komandiri / Kurs starshinasi / Kurs pisari / Kaptyorchik / Lavozimsiz.
+  - Lavozimdan bo‘shasa — **Lavozimni olib tashlash…**. Algoritm uni hisob bo‘yicha o‘zi oldinga qo‘yadi.
+- Guruhlar jadvalidagi **“Naryadga chiqadi”** ustuni — lavozimdagilarsiz o‘g‘il bolalar soni (jami 78).
 
 Kursant kartochkasida: naryadlar tarixi, joylar va lavozimlar bo‘yicha sonlar, guruh o‘rtachasi bilan solishtirish, o‘zgarishlar jurnali.
 
@@ -138,7 +148,7 @@ Menyudagi **Zalyotchiklar** bo‘limi — tanbeh olgan kursantlar uchun navbatda
 - buyruq/tanbeh sanasi;
 - jazo naryadlari soni (1–10).
 
-Kursantda faol zalyot bo‘lsa, yangi son unga qo‘shiladi. Faqat o‘g‘il, faol va naryaddan ozod bo‘lmagan kursantni zalyotchik qilish mumkin.
+Kursantda faol zalyot bo‘lsa, yangi son unga qo‘shiladi. Faqat o‘g‘il, faol va lavozimda bo‘lmagan kursantni zalyotchik qilish mumkin.
 
 **Qanday qo‘yiladi.** Dastur sutkani tuzganda faol zalyotchikni **1-NO‘J** yoki **1-Yotoqxonaga** posbon o‘rniga qo‘yadi:
 - uning guruhi qayerda turishi muhim emas;
@@ -155,7 +165,7 @@ Kecha turgan yoki sababli holatdagi zalyotchik qo‘yilmaydi — sutka sahifasid
 
 **Bekor qilish.** Zalyotni sabab yozib bekor qilish mumkin. Hamma amallar jurnalga yoziladi.
 - Bekor qilingan zalyotning kursanti ochiq qoralamada jazo o‘rnida qolsa, sutka tasdiqlanmaydi: uni almashtiring yoki sutkani qayta tuzing.
-- Faol zalyoti bor kursantni naryaddan ozod qilib bo‘lmaydi: avval zalyot bajarilishi yoki bekor qilinishi kerak.
+- Faol zalyoti bor kursantga lavozim belgilab bo‘lmaydi: avval zalyot bajarilishi yoki bekor qilinishi kerak.
 
 <img src="qollanma/rasmlar/25-zalyotchiklar-telefon.png" alt="Zalyotchiklar sahifasi" width="300">
 
@@ -194,6 +204,9 @@ Hamma sahifa telefonga moslangan: menyu o‘ng yuqoridagi **Menyu** tugmasida.
 | Sutka (telefon) | Menyu |
 |---|---|
 | <img src="qollanma/rasmlar/14-sutka-telefon.png" width="260"> | <img src="qollanma/rasmlar/15-menyu-telefon.png" width="260"> |
+
+### 1.12a. Kadir roli
+Kadir — kurs xodimi: yuqoridagi barcha amallar (haftani ochish, sutkani tuzish, tuzatish, tasdiqlash, kursantlar, sababli holatlar, kasallar, zalyotchiklar, statistika) admin bilan bir xil ishlaydi. **Faqat boshqaruv paneli, Sozlamalar va sinov ma’lumotlarini tozalash yo‘q** — menyuda ham ko‘rinmaydi. Akkauntni admin boshqaruv panelida yaratadi: *Foydalanuvchilar → qo‘shish → Rol: Kadir* (kursantga bog‘lash shart emas).
 
 ### 1.13. Boshqaruv paneli
 **Boshqaruv paneli** (`/admin/`) — kamdan-kam kerak bo‘ladigan sozlamalar uchun:

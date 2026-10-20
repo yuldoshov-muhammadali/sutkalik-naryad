@@ -43,6 +43,12 @@
   <ul class="list-disc space-y-1 pl-5">{% for n in notes %}<li>{{ n }}</li>{% endfor %}</ul>
 </div>
 {% endif %}
+{% if rotation_notices %}
+<div class="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="status" data-testid="rotation-notices">
+  <p class="font-semibold">{% translate "Joylar navbati" %}</p>
+  <ul class="mt-1 list-disc space-y-1 pl-5">{% for n in rotation_notices %}<li>{{ n }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
 
 {# --- amallar --- #}
 {% if can.day_view_draft %}
@@ -137,7 +143,7 @@
       {% for row in section.rows %}
       <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-2.5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6rem_8rem] {% if cadet_view %}{% if row.cadet and row.cadet.pk == my_cadet_id %}bg-brand-50 ring-2 ring-inset ring-brand-400{% endif %}{% elif not row.assignment %}bg-red-50{% elif row.is_penalty %}bg-gold-50{% endif %}"{% if cadet_view %}{% if row.cadet and row.cadet.pk == my_cadet_id %} data-testid="my-row" aria-current="true"{% endif %}{% elif row.is_penalty %} data-testid="penalty-row"{% endif %}>
         <span class="col-span-2 text-xs text-slate-500 md:col-span-1 md:text-sm md:text-slate-800">{% if row.slot.show_label %}{% translate row.slot.print_label %}{% else %}<span class="md:invisible">{% translate row.slot.print_label %}</span>{% endif %}</span>
-        <span class="min-w-0 break-words font-medium">{% if row.cadet and cadet_view %}{{ row.cadet.short_name }}{% if row.cadet.pk == my_cadet_id %} <span class="whitespace-nowrap rounded bg-brand-800 px-1.5 py-0.5 text-xs font-semibold text-white">{% translate "Siz" %}</span>{% endif %}{% elif row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="{% translate "qo‘lda" %}">✎</span>{% endif %}{% if row.is_penalty %} <span class="whitespace-nowrap rounded bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-brand-950" title="{% translate "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Zalyot" %}</span>{% endif %}{% else %}<span class="text-red-700">{% translate "— bo‘sh —" %}</span>{% endif %}</span>
+        <span class="min-w-0 break-words font-medium">{% if row.cadet and cadet_view %}{{ row.cadet.short_name }}{% if row.cadet.pk == my_cadet_id %} <span class="whitespace-nowrap rounded bg-brand-800 px-1.5 py-0.5 text-xs font-semibold text-white">{% translate "Siz" %}</span>{% endif %}{% elif row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="{% translate "qo‘lda" %}">✎</span>{% endif %}{% if row.is_penalty %} <span class="whitespace-nowrap rounded bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-brand-950" title="{% translate "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Zalyot" %}</span>{% endif %}{% if row.assignment.no_rest %} <span class="whitespace-nowrap rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800" data-testid="no-rest-badge" title="{% translate "Bu kursant kecha naryadda bo‘lgan, dam olmagan" %}">{% translate "dam olmagan" %}</span>{% endif %}{% else %}<span class="text-red-700">{% translate "— bo‘sh —" %}</span>{% endif %}</span>
         <span class="text-sm text-slate-600 md:order-none">{% if row.assignment %}{{ row.assignment.group.code }}{% endif %}</span>
         <span class="col-span-2 md:col-span-1 md:text-right">
           {% if editable %}
@@ -151,6 +157,31 @@
   </section>
   {% endfor %}
 </div>
+{% if explanations %}
+<details class="mt-4 rounded-2xl bg-white shadow-sm ring-1 ring-slate-200" data-testid="explanations">
+  <summary class="cursor-pointer px-4 py-3 text-sm font-semibold">{% translate "Tanlash tushuntirishi (joylar navbati)" %}</summary>
+  <div class="overflow-x-auto px-4 pb-4">
+    <p class="mb-2 text-xs text-slate-500">{% translate "Saralash kaliti: haftada 3-marta (faqat iloji bo‘lmasa) → og‘ir joy va shu hafta og‘ir joyda turgan → oxirgi marta shu joyda → haftadagi soni → tsiklda bu joy bor → jami (eng kami + 1 teng) → og‘ir joylar → shu joyda → oxirgi naryad." %}</p>
+    <table class="min-w-full text-sm">
+      <thead><tr class="text-left text-xs text-slate-500">
+        <th scope="col" class="py-1 pr-3 font-medium">{% translate "Joy" %}</th><th scope="col" class="py-1 pr-3 font-medium">{% translate "Kursant" %}</th>
+        <th scope="col" class="py-1 pr-3 text-right font-medium">{% translate "Haftada" %}</th><th scope="col" class="py-1 pr-3 text-right font-medium">{% translate "Jami" %}</th>
+        <th scope="col" class="py-1 pr-3 text-right font-medium">{% translate "Og‘ir joylar" %}</th><th scope="col" class="py-1 font-medium">{% translate "Belgilar" %}</th>
+      </tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for e in explanations %}
+        <tr>
+          <td class="py-1.5 pr-3">{% translate e.post.name %}</td><td class="py-1.5 pr-3 font-medium">{{ e.cadet.short_name }}</td>
+          <td class="py-1.5 pr-3 text-right tabular-nums">{{ e.score.week_count }}</td><td class="py-1.5 pr-3 text-right tabular-nums">{{ e.score.total }}</td>
+          <td class="py-1.5 pr-3 text-right tabular-nums">{{ e.score.hard_count }}</td>
+          <td class="py-1.5">{% for t in e.tags %}<span class="mr-1 inline-block whitespace-nowrap rounded bg-amber-100 px-1.5 text-xs font-semibold text-amber-900">{{ t }}</span>{% empty %}<span class="text-xs text-slate-400">—</span>{% endfor %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</details>
+{% endif %}
 {% elif not can.day_view_draft %}
 <p class="mt-5 text-sm text-slate-600">{% translate "Bu sutka hali tasdiqlanmagan." %}</p>
 {% endif %}

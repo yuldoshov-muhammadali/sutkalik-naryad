@@ -123,7 +123,10 @@ def db_cadets(db_groups):
 
 
 # 16-bosqich: “ozod” yozuvi sahifalardan olib tashlandi (uch tilda). Kursant ismlari (masalan, Ozodbek) hisobga olinmaydi.
-EXEMPT_WORD = re.compile(r"\w*(?:ozod|освобожд|exempt)\w*", re.IGNORECASE)
+# 21-bosqich (5a): “Naryadga chiqmaydi” ham olib tashlandi — faqat lavozim nomi qoladi.
+EXEMPT_WORD = re.compile(
+    r"\w*(?:ozod|освобожд|exempt)\w*|naryadga chiqmaydi\w*|не заступа\w* в наряд|not on the duty roster", re.IGNORECASE
+)
 
 
 def exempt_words(html: str) -> set[str]:

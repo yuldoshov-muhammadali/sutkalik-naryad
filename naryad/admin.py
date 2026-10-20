@@ -10,9 +10,12 @@ from django.db import models
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _lazy
-from django.utils.translation import ngettext
+from django.utils.translation import ngettext, pgettext_lazy
+
+from naryad.engine import config as engine_config
 
 from .models import (
+    POSITION_LABELS,
     Absence,
     Assignment,
     Cadet,
@@ -50,7 +53,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
         (_lazy("Naryad platformasi"), {
             "fields": ("role", "cadet", "must_change_password"),
-            "description": _lazy("“Guruh komandiri” roli faqat guruh komandiri lavozimidagi kursantga beriladi; guruh kursantning guruhidan olinadi, har guruhga bitta faol komandir."),
+            "description": _lazy("“Guruh komandiri” roli faqat guruh komandiri lavozimidagi kursantga beriladi; guruh kursantning guruhidan olinadi, har guruhga bitta faol komandir. “Kadir” roli — admin bilan bir xil amallar, lekin boshqaruv paneli va Sozlamalarsiz (kursantga bog‘lash shart emas)."),
         }),
     )
     actions = ["reset_temp_passwords"]
@@ -106,12 +109,32 @@ def _xlsx_response(content: bytes, prefix: str) -> HttpResponse:
     return response
 
 
+class PositionFilter(admin.SimpleListFilter):
+    """“Lavozim” filtri (21-bosqich, 5a): Hammasi / Guruh komandiri / Kurs starshinasi / Kurs pisari / Kaptyorchik / Lavozimsiz."""
+
+    title = pgettext_lazy("kursant lavozimi", "Lavozim")
+    parameter_name = "lavozim"
+
+    def lookups(self, request, model_admin):
+        return [*POSITION_LABELS.items(), ("yoq", _lazy("Lavozimsiz"))]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == "yoq":
+            return queryset.filter(duty_exempt=False)
+        if value == "komandir":
+            return queryset.filter(duty_exempt=True, duty_position__iendswith="guruh komandiri")
+        if value in POSITION_LABELS:
+            return queryset.filter(duty_exempt=True, duty_position__icontains=value)
+        return queryset
+
+
 @admin.register(Cadet)
 class CadetAdmin(admin.ModelAdmin):
-    list_display = ("short_name", "fio", "group", "gender", "list_number", "is_active", "duty_exempt", "duty_position")
-    list_filter = ("group", "gender", "is_active", "duty_exempt")
+    list_display = ("short_name", "fio", "group", "gender", "list_number", "is_active", "position")
+    list_filter = ("group", "gender", "is_active", PositionFilter)
     search_fields = ("last_name", "first_name", "patronymic", "short_name")
-    # Naryaddan ozod belgisi faqat kursant kartochkasidan, sabab bilan o'zgartiriladi (jurnalga yoziladi)
+    # Lavozim belgisi faqat kursant kartochkasidan, sabab bilan o'zgartiriladi (jurnalga yoziladi)
     readonly_fields = ("deactivated_at", "duty_exempt", "duty_position", "created_at", "updated_at")
     actions = ["create_accounts"]
 
@@ -127,14 +150,18 @@ class CadetAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {"fields": ("group", "list_number", "last_name", "first_name", "patronymic", "gender", "short_name")}),
         (_lazy("Faollik"), {"fields": ("is_active", "deactivation_reason", "deactivated_at")}),
-        (_lazy("Naryadga chiqmaydi (lavozim)"), {"fields": ("duty_exempt", "duty_position"),
-                            "description": _lazy("Kursant kartochkasidagi “Naryadga chiqmaydi deb belgilash” / “Naryadga qaytarish” orqali o‘zgartiriladi.")}),
+        (pgettext_lazy("kursant lavozimi", "Lavozim"), {"fields": ("duty_exempt", "duty_position"),
+                            "description": _lazy("Kursant kartochkasidagi “Lavozim belgilash” / “Lavozimni olib tashlash” orqali o‘zgartiriladi.")}),
         (_lazy("Tizim"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
 
     @admin.display(description=_lazy("F.I.Sh."))
     def fio(self, obj):
         return obj.full_name
+
+    @admin.display(description=pgettext_lazy("kursant lavozimi", "Lavozim"))
+    def position(self, obj):
+        return obj.position_label or "—"
 
     def has_delete_permission(self, request, obj=None):
         # Kursant o'chirilmaydi — faqat faolsizlantiriladi (tarix saqlanadi)
@@ -370,11 +397,47 @@ class PrepNoteInline(admin.StackedInline):
         return False
 
 
+class SettingForm(forms.ModelForm):
+    """Og'ir joylar — o'g'il bolalar joylaridan belgilanadi (Qizlar yotoqxonasi kirmaydi)."""
+
+    hard_posts = forms.MultipleChoiceField(
+        label=_lazy("og‘ir joylar"), required=False, widget=forms.CheckboxSelectMultiple,
+        help_text=_lazy("Bir haftada kursant ko‘pi bilan bittasida turadi. Qizlar yotoqxonasi kirmaydi."),
+    )
+
+    class Meta:
+        model = Setting
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["hard_posts"].choices = [
+            (code, _lazy(engine_config.POSTS_BY_CODE[code].name)) for code in engine_config.ROTATION_CHAIN
+        ]
+
+
 @admin.register(Setting)
 class SettingAdmin(admin.ModelAdmin):
+    form = SettingForm
     list_display = ("__str__", "recipient_name", "course_head_name", "course_number", "approval_lead_hours", "updated_at")
     readonly_fields = ("updated_by", "updated_at", "test_data_link")
     inlines = [InitialRotationInline, PrepNoteInline]
+    fieldsets = (
+        (None, {"fields": (
+            "recipient_position", "recipient_name", "course_head_position", "course_head_rank", "course_head_name",
+            "course_number", "approval_lead_hours", "penalty_per_post",
+            "commander_penalty_max", "commander_order_max_age_days", "commander_daily_limit",
+        )}),
+        (_lazy("Joylar navbati va og‘ir joylar (21-bosqich)"), {
+            "fields": ("post_rotation_enabled", "hard_posts"),
+            "description": _lazy(
+                "Haftada (yakshanba 18:00 – yakshanba 18:00) kursant ko‘pi bilan bitta og‘ir joyda turadi; oxirgi marta "
+                "turgan joyiga qayta qo‘yilmaydi; 5 ta katta joyning hammasida turmaguncha bittasi takrorlanmaydi. "
+                "Kecha naryadda bo‘lgan kursantni generator hech qachon qo‘ymaydi. O‘chiq bo‘lsa — avvalgi tartib."
+            ),
+        }),
+        (_lazy("Tizim"), {"fields": ("updated_by", "updated_at", "test_data_link")}),
+    )
 
     @admin.display(description=_lazy("Sinov ma’lumotlarini tozalash"))
     def test_data_link(self, obj):
@@ -399,6 +462,14 @@ class SettingAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.updated_by = request.user
         super().save_model(request, obj, form, change)
+        if change and {"post_rotation_enabled", "hard_posts"} & set(form.changed_data):
+            # 21-bosqich: yoqish/o'chirish jurnalga yoziladi; faqat keyingi tuziladigan sutkalarga ta'sir qiladi
+            state = "yoqildi" if obj.post_rotation_enabled else "o‘chirildi"
+            names = ", ".join(engine_config.POSTS_BY_CODE[c].name for c in obj.hard_posts if c in engine_config.POSTS_BY_CODE)
+            ChangeLog.objects.create(
+                action=ChangeLog.Action.POST_ROTATION, user=request.user,
+                details=f"Joylar navbati va og‘ir joylar: {state}. Og‘ir joylar: {names or '—'}.",
+            )
 
 
 @admin.register(LoginThrottle)

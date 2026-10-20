@@ -20,6 +20,24 @@
     }
   }, true);
 
+  // --- Almashtirish: “dam olmagan” kursant tanlansa — qizil ogohlantirish, sabab va tasdiq (21-bosqich) ---
+  function syncNoRest(form) {
+    var box = form.querySelector("[data-no-rest-fields]");
+    if (!box) return;
+    var checked = form.querySelector("input[name=cadet]:checked");
+    var on = !!(checked && checked.hasAttribute("data-no-rest"));
+    box.hidden = !on;
+    box.querySelectorAll("textarea, input").forEach(function (el) { el.required = on; });
+  }
+  document.addEventListener("change", function (event) {
+    var form = event.target.closest("form[data-no-rest-form]");
+    if (form && event.target.name === "cadet") syncNoRest(form);
+  });
+  document.addEventListener("htmx:afterSwap", function () {
+    document.querySelectorAll("form[data-no-rest-form]").forEach(syncNoRest);
+  });
+  document.querySelectorAll("form[data-no-rest-form]").forEach(syncNoRest);
+
   // --- Kunduzgi / tungi / avtomatik rejim (static/js/theme.js bilan birga) -----------------
   var THEME_KEY = "naryad-theme";
   var THEME_ORDER = ["auto", "light", "dark"];

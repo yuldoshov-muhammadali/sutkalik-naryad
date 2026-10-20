@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sutkalik-naryad 1.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 03:12+0500\n"
+"POT-Creation-Date: 2026-10-20 23:52+0500\n"
 "PO-Revision-Date: 2026-10-14 12:00+0500\n"
 "Last-Translator: Sutkalik naryad jamoasi\n"
 "Language-Team: Russian\n"
@@ -60,11 +60,13 @@ msgstr "Платформа нарядов"
 msgid ""
 "“Guruh komandiri” roli faqat guruh komandiri lavozimidagi kursantga "
 "beriladi; guruh kursantning guruhidan olinadi, har guruhga bitta faol "
-"komandir."
+"komandir. “Kadir” roli — admin bilan bir xil amallar, lekin boshqaruv paneli "
+"va Sozlamalarsiz (kursantga bog‘lash shart emas)."
 msgstr ""
-"Роль «Командир группы» выдаётся только курсанту в должности командира "
+"Роль «Командир группы» выдаётся только курсанту на должности командира "
 "группы; группа берётся из группы курсанта, на группу — один активный "
-"командир."
+"командир. Роль «Кадир» — те же действия, что у администратора, но без панели "
+"управления и Настроек (привязка к курсанту не обязательна)."
 
 msgid "Vaqtinchalik parol berish (Excel)"
 msgstr "Выдать временный пароль (Excel)"
@@ -77,6 +79,13 @@ msgstr "юноши"
 
 msgid "qiz"
 msgstr "девушки"
+
+msgctxt "kursant lavozimi"
+msgid "Lavozim"
+msgstr "Должность"
+
+msgid "Lavozimsiz"
+msgstr "Без должности"
 
 msgid "Akkaunt yaratish (Excel) — guruh komandirlariga rol avtomatik"
 msgstr ""
@@ -92,15 +101,11 @@ msgstr ""
 msgid "Faollik"
 msgstr "Активность"
 
-msgid "Naryadga chiqmaydi (lavozim)"
-msgstr "Не заступает в наряд (должность)"
-
 msgid ""
-"Kursant kartochkasidagi “Naryadga chiqmaydi deb belgilash” / “Naryadga "
-"qaytarish” orqali o‘zgartiriladi."
+"Kursant kartochkasidagi “Lavozim belgilash” / “Lavozimni olib tashlash” "
+"orqali o‘zgartiriladi."
 msgstr ""
-"Изменяется через «Отметить: не заступает в наряд» / «Вернуть в наряд» в "
-"карточке курсанта."
+"Изменяется на карточке курсанта: «Назначить должность» / «Снять должность»."
 
 msgid "Tizim"
 msgstr "Система"
@@ -146,6 +151,31 @@ msgid ""
 msgstr ""
 "Начальное распределение группа → пост (используется для первых суток, только "
 "если в базе нет утверждённой истории)"
+
+msgid "og‘ir joylar"
+msgstr "тяжёлые посты"
+
+msgid ""
+"Bir haftada kursant ko‘pi bilan bittasida turadi. Qizlar yotoqxonasi "
+"kirmaydi."
+msgstr ""
+"За неделю курсант заступает не более чем на один из них. Женское общежитие "
+"не входит."
+
+msgid "Joylar navbati va og‘ir joylar (21-bosqich)"
+msgstr "Очерёдность постов и тяжёлые посты (этап 21)"
+
+msgid ""
+"Haftada (yakshanba 18:00 – yakshanba 18:00) kursant ko‘pi bilan bitta og‘ir "
+"joyda turadi; oxirgi marta turgan joyiga qayta qo‘yilmaydi; 5 ta katta "
+"joyning hammasida turmaguncha bittasi takrorlanmaydi. Kecha naryadda bo‘lgan "
+"kursantni generator hech qachon qo‘ymaydi. O‘chiq bo‘lsa — avvalgi tartib."
+msgstr ""
+"За неделю (воскресенье 18:00 – воскресенье 18:00) курсант заступает не более "
+"чем на один тяжёлый пост; на пост, где он стоял в последний раз, снова не "
+"ставится; пока он не постоял на всех 5 больших постах, ни один не "
+"повторяется. Курсанта, который был в наряде вчера, генератор никогда не "
+"ставит. Если выключено — прежний порядок."
 
 msgid "Sinov ma’lumotlarini tozalash"
 msgstr "Очистка тестовых данных"
@@ -380,12 +410,10 @@ msgstr "например: снят с должности (приказ)"
 #, python-format
 msgid ""
 "%(name)s faol zalyotchik (%(count)s ta jazo naryadi) — avval zalyot "
-"bajarilishi yoki bekor qilinishi kerak, keyin “naryadga chiqmaydi” deb "
-"belgilanadi."
+"bajarilishi yoki bekor qilinishi kerak, keyin lavozim belgilanadi."
 msgstr ""
-"%(name)s — действующий залётчик (нарядов вне очереди: %(count)s): сначала "
-"взыскание должно быть отработано или отменено, затем курсанта можно отметить "
-"как «не заступает в наряд»."
+"%(name)s — активный залётчик (%(count)s нарядов вне очереди): сначала "
+"взыскание должно быть выполнено или отменено, затем назначается должность."
 
 msgid "Zaxira bo‘sh chiqdi."
 msgstr "Резервная копия оказалась пустой."
@@ -543,11 +571,11 @@ msgstr "%(name)s (%(slot)s) неактивен — замените или пе�
 
 #, python-format
 msgid ""
-"%(name)s (%(slot)s) — %(position)s, naryadga chiqmaydi — almashtiring yoki "
-"qayta tuzing."
+"%(name)s (%(slot)s) — %(position)s (lavozimda) — almashtiring yoki qayta "
+"tuzing."
 msgstr ""
-"%(name)s (%(slot)s) — %(position)s, не заступает в наряд — замените или "
-"пересоставьте."
+"%(name)s (%(slot)s) — %(position)s (на должности) — замените или "
+"пересформируйте."
 
 #, python-format
 msgid ""
@@ -582,12 +610,8 @@ msgstr ""
 "наряда вне очереди не идёт)."
 
 #, python-format
-msgid ""
-"Zalyotchik %(name)s faol emas yoki naryadga chiqmaydi (lavozimda) — bugun "
-"qo‘yilmadi."
-msgstr ""
-"Залётчик %(name)s неактивен или не заступает в наряд (должность) — сегодня "
-"не поставлен."
+msgid "Zalyotchik %(name)s faol emas yoki lavozimda — bugun qo‘yilmadi."
+msgstr "Залётчик %(name)s неактивен или на должности — сегодня не назначен."
 
 #, python-format
 msgid "Zalyotchik %(name)s sababli holatda bo‘lgani uchun bugun qo‘yilmadi."
@@ -604,6 +628,43 @@ msgstr ""
 "Залётчик %(name)s: сегодня мест для нарядов вне очереди нет — перенесено на "
 "следующие сутки."
 
+#, python-format
+msgid ""
+"%(name)s (%(slot)s): kecha naryadda bo‘lgan — dam olmagan (admin qo‘ydi)."
+msgstr ""
+"%(name)s (%(slot)s): был в наряде вчера — без отдыха после наряда (поставил "
+"администратор)."
+
+#, python-format
+msgid ""
+"Guruhda kishi yetmagani uchun %(name)s bu hafta ikkinchi marta og‘ir joyga "
+"qo‘yildi (%(post)s)."
+msgstr ""
+"Из-за нехватки людей в группе %(name)s на этой неделе второй раз поставлен "
+"на тяжёлый пост (%(post)s)."
+
+#, python-format
+msgid ""
+"%(name)s bu hafta ikkinchi marta og‘ir joyda (%(post)s) — qo‘lda qo‘yilgan."
+msgstr ""
+"%(name)s на этой неделе второй раз на тяжёлом посту (%(post)s) — поставлен "
+"вручную."
+
+msgid "shu hafta og‘ir joyda turgan"
+msgstr "на этой неделе уже был на тяжёлом посту"
+
+msgid "oxirgi marta shu joyda"
+msgstr "в последний раз на этом посту"
+
+msgid "tsiklda bu joy bor"
+msgstr "этот пост уже есть в цикле"
+
+msgid "haftada 3-marta"
+msgstr "3-й раз за неделю"
+
+msgid "dam olmagan"
+msgstr "без отдыха"
+
 msgid "Bu sana ochilgan 2-kurs haftasiga tegishli emas."
 msgstr "Эта дата не относится к открытой неделе 2-го курса."
 
@@ -619,8 +680,15 @@ msgid "Kasal: %(start)s–%(end)s (kasallar ro‘yxatida)."
 msgstr "Болен: %(start)s–%(end)s (в списке больных)."
 
 #, python-format
-msgid "%(position)s — naryadga chiqmaydi"
-msgstr "%(position)s — не заступает в наряд"
+msgid "%(position)s (lavozimda)"
+msgstr "%(position)s (на должности)"
+
+#, python-format
+msgid ""
+"%(name)s kecha (%(day)s) naryadda bo‘lgan — ketma-ket ikki sutka turmaydi."
+msgstr ""
+"%(name)s был в наряде вчера (%(day)s) — двое суток подряд в наряд не "
+"ставится."
 
 msgid "Bu kursant allaqachon shu o‘rinda."
 msgstr "Этот курсант уже на этом месте."
@@ -664,13 +732,6 @@ msgid "%(name)s shu sutkada boshqa o‘rinda turibdi: %(slot)s."
 msgstr "%(name)s в эти сутки уже стоит на другом месте: %(slot)s."
 
 #, python-format
-msgid ""
-"%(name)s kecha (%(day)s) naryadda bo‘lgan — ketma-ket ikki sutka turmaydi."
-msgstr ""
-"%(name)s был в наряде вчера (%(day)s) — двое суток подряд в наряд не "
-"ставится."
-
-#, python-format
 msgid "%(name)s sababli yo‘q: %(reason)s (%(start)s–%(end)s)."
 msgstr ""
 "%(name)s отсутствует по уважительной причине: %(reason)s (%(start)s–%(end)s)."
@@ -684,6 +745,17 @@ msgid ""
 msgstr ""
 "Сутки утверждены — изменить нельзя. При необходимости администратор отменит "
 "утверждение."
+
+msgid "Bu kursant kecha naryadda bo‘lgan, dam olmagan"
+msgstr "Этот курсант был в наряде вчера и не отдохнул"
+
+#, python-format
+msgid "%(warning)s — sababini yozing (majburiy)."
+msgstr "%(warning)s — укажите причину (обязательно)."
+
+#, python-format
+msgid "%(warning)s — qo‘yishni tasdiqlang."
+msgstr "%(warning)s — подтвердите назначение."
 
 msgid "Ikki xil qatorni tanlang."
 msgstr "Выберите две разные строки."
@@ -870,6 +942,9 @@ msgstr "Курсант (только просмотр)"
 msgid "Guruh komandiri (o‘z guruhini ko‘rish)"
 msgstr "Командир группы (просмотр своей группы)"
 
+msgid "Kadir (hamma amal, boshqaruv panelisiz)"
+msgstr "Кадир (все действия, без панели управления)"
+
 msgid "rol"
 msgstr "роль"
 
@@ -947,6 +1022,18 @@ msgstr "группа"
 msgid "guruhlar"
 msgstr "группы"
 
+msgid "Guruh komandiri"
+msgstr "Командир группы"
+
+msgid "Kurs starshinasi"
+msgstr "Старшина курса"
+
+msgid "Kurs pisari"
+msgstr "Писарь курса"
+
+msgid "Kaptyorchik"
+msgstr "Каптёрщик"
+
 msgid "familiya"
 msgstr "фамилия"
 
@@ -975,8 +1062,11 @@ msgstr "время деактивации"
 msgid "faolsizlantirish sababi"
 msgstr "причина деактивации"
 
-msgid "naryadga chiqmaydi"
-msgstr "не заступает в наряд"
+msgid "lavozimda"
+msgstr "на должности"
+
+msgid "Lavozimi sababli naryad navbatiga kirmaydi"
+msgstr "Из-за должности не входит в очерёдность нарядов"
 
 msgid "lavozimi"
 msgstr "должность"
@@ -1327,11 +1417,11 @@ msgstr "Курсант снова активирован"
 msgid "Kursant Excel’dan import qilindi"
 msgstr "Курсант импортирован из Excel"
 
-msgid "Naryadga chiqmaydi deb belgilandi"
-msgstr "Отмечен: не заступает в наряд"
+msgid "Lavozim belgilandi"
+msgstr "Назначена должность"
 
-msgid "Naryadga qaytarildi"
-msgstr "Возвращён в наряд"
+msgid "Lavozim olib tashlandi"
+msgstr "Должность снята"
 
 msgid "Sababli holat kiritildi"
 msgstr "Уважительная причина внесена"
@@ -1386,6 +1476,12 @@ msgstr "Взыскание рассмотрено"
 
 msgid "Sinov ma’lumotlari tozalandi"
 msgstr "Тестовые данные очищены"
+
+msgid "Dam olmagan kursant qo‘yildi"
+msgstr "Поставлен курсант без отдыха"
+
+msgid "Joylar navbati sozlamasi o‘zgartirildi"
+msgstr "Изменена настройка очерёдности постов"
 
 msgid "Sutka o‘chirilsa ham jurnal saqlanadi (8-bosqich)."
 msgstr "Журнал сохраняется, даже если сутки удалены (этап 8)."
@@ -1479,6 +1575,15 @@ msgstr "дата взыскания не старше скольких дней 
 msgid "komandir bir kunda kirita oladigan zalyotlar"
 msgstr "взыскания, которые командир может внести за день"
 
+msgid ""
+"Yoqilgan: haftada bitta og‘ir joy, oxirgi joy takrorlanmaydi, 5 ta katta joy "
+"navbati. O‘chiq: avvalgi tartib. Faqat keyingi tuziladigan sutkalarga ta’sir "
+"qiladi."
+msgstr ""
+"Включено: один тяжёлый пост в неделю, последний пост не повторяется, "
+"очерёдность 5 больших постов. Выключено: прежний порядок. Влияет только на "
+"сутки, которые будут сформированы позже."
+
 msgid "kim o‘zgartirdi"
 msgstr "кто изменил"
 
@@ -1553,10 +1658,8 @@ msgid "%(name)s faol emas — zalyotchik qilib bo‘lmaydi."
 msgstr "%(name)s неактивен — нельзя назначить залётчиком."
 
 #, python-format
-msgid ""
-"%(name)s — %(position)s, naryadga chiqmaydi — avval bu belgini olib tashlang."
-msgstr ""
-"%(name)s — %(position)s, не заступает в наряд — сначала снимите эту отметку."
+msgid "%(name)s — %(position)s (lavozimda) — avval lavozimni olib tashlang."
+msgstr "%(name)s — %(position)s (на должности) — сначала снимите должность."
 
 msgid "Faqat o‘z guruhingiz kursantiga zalyot kiritasiz."
 msgstr "Взыскание можно внести только курсанту своей группы."
@@ -1620,8 +1723,8 @@ msgstr "Причина отмены"
 msgid "Jazo naryadlari soni (jami)"
 msgstr "Нарядов вне очереди (всего)"
 
-msgid "Guruh komandiri"
-msgstr "Командир группы"
+msgid "Kadir"
+msgstr "Кадир"
 
 msgid "Bosh sahifa (rolga qarab)"
 msgstr "Главная (в зависимости от роли)"
@@ -1703,6 +1806,12 @@ msgid ""
 msgstr ""
 "Добавление, редактирование, деактивация курсантов, импорт из Excel, учётные "
 "записи"
+
+msgid ""
+"Kursantni faolsizlantirish / qayta faollashtirish va lavozim belgilash / "
+"olib tashlash"
+msgstr ""
+"Деактивация / повторная активация курсанта и назначение / снятие должности"
 
 msgid "Sozlamalar, boshlang‘ich taqsimot va sinov ma’lumotlarini tozalash"
 msgstr "Настройки, начальное распределение и очистка тестовых данных"
@@ -1968,16 +2077,15 @@ msgid "%(name)s qayta faollashtirildi."
 msgstr "%(name)s снова активирован."
 
 msgid ""
-"Faol bo‘lmagan kursantni “naryadga chiqmaydi” deb belgilab bo‘lmaydi — u "
-"baribir naryadga tushmaydi."
+"Faol bo‘lmagan kursantga lavozim belgilab bo‘lmaydi — u baribir naryadga "
+"tushmaydi."
 msgstr ""
-"Неактивного курсанта нельзя отметить как «не заступает в наряд» — он и так "
-"не попадает в наряд."
+"Неактивному курсанту нельзя назначить должность — он и так не попадает в "
+"наряд."
 
 #, python-format
-msgid "%(name)s endi naryadga chiqmaydi (%(position)s). Tarixi saqlanadi."
-msgstr ""
-"%(name)s больше не заступает в наряд (%(position)s). История сохраняется."
+msgid "%(name)s: lavozim belgilandi (%(position)s). Tarixi saqlanadi."
+msgstr "%(name)s: назначена должность (%(position)s). История сохраняется."
 
 #, python-format
 msgid ""
@@ -1991,16 +2099,16 @@ msgstr ""
 msgid "Belgilanmadi: %(errors)s"
 msgstr "Не отмечено: %(errors)s"
 
-msgid "Kursant “naryadga chiqmaydi” deb belgilanmagan."
-msgstr "Курсант не отмечен как «не заступает в наряд»."
+msgid "Kursantga lavozim belgilanmagan."
+msgstr "Курсанту не назначена должность."
 
 #, python-format
 msgid ""
-"%(name)s naryadga qaytarildi. Algoritm uni haftalik va jami hisob bo‘yicha "
-"avtomatik oldinga qo‘yadi."
+"%(name)s: lavozim olib tashlandi. Algoritm uni haftalik va jami hisob "
+"bo‘yicha avtomatik oldinga qo‘yadi."
 msgstr ""
-"%(name)s возвращён в наряд. Алгоритм автоматически выдвинет его вперёд по "
-"недельному и общему учёту."
+"%(name)s: должность снята. Алгоритм автоматически поставит его вперёд по "
+"недельному и общему счёту."
 
 #, python-format
 msgid "Qaytarilmadi: %(errors)s"
@@ -2381,14 +2489,6 @@ msgstr "Неактивен"
 
 #, python-format
 msgid ""
-"<b>%(position)s.</b> Sutkalik naryadga qo‘yilmaydi va adolat hisobiga "
-"kirmaydi; avvalgi naryadlari tarixda saqlanadi."
-msgstr ""
-"<b>%(position)s.</b> В суточный наряд не ставится и в расчёт справедливости "
-"не входит; прежние наряды сохраняются в истории."
-
-#, python-format
-msgid ""
 "Faolsizlantirilgan: %(d)s — %(reason)s. Generatorga tushmaydi, tarixi "
 "saqlanadi."
 msgstr ""
@@ -2418,8 +2518,8 @@ msgstr ""
 msgid "Faolsizlantirish"
 msgstr "Деактивировать"
 
-msgid "Naryadga qaytarish…"
-msgstr "Вернуть в наряд…"
+msgid "Lavozimni olib tashlash…"
+msgstr "Снять должность…"
 
 msgid ""
 "Lavozimdan bo‘shagan bo‘lsa, kursant yana naryadga tushadi. Algoritm uni "
@@ -2428,21 +2528,21 @@ msgstr ""
 "Если курсанта сняли с должности, он снова будет заступать в наряд. Алгоритм "
 "сам поставит его в приоритет по недельному и общему счёту."
 
-msgid "Naryadga qaytarish"
-msgstr "Вернуть в наряд"
+msgid "Lavozimni olib tashlash"
+msgstr "Снять должность"
 
-msgid "Naryadga chiqmaydi deb belgilash…"
-msgstr "Отметить: не заступает в наряд…"
+msgid "Lavozim belgilash…"
+msgstr "Назначить должность…"
 
 msgid ""
-"Komandirlar va kurs lavozimlari: kursant faol qoladi (tizimga kiradi), faqat "
-"sutkalik naryadga qo‘yilmaydi."
+"Guruh komandiri, kurs starshinasi, kurs pisari, kaptyorchik: kursant faol "
+"qoladi (tizimga kiradi)."
 msgstr ""
-"Командиры и курсовые должности: курсант остаётся активным (входит в "
-"систему), но не ставится в суточный наряд."
+"Командир группы, старшина курса, писарь курса, каптёрщик: курсант остаётся "
+"активным (входит в систему)."
 
-msgid "Naryadga chiqmaydi deb belgilash"
-msgstr "Отметить: не заступает в наряд"
+msgid "Lavozim belgilash"
+msgstr "Назначить должность"
 
 msgid "Qayta faollashtirish"
 msgstr "Активировать снова"
@@ -2463,6 +2563,20 @@ msgstr "По постам"
 
 msgid "Lavozimlar bo‘yicha"
 msgstr "По должностям"
+
+msgid "Joylar navbati"
+msgstr "Очерёдность постов"
+
+#, python-format
+msgid "Og‘ir joylar: <b>%(n)s</b> marta"
+msgid_plural "Og‘ir joylar: <b>%(n)s</b> marta"
+msgstr[0] "Тяжёлые посты: <b>%(n)s</b> раз"
+msgstr[1] "Тяжёлые посты: <b>%(n)s</b> раза"
+msgstr[2] "Тяжёлые посты: <b>%(n)s</b> раз"
+msgstr[3] "Тяжёлые посты: <b>%(n)s</b> раза"
+
+msgid "Joriy tsikl (5 ta katta joy; hammasida turgach qaytadan boshlanadi):"
+msgstr "Текущий цикл (5 больших постов; после всех начинается заново):"
 
 #, python-format
 msgid ""
@@ -2490,12 +2604,13 @@ msgstr "Среднее по группе"
 msgid "Farq"
 msgstr "Разница"
 
+#, python-format
 msgid ""
-"Naryadga chiqmaydi (lavozimda) — o‘rtacha faqat naryadga chiqadiganlar "
-"bo‘yicha; bu kursant adolat hisobiga kirmaydi."
+"%(position)s — o‘rtacha faqat navbatdagilar bo‘yicha; bu kursant adolat "
+"hisobiga kirmaydi."
 msgstr ""
-"Не заступает в наряд (должность) — среднее считается только по заступающим в "
-"наряд; этот курсант в расчёт справедливости не входит."
+"%(position)s — среднее только по тем, кто в очерёдности; этот курсант не "
+"входит в расчёт справедливости."
 
 msgid "O‘rtachadan ko‘proq — keyingi sutkalarda algoritm kamroq tanlaydi."
 msgstr "Больше среднего — в следующие сутки алгоритм будет выбирать реже."
@@ -2683,8 +2798,8 @@ msgstr "По группам (активные курсанты)"
 msgid "Kutilgan"
 msgstr "Ожидается"
 
-msgid "Faol o‘g‘il bolalar, naryadga chiqmaydigan lavozimdagilarsiz"
-msgstr "Активные юноши, без курсантов на должностях (не заступают в наряд)"
+msgid "Faol o‘g‘il bolalar, lavozimdagilarsiz"
+msgstr "Активные юноши, без курсантов на должностях"
 
 msgid "Naryadga chiqadi"
 msgstr "Заступают в наряд"
@@ -2714,9 +2829,6 @@ msgstr "Все"
 
 msgid "Barcha holatlar"
 msgstr "Все статусы"
-
-msgid "Naryadga chiqmaydi"
-msgstr "Не заступает в наряд"
 
 msgid "Qidirish"
 msgstr "Найти"
@@ -2767,6 +2879,16 @@ msgstr ""
 "(обычный наряд)."
 
 msgid ""
+"Nomzodlar joylar navbati kaliti bo‘yicha saralangan: avval shu hafta og‘ir "
+"joyda turmagan va oxirgi marta bu joyda bo‘lmagan, keyin shu haftada kam "
+"turgan, tsiklda bu joy yo‘q, jami kam. Eng munosibi — birinchi."
+msgstr ""
+"Кандидаты отсортированы по ключу очерёдности постов: сначала те, кто на этой "
+"неделе не был на тяжёлом посту и в последний раз стоял не на этом посту, "
+"затем реже стоявшие на этой неделе, без этого поста в цикле, с меньшим общим "
+"числом. Самый подходящий — первый."
+
+msgid ""
 "Nomzodlar algoritm kaliti bo‘yicha saralangan: avval shu haftada kam turgan, "
 "keyin jami kam, shu joyda kam, uzoq dam olgan. Eng munosibi — birinchi."
 msgstr ""
@@ -2789,6 +2911,16 @@ msgstr ""
 
 msgid "Nomzod yo‘q."
 msgstr "Кандидатов нет."
+
+msgid "Nega dam olmagan kursant qo‘yilmoqda? (majburiy)"
+msgstr "Почему ставится курсант без отдыха? (обязательно)"
+
+msgid ""
+"Tasdiqlayman: kursant ketma-ket ikkinchi sutka turadi. Bu jurnalga alohida "
+"yoziladi."
+msgstr ""
+"Подтверждаю: курсант заступает вторые сутки подряд. Это отдельно "
+"записывается в журнал."
 
 msgid ""
 "“Kasal” yoki “Ta’til” tanlansa, almashtirilgan kursantga shu sutka uchun "
@@ -2953,6 +3085,32 @@ msgstr "— свободно —"
 
 msgid "Kursant qo‘yish"
 msgstr "Поставить курсанта"
+
+msgid "Tanlash tushuntirishi (joylar navbati)"
+msgstr "Пояснение выбора (очерёдность постов)"
+
+msgid ""
+"Saralash kaliti: haftada 3-marta (faqat iloji bo‘lmasa) → og‘ir joy va shu "
+"hafta og‘ir joyda turgan → oxirgi marta shu joyda → haftadagi soni → tsiklda "
+"bu joy bor → jami (eng kami + 1 teng) → og‘ir joylar → shu joyda → oxirgi "
+"naryad."
+msgstr ""
+"Ключ сортировки: 3-й раз за неделю (только если нет выхода) → тяжёлый пост и "
+"уже был на тяжёлом посту на этой неделе → в последний раз на этом посту → "
+"число за неделю → пост уже есть в цикле → всего (минимум + 1 считается "
+"равным) → тяжёлые посты → на этом посту → последний наряд."
+
+msgid "Joy"
+msgstr "Пост"
+
+msgid "Haftada"
+msgstr "За неделю"
+
+msgid "Og‘ir joylar"
+msgstr "Тяжёлые посты"
+
+msgid "Belgilar"
+msgstr "Отметки"
 
 #, python-format
 msgid "Jurnal %(d)s"
@@ -3326,12 +3484,12 @@ msgstr "Останется"
 
 msgid ""
 "Kursantlar, guruhlar, joylar, foydalanuvchilar va akkauntlar, sozlamalar, "
-"boshlang‘ich taqsimot, lavozim va “naryadga chiqmaydi” belgilari, sababli "
-"holatlar va kasallar ro‘yxati (hujjatlari bilan)."
+"boshlang‘ich taqsimot, lavozimlar, sababli holatlar va kasallar ro‘yxati "
+"(hujjatlari bilan)."
 msgstr ""
-"Курсанты, группы, места, пользователи и учётные записи, настройки, начальное "
-"распределение, должности и отметки «не заступает в наряд», уважительные "
-"причины и список больных (с документами)."
+"Курсанты, группы, посты, пользователи и учётные записи, настройки, начальное "
+"распределение, должности, уважительные причины и список больных (с "
+"документами)."
 
 msgid "Kursantlar bo‘yicha turgan soni (oldin → keyin)"
 msgstr "Число нарядов по курсантам (до → после)"
@@ -3494,6 +3652,10 @@ msgid "farq %(diff)s"
 msgstr "разница %(diff)s"
 
 #, python-format
+msgid "og‘ir joy farqi %(diff)s"
+msgstr "разница по тяжёлым постам %(diff)s"
+
+#, python-format
 msgid "Ketma-ket ikki naryadi bir joyga tushgan: %(n)s ta holat"
 msgid_plural "Ketma-ket ikki naryadi bir joyga tushgan: %(n)s ta holat"
 msgstr[0] "Два наряда подряд на одном посту: %(n)s случай"
@@ -3549,14 +3711,14 @@ msgstr "Показатель справедливости (по группам)"
 
 msgid ""
 "Jami naryadlar bo‘yicha: yashil — farq (max − min) ≤ 1, sariq — 2, qizil — 3 "
-"va undan ko‘p. Faqat naryadga chiqadiganlar hisobga olinadi (faol emaslar va "
-"naryadga chiqmaydigan lavozimdagilar — kurs starshinasi, guruh komandirlari, "
-"kurs pisari, kaptyorchik — kirmaydi)."
+"va undan ko‘p. Faqat naryad navbatidagilar hisobga olinadi (faol emaslar va "
+"lavozimdagilar — kurs starshinasi, guruh komandirlari, kurs pisari, "
+"kaptyorchik — kirmaydi)."
 msgstr ""
 "По общему числу нарядов: зелёный — разница (max − min) ≤ 1, жёлтый — 2, "
-"красный — 3 и более. Учитываются только заступающие в наряд (неактивные и "
-"курсанты на должностях — старшина курса, командиры групп, писарь курса, "
-"каптёрщик — не входят)."
+"красный — 3 и более. Учитываются только курсанты в очерёдности нарядов "
+"(неактивные и курсанты на должностях — старшина курса, командиры групп, "
+"писарь курса, каптёрщик — не входят)."
 
 msgid "min"
 msgstr "мин"
@@ -3652,8 +3814,8 @@ msgstr "Девушек, бывших дежурными в двух наряда
 msgid "Guruhlar kesimi: guruh × joy (necha sutka bergan)"
 msgstr "По группам: группа × пост (сколько суток выделила)"
 
-msgid "Faol, naryadga chiqmaydigan lavozimdagilarsiz"
-msgstr "Активные, без курсантов на должностях (не заступают в наряд)"
+msgid "Faol, lavozimdagilarsiz"
+msgstr "Активные, без курсантов на должностях"
 
 msgid "1 o‘g‘ilga o‘rtacha naryad"
 msgstr "Нарядов в среднем на 1 юношу"
@@ -3670,11 +3832,11 @@ msgstr ""
 "принятое правило (справедливость измеряется внутри группы, CLAUDE.md 4-B.5)."
 
 msgid ""
-"O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi (naryadga "
-"chiqmaydigan komandirlar va kurs lavozimlari kirmaydi)."
+"O‘rtacha faqat naryadga chiqadigan o‘g‘il bolalar soniga bo‘linadi "
+"(lavozimdagi komandirlar va kurs lavozimlari kirmaydi)."
 msgstr ""
 "Среднее делится только на число юношей, заступающих в наряд (командиры и "
-"курсанты на должностях курса не входят)."
+"курсовые должности не входят)."
 
 msgid "Qo‘lda tuzatishlar nazorati"
 msgstr "Контроль ручных исправлений"

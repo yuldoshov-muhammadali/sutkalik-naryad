@@ -6,6 +6,7 @@ CLAUDE.md 3-bo'lim. Joylar va o'rinlar soni hech kim tomonidan o'zgartirilmaydi.
 from __future__ import annotations
 
 import datetime as dt
+from dataclasses import dataclass
 
 from .models import FEMALE, MALE, ROLE_ASSISTANT, ROLE_DUTY, ROLE_GUARD, Post, Slot
 
@@ -151,6 +152,25 @@ FEMALE_POST: Post = QIZLAR
 PENALTY_POSTS: tuple[str, ...] = (NOJ1.code, YOTOQ1.code)
 PENALTY_ROLE = ROLE_GUARD
 PENALTY_PER_POST_DEFAULT = 1  # bir sutkada bitta joyga ko'pi bilan (Sozlamalarda o'zgaradi)
+
+# 21-bosqich: joylar navbati va og'ir joylar (Sozlamalarda yoqiladi; o'chiq bo'lsa — eski tartib, bayt-bayt)
+HARD_POSTS_DEFAULT: tuple[str, ...] = (NOJ1.code, YOTOQ1.code)
+# Tsikl: Markaz (1 kishi) kirmaydi; kursant 5 ta katta joyning hammasida turmaguncha bittasini takrorlamaslikka harakat
+CYCLE_POSTS: tuple[str, ...] = tuple(c for c in ROTATION_CHAIN if c != MARKAZ.code)
+
+
+@dataclass(frozen=True)
+class PostRotation:
+    """Joylar navbati qoidalari (21-bosqich). `generate_day(..., rotation=None)` — eski tartib.
+
+    QOIDA A: 2-kurs haftasida (yakshanba 18:00 – yakshanba 18:00) bitta kursant ko'pi bilan BITTA og'ir joyda;
+    faqat guruhda kishi yetmasa yumshatiladi (o'rin bo'sh qolmasin) va ogohlantirish yoziladi.
+    Faqat ODDIY naryadlar hisoblanadi; jazo naryadlari QOIDA A, tsikl va og'ir joylar soniga kirmaydi.
+    """
+
+    hard_posts: tuple[str, ...] = HARD_POSTS_DEFAULT
+    cycle_posts: tuple[str, ...] = CYCLE_POSTS
+
 
 TOTAL_SLOTS = sum(p.size for p in POSTS)
 MALE_SLOTS = sum(p.size for p in MALE_POSTS)
