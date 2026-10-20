@@ -73,6 +73,7 @@ def stats_page(request):
         "girl_roles": [stats.ROLE_SHORT[x] for x in GIRL_ROLES],
         "boys": boys_table(rows_pool.get(selected, []), posts) if selected else [],
         "boys_fair": by_pool.get(selected),
+        "hard_title": ", ".join(str(stats.POST_SHORT[c]) for c in stats.ROTATION_CHAIN if c in stats.hard_posts()),
         "girls": girls_table(rows_pool.get(stats.GIRLS, [])),
         "girls_fair": by_pool.get(stats.GIRLS),
         "fairness": fairness,

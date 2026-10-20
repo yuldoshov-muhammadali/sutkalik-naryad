@@ -18,16 +18,19 @@ from django.utils.translation import gettext_lazy as _lazy
 ADMIN = "admin"
 CADET = "cadet"
 COMMANDER = "commander"  # guruh komandiri (19-bosqich): kursant imkoniyatlari + “Mening guruhim” (faqat ko'rish)
+KADIR = "kadir"  # 22-bosqich: admin kabi hamma amal, faqat Django boshqaruv paneli (/admin/) va sozlamalarsiz
 
 ROLE_TITLES = {
     ADMIN: _lazy("Admin (kurs boshlig‘i)"),
     CADET: _lazy("Kursant"),
     COMMANDER: _lazy("Guruh komandiri"),
+    KADIR: _lazy("Kadir"),
 }
 
-ALL = frozenset({ADMIN, CADET, COMMANDER})
+ALL = frozenset({ADMIN, CADET, COMMANDER, KADIR})
 CADETS = frozenset({CADET, COMMANDER})  # komandir ham kursant: o'z kartochkasi, hujjatlari
-ADMIN_ONLY = frozenset({ADMIN})
+ADMIN_ONLY = frozenset({ADMIN})  # boshqaruv paneli va sozlamalar: kadir kirmaydi
+STAFF = frozenset({ADMIN, KADIR})  # kurs boshlig'i va kadir: platformadagi barcha amallar
 
 # amal -> (tavsif, ruxsat etilgan rollar)
 PERMISSIONS: dict[str, tuple[str, frozenset[str]]] = {
@@ -37,25 +40,32 @@ PERMISSIONS: dict[str, tuple[str, frozenset[str]]] = {
     "day.view_approved": (_lazy("Tasdiqlangan sutkalarni ko‘rish (kursant — faqat o‘qish uchun)"), ALL),
     "history.own": (_lazy("O‘z kartochkasi va naryad tarixini ko‘rish"), CADETS),
     "group.view": (_lazy("Mening guruhim: o‘z guruhi kursantlarining tasdiqlangan naryadlari va “kasal, sana–sana” (faqat ko‘rish)"), frozenset({COMMANDER})),
-    "week.view": (_lazy("2-kurs haftalari va sutkalar holatini ko‘rish"), ADMIN_ONLY),
-    "week.open": (_lazy("2-kurs haftasini ochish"), ADMIN_ONLY),
-    "day.view_draft": (_lazy("Qoralama sutkalarni ko‘rish"), ADMIN_ONLY),
-    "day.generate": (_lazy("Sutka qoralamasini tuzish (ro‘yxatni dastur avtomatik tuzadi)"), ADMIN_ONLY),
-    "day.edit": (_lazy("Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi)"), ADMIN_ONLY),
-    "day.approve": (_lazy("Sutkani tasdiqlash"), ADMIN_ONLY),
-    "day.reopen": (_lazy("Tasdiqlangan sutkani qayta ochish (sabab majburiy)"), ADMIN_ONLY),
-    "absence.manage": (_lazy("Sababli yo‘qliklarni (kasal, ta’til) kiritish"), ADMIN_ONLY),
-    "sick.manage": (_lazy("Kasallar ro‘yxati: kasallikni kiritish, tahrirlash, muddatni uzaytirish (tavsif bilan), hujjat rasmlari"), ADMIN_ONLY),
+    "week.view": (_lazy("2-kurs haftalari va sutkalar holatini ko‘rish"), STAFF),
+    "week.open": (_lazy("2-kurs haftasini ochish"), STAFF),
+    "day.view_draft": (_lazy("Qoralama sutkalarni ko‘rish"), STAFF),
+    "day.generate": (_lazy("Sutka qoralamasini tuzish (ro‘yxatni dastur avtomatik tuzadi)"), STAFF),
+    "day.edit": (_lazy("Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi)"), STAFF),
+    "day.approve": (_lazy("Sutkani tasdiqlash"), STAFF),
+    "day.reopen": (_lazy("Tasdiqlangan sutkani qayta ochish (sabab majburiy)"), STAFF),
+    "absence.manage": (_lazy("Sababli yo‘qliklarni (kasal, ta’til) kiritish"), STAFF),
+    "sick.manage": (_lazy("Kasallar ro‘yxati: kasallikni kiritish, tahrirlash, muddatni uzaytirish (tavsif bilan), hujjat rasmlari"), STAFF),
     "documents.own": (_lazy("O‘z kasallik hujjatlarini (rasmlarini) ko‘rish — faqat ko‘rish"), CADETS),
     "penalty.group": (_lazy("O‘z guruhi kursantiga zalyot kiritish va o‘z guruhi zalyotlarini ko‘rish (tahrir va bekor qilish — yo‘q)"), frozenset({COMMANDER})),
-    "penalty.manage": (_lazy("Zalyotchiklar: jazo naryadini kiritish, tahrirlash, bekor qilish, ko‘rib chiqish va zalyot hisobi"), ADMIN_ONLY),
-    "history.all": (_lazy("Har qanday kursant kartochkasi, tarixi va statistika"), ADMIN_ONLY),
+    "penalty.manage": (_lazy("Zalyotchiklar: jazo naryadini kiritish, tahrirlash, bekor qilish, ko‘rib chiqish va zalyot hisobi"), STAFF),
+    "history.all": (_lazy("Har qanday kursant kartochkasi, tarixi va statistika"), STAFF),
     "pdf.export": (_lazy("PDF yuklab olish va chop etish (kursant — faqat tasdiqlangan sutkalar)"), ALL),
-    "cadets.view": (_lazy("Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv)"), ADMIN_ONLY),
-    "cadets.manage": (_lazy("Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar"), ADMIN_ONLY),
+    "cadets.view": (_lazy("Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv)"), STAFF),
+    "cadets.manage": (_lazy("Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar"), STAFF),
+    # 22-bosqich (1.13.1): faolsizlantirish va lavozim belgilash — faqat admin (kadir kartochkada ko'rmaydi)
+    "cadets.status": (_lazy("Kursantni faolsizlantirish / qayta faollashtirish va lavozim belgilash / olib tashlash"), ADMIN_ONLY),
     "settings.manage": (_lazy("Sozlamalar, boshlang‘ich taqsimot va sinov ma’lumotlarini tozalash"), ADMIN_ONLY),
     "admin_panel": (_lazy("Django boshqaruv paneli (/admin/)"), ADMIN_ONLY),
 }
+
+
+def is_staff_role(role) -> bool:
+    """Kurs boshlig'i yoki kadir — xodimlar menyusi va bosh sahifasi."""
+    return role in STAFF
 
 
 def user_role(user) -> str | None:

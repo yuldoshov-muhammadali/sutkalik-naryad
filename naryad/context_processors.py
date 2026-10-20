@@ -15,7 +15,7 @@ def ui(request):
     menu = []
     if role:
         menu.append({"label": _("Bosh sahifa"), "url": reverse("home"), "active": request.path == reverse("home")})
-        if role == perms.ADMIN:
+        if perms.is_staff_role(role):
             cadets_url = reverse("cadet_list")
             weeks_url, abs_url = reverse("week_list"), reverse("absence_list")
             menu += [

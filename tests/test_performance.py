@@ -20,12 +20,12 @@ SUNDAY = dt.date(2026, 9, 13)
 pytestmark = pytest.mark.django_db
 
 LIMITS = {
-    "home": 18,  # 14-bosqich: ertangi ro'yxat banneri (+3: sozlama, 2 sutka, haftalar)
+    "home": 19,  # 14-bosqich: ertangi ro'yxat banneri (+3: sozlama, 2 sutka, haftalar); 21-bosqich: og'ir joylar (+1)
     "week_list": 10,
     "cadet_list": 10,
     "approved_days": 8,
     "absence_list": 10,
-    "stats": 25,
+    "stats": 26,  # 21-bosqich: og'ir joylar ro'yxati (sozlama, +1)
     "stats_excel": 25,
 }
 
@@ -55,5 +55,5 @@ def test_query_counts_do_not_grow_with_history(client, admin, django_assert_max_
         with django_assert_max_num_queries(20):
             client.get(reverse("day_detail", args=[date.isoformat()]))
     cadet = Cadet.objects.first()
-    with django_assert_max_num_queries(12):
+    with django_assert_max_num_queries(13):  # 21-bosqich: joylar navbati kartochkasi (og'ir joylar sozlamasi, +1)
         client.get(reverse("cadet_detail", args=[cadet.pk]))

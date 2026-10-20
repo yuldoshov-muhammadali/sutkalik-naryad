@@ -30,6 +30,7 @@ from .models import (
     GroupPostAssignment,
     Penalty,
     Post,
+    Setting,
     SlotRole,
     StudyGroup,
 )
@@ -135,6 +136,12 @@ class CadetRow:
     dates_posts: list[tuple[dt.date, str]] = field(default_factory=list)
     dates_roles: list[tuple[dt.date, str]] = field(default_factory=list)
     penalty: int = 0  # navbatdan tashqari (jazo) naryadlari — yuqoridagi sonlarga kirmaydi
+    hard: int = 0  # og'ir joylarda (21-bosqich, Sozlamalardagi ro'yxat) — faqat oddiy naryadlar
+
+
+def hard_posts() -> set[str]:
+    """Og'ir joylar (Sozlamalar; standart 1-NO‘J va 1-Yotoqxona). Qizlar yotoqxonasi kirmaydi."""
+    return set(Setting.load().hard_posts or ()) & set(ROTATION_CHAIN)
 
 
 def pool_cadets(pool: str):
@@ -165,6 +172,7 @@ def rows_by_pool(period: Period) -> dict[str, list[CadetRow]]:
 def build_rows(cadets: list[Cadet], period: Period) -> list[CadetRow]:
     rows = {c.pk: CadetRow(cadet=c) for c in cadets}
     ref_week = reference_week(period)
+    hard = hard_posts()
     qs = Assignment.objects.filter(duty_day__status=DutyDay.Status.APPROVED, cadet_id__in=rows.keys())
     for a in period.filter(qs).select_related("duty_day", "post_slot__post").order_by("duty_day__date"):
         row = rows[a.cadet_id]
@@ -175,6 +183,7 @@ def build_rows(cadets: list[Cadet], period: Period) -> list[CadetRow]:
         row.by_post[post] = row.by_post.get(post, 0) + 1
         row.by_role[a.post_slot.role] = row.by_role.get(a.post_slot.role, 0) + 1
         row.total += 1
+        row.hard += 1 if post in hard else 0
         if ref_week and week_start(a.duty_day.date) == ref_week:
             row.this_week += 1
         row.last_date = a.duty_day.date
@@ -231,6 +240,7 @@ class Fairness:
     status: str
     repeats_applicable: bool = True  # qizlarda joy bitta — tekshirilmaydi
     duty_repeats: list[dict] = field(default_factory=list)  # qizlar: ketma-ket ikki naryadda navbatchi
+    hard_diff: int | None = None  # og'ir joylar farqi (max − min) guruh ichida (21-bosqich)
 
     @property
     def status_label(self) -> str:
@@ -238,7 +248,7 @@ class Fairness:
 
 
 def fairness_from_rows(pool: str, title: str, rows: list[CadetRow]) -> Fairness:
-    # Adolat faqat naryadga chiqadiganlar orasida: faol emaslar va naryaddan ozodlar hisobga olinmaydi
+    # Adolat faqat naryadga chiqadiganlar orasida: faol emaslar va lavozimdagilar hisobga olinmaydi
     active = [r for r in rows if r.cadet.on_duty]
     totals = [r.total for r in active]
     applicable = pool != GIRLS
@@ -253,9 +263,11 @@ def fairness_from_rows(pool: str, title: str, rows: list[CadetRow]) -> Fairness:
     mean = sum(totals) / len(totals)
     lo, hi = min(totals), max(totals)
     within = sum(1 for t in totals if abs(t - mean) <= 1)
+    hard = [r.hard for r in active]
     return Fairness(
         pool, title, len(active), sum(totals), lo, hi, hi - lo, round(mean, 2),
         round(100 * within / len(totals), 1), repeats, fairness_status(hi - lo), applicable, duty_repeats,
+        hard_diff=max(hard) - min(hard) if applicable else None,
     )
 
 
@@ -301,7 +313,7 @@ def group_sections(period: Period) -> list[GroupSection]:
         a["group_id"] for a in approved_assignments(period).filter(post_slot__post__gender=Gender.MALE).values("group_id")
     )
     boys_by_group = Counter(
-        # bir o'g'ilga o'rtacha — faqat naryadga chiqadiganlarga bo'linadi (ozodlarsiz)
+        # bir o'g'ilga o'rtacha — faqat naryadga chiqadiganlarga bo'linadi (lavozimdagilarsiz)
         Cadet.objects.filter(gender=Gender.MALE, is_active=True, duty_exempt=False).values_list("group_id", flat=True)
     )
     out = []
@@ -470,17 +482,18 @@ def _excel_export(period: Period) -> bytes:
             sheet("Qizlar", header, data)
         else:
             header = (["F.I.Sh."] + [p.name for p in posts] + [str(ROLE_SHORT[r]) for r in ROLES]
-                      + ["Jami", "Joriy haftada", "Oxirgi naryad", "Naryadga chiqmaydi (lavozim)", "Jazo naryadlari (navbatdan tashqari)"])
+                      + ["Jami", "Og‘ir joylar", "Joriy haftada", "Oxirgi naryad", "Lavozim", "Jazo naryadlari (navbatdan tashqari)"])
             data = [[r.cadet.full_name] + [r.by_post.get(p.code, 0) for p in posts] + [r.by_role.get(x, 0) for x in ROLES]
-                    + [r.total, r.this_week, r.last_date, r.cadet.duty_position if r.cadet.duty_exempt else "", r.penalty]
+                    + [r.total, r.hard, r.this_week, r.last_date, r.cadet.position_label_uz, r.penalty]
                     for r in rows]
             sheet(f"Guruh {code}", header, data)
 
     fair = fairness_all(period, by_pool)
     sheet("Adolat", ["Hovuz", "Kursant", "Jami naryad", "Min", "Max", "Farq", "O‘rtacha", "±1 ichida, %", "Ketma-ket bir joy",
-                    "Ketma-ket 2 marta navbatchi (qizlar)", "Holat"],
+                    "Ketma-ket 2 marta navbatchi (qizlar)", "Holat", "Og‘ir joylar farqi"],
           [[f.title, f.members, f.total, f.min, f.max, f.diff, f.mean, f.within_one_pct,
-            len(f.repeats) if f.repeats_applicable else "—", len(f.duty_repeats) if f.pool == GIRLS else "—", f.status_label]
+            len(f.repeats) if f.repeats_applicable else "—", len(f.duty_repeats) if f.pool == GIRLS else "—", f.status_label,
+            "—" if f.hard_diff is None else f.hard_diff]
            for f in fair])
     repeats = [[f.title, x["cadet"].full_name, x["post_name"], x["first"], x["second"]] for f in fair for x in f.repeats]
     repeats += [[f.title, x["cadet"].full_name, "Navbatchi (ketma-ket 2 marta)", x["first"], x["second"]]

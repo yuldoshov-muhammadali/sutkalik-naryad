@@ -17,7 +17,7 @@
   <div class="overflow-x-auto">
     <table class="mt-2 w-full text-sm">
       <thead class="bg-slate-50 text-left text-xs text-slate-500">
-        <tr><th class="px-3 py-2 font-medium">{% translate "Guruh" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "O‘g‘il" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Qiz" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Kutilgan" %}</th><th class="px-2 py-2 text-right font-medium" title="{% translate "Faol o‘g‘il bolalar, naryadga chiqmaydigan lavozimdagilarsiz" %}">{% translate "Naryadga chiqadi" %}</th><th class="px-3 py-2 text-right font-medium">{% translate "Faol emas" %}</th></tr>
+        <tr><th class="px-3 py-2 font-medium">{% translate "Guruh" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "O‘g‘il" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Qiz" %}</th><th class="px-2 py-2 text-right font-medium">{% translate "Kutilgan" %}</th><th class="px-2 py-2 text-right font-medium" title="{% translate "Faol o‘g‘il bolalar, lavozimdagilarsiz" %}">{% translate "Naryadga chiqadi" %}</th><th class="px-3 py-2 text-right font-medium">{% translate "Faol emas" %}</th></tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         {% for row in summary %}
@@ -72,7 +72,12 @@
       <option value="faol" {% if filters.holat == "faol" %}selected{% endif %}>{% translate "Faol" %}</option>
       <option value="faol-emas" {% if filters.holat == "faol-emas" %}selected{% endif %}>{% translate "Faol emas" %}</option>
       <option value="naryadga" {% if filters.holat == "naryadga" %}selected{% endif %}>{% translate "Naryadga chiqadi" %}</option>
-      <option value="lavozimda" {% if filters.holat == "lavozimda" %}selected{% endif %}>{% translate "Naryadga chiqmaydi" %}</option>
+    </select>
+  </label>
+  <label class="col-span-2 sm:col-span-1"><span class="sr-only">{% translate "Lavozim" context "kursant lavozimi" %}</span>
+    <select name="lavozim" class="block w-full rounded-lg border border-slate-300 px-2 py-2 text-base" data-testid="position-filter">
+      <option value="">{% translate "Lavozim" context "kursant lavozimi" %}: {% translate "Hammasi" %}</option>
+      {% for code, label in positions %}<option value="{{ code }}" {% if filters.lavozim == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </label>
   <noscript><button class="col-span-2 rounded-lg bg-brand-800 px-3 py-2 text-sm font-semibold text-white sm:col-span-4">{% translate "Qidirish" %}</button></noscript>

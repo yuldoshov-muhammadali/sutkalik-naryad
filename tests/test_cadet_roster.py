@@ -7,6 +7,7 @@ import io
 
 import pytest
 from django.urls import reverse
+from django.utils import translation
 from pypdf import PdfReader
 
 from naryad import days, penalties, services
@@ -184,7 +185,7 @@ def test_no_exempt_word_anywhere_position_label_stays(client, admin, lang):
     slot = PostSlot.objects.get(post__code="noj1", position=1)
     pages = {
         "cadet_list": page(client, "cadet_list"),
-        "cadet_list_filter": client.get(reverse("cadet_list"), {"holat": "lavozimda"}).content.decode(),
+        "cadet_list_filter": client.get(reverse("cadet_list"), {"lavozim": "starshina"}).content.decode(),
         "cadet_detail": page(client, "cadet_detail", starshina.pk),
         "stats": page(client, "stats"),
         "day_replace": client.get(reverse("day_replace", args=[MONDAY.isoformat(), slot.pk]), HTTP_HX_REQUEST="true").content.decode(),
@@ -193,22 +194,28 @@ def test_no_exempt_word_anywhere_position_label_stays(client, admin, lang):
     }
     for name, html in pages.items():
         assert not exempt_words(html), (lang, name, exempt_words(html))
-    chiqmaydi = {"uz": "naryadga chiqmaydi", "ru": "не заступает в наряд", "en": "not on the duty roster"}[lang]
-    assert chiqmaydi in pages["day_replace"]  # almashtirish oynasida: “lavozim — naryadga chiqmaydi”
-    assert starshina.duty_position in pages["cadet_list"] and starshina.duty_position in pages["cadet_detail"]
-    assert starshina.duty_position in pages["stats"]
+    # 21-bosqich (5a): faqat lavozim nomi (joriy tilda), “naryadga chiqmaydi” yo'q
+    label = {"uz": "Kurs starshinasi", "ru": "Старшина курса", "en": "Course senior cadet"}[lang]
+    for name in ("cadet_list", "cadet_list_filter", "cadet_detail", "stats"):
+        assert label in pages[name], (lang, name)
+    # almashtirish oynasida — shu joy guruhining lavozimdagi kursanti, lavozim nomi bilan
+    holder = Cadet.objects.get(group=draft.group_posts.get(post__code="noj1").group, duty_exempt=True)
+    with translation.override(lang):
+        assert f"{holder.position_label} (" in pages["day_replace"], lang
     assert draft.status == DutyDay.Status.DRAFT
 
 
 def test_filter_and_column_renamed_in_three_languages(client, admin):
-    expected = {"uz": "Naryadga chiqmaydi", "ru": "Не заступает в наряд", "en": "Not on the duty roster"}
+    """21-bosqich (5a): filtr va ustun — “Lavozim”."""
+    expected = {"uz": "Lavozim", "ru": "Должность", "en": "Position"}
     for lang, label in expected.items():
         login(client, lang=lang, role="admin")
-        assert label in page(client, "cadet_list"), lang
+        html = page(client, "cadet_list")
+        assert label in html and 'data-testid="position-filter"' in html and not exempt_words(html), lang
     # Django boshqaruv paneli: filtr va ustun ham shu nom bilan
     login(client, lang="uz", role="admin")
     html = client.get("/admin/naryad/cadet/").content.decode()
-    assert "naryadga chiqmaydi" in html.lower() and not exempt_words(html)
+    assert "Lavozim" in html and "Lavozimsiz" in html and not exempt_words(html)
 
 
 def test_exempt_rules_unchanged(admin):

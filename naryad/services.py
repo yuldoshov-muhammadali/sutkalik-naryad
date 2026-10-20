@@ -81,7 +81,7 @@ def to_engine_cadet(cadet: Cadet) -> em.Cadet:
 
 def engine_cadets() -> list[em.Cadet]:
     """Nomzodlar hovuzi: barcha kursantlar (faol emaslari ham — algoritm ularni o'zi chiqarib tashlaydi),
-    naryaddan ozodlardan tashqari (CLAUDE.md 4-bo'lim). Algoritm qoidalari o'zgarmaydi — ozodlar hovuzga kirmaydi."""
+    lavozimdagilardan tashqari (CLAUDE.md 4-bo'lim). Algoritm qoidalari o'zgarmaydi — ular hovuzga kirmaydi."""
     qs = Cadet.objects.select_related("group").filter(duty_exempt=False).order_by("pk")
     return [to_engine_cadet(c) for c in qs]
 
@@ -266,6 +266,7 @@ def generate_draft(
         )
     from .penalties import engine_offenders  # aylana importdan qochish
 
+    setting = Setting.load()
     result = generate_day(
         day,
         engine_cadets(),
@@ -273,7 +274,8 @@ def generate_draft(
         engine_absences(day) if absences is None else list(absences),
         initial_rotation=rotation,
         offenders=engine_offenders(day),
-        penalty_per_post=Setting.load().penalty_per_post,
+        penalty_per_post=setting.penalty_per_post,
+        rotation=setting.post_rotation(),  # 21-bosqich: o'chiq bo'lsa None — eski tartib
     )
     # ChangeLog.details — saqlanadigan matn, doim o'zbekcha (tarjima qilinmaydi)
     details = "Qayta tuzildi: avvalgi qoralama almashtirildi." if existing is not None else ""

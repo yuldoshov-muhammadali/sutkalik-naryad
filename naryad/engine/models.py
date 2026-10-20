@@ -129,9 +129,41 @@ class CandidateScore:
     post_count: int  # shu joyda necha marta turgan
     last_day: dt.date | None  # oxirgi naryad sanasi
     tiebreak: str  # deterministik tasodif (sana + kursant)
+    # 21-bosqich (joylar navbati yoqilgan bo'lsa; aks holda standart qiymatlar va eski kalit)
+    rotation: bool = False
+    hard_post: bool = False  # tanlanayotgan joy og'irmi
+    week_hard: int = 0  # shu haftada og'ir joyda necha marta turgan (oddiy naryadlar)
+    hard_count: int = 0  # jami og'ir joylar soni
+    cycle: tuple[str, ...] = ()  # joriy tsiklda turgan katta joylar
+    cycle_repeat: bool = False  # bu joy joriy tsiklda allaqachon bor
+    total_band: int = 0  # jami, +1 bag'rikenglik bilan: max(jami, guruhdagi eng kami + 1)
+
+    @property
+    def third_time(self) -> bool:
+        """Shu haftada uchinchi (yoki undan ko'p) marta bo'ladi — faqat boshqa iloj bo'lmasa."""
+        return self.week_count >= 2
+
+    @property
+    def hard_conflict(self) -> bool:
+        """QOIDA A: og'ir joy va shu haftada allaqachon og'ir joyda turgan."""
+        return self.hard_post and self.week_hard >= 1
 
     @property
     def sort_key(self) -> tuple:
+        if self.rotation:
+            return (
+                1 if self.third_time else 0,
+                1 if self.hard_conflict else 0,
+                1 if self.last_is_same_post else 0,
+                self.week_count,
+                1 if self.cycle_repeat else 0,
+                self.total_band,
+                self.hard_count if self.hard_post else 0,
+                self.post_count,
+                self.total,
+                self.last_day or dt.date.min,
+                self.tiebreak,
+            )
         return (
             self.week_count,
             self.total + self.penalty,

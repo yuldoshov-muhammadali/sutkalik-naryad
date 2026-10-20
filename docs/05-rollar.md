@@ -5,41 +5,43 @@
 
 ## Rollar
 
-Platformada **uch rol** bor (19-bosqichdan: admin, kursant, guruh komandiri). Sutkalik naryad ro‘yxatini **dastur o‘zi tuzadi** (algoritm, `docs/02-algoritm.md`), shuning uchun alohida “tuzuvchi” roli yo‘q (CLAUDE.md 10-bo‘lim, 26-band). 10-bosqichda qayta tasdiqlandi: sutkani tuzish, tuzatish va tasdiqlashni **faqat admin** qiladi, tuzuvchi roli qaytarilmaydi (50-band).
+Platformada **to‘rt rol** bor (22-bosqichdan: admin, kadir, kursant, guruh komandiri). Sutkalik naryad ro‘yxatini **dastur o‘zi tuzadi** (algoritm, `docs/02-algoritm.md`), shuning uchun alohida “tuzuvchi” roli yo‘q (CLAUDE.md 10-bo‘lim, 26-band). 10-bosqichda qayta tasdiqlandi: sutkani tuzish, tuzatish va tasdiqlashni **faqat admin** qiladi, tuzuvchi roli qaytarilmaydi (50-band).
 
 | Rol | Kim | Qisqacha |
 |---|---|---|
 | **Admin** (`admin`) | Kurs boshlig‘i | Hammasi: haftani ochish, “qoralama tuzish” tugmasi (ro‘yxatni dastur tuzadi), sabab bilan qo‘lda tuzatish, sutkani tasdiqlash va qayta ochish, kursantlar bazasi, sozlamalar, boshqaruv paneli. Superuser ham admin hisoblanadi. |
+| **Kadir** (`kadir`) | Kadrlar / kurs xodimi (22-bosqich, CLAUDE.md 71-band) | Admin bilan bir xil barcha amallar: haftani ochish, sutkani tuzish, tuzatish, tasdiqlash va qayta ochish, kursantlar bazasi va akkauntlari, sababli holatlar, kasallar ro‘yxati, zalyotchiklar, statistika, PDF. **Faqat Django boshqaruv paneli (`/admin/`), Sozlamalar, sinov ma’lumotlarini tozalash, kursant kartochkasidagi “Faolsizlantirish” va “Lavozim belgilash” yo‘q** (menyuda ham ko‘rinmaydi; `/admin/` — kirish sahifasiga, tozalash — 403). Akkauntni kursantga bog‘lash shart emas. Akkauntni faqat admin boshqaruv panelida yaratadi. |
 | **Kursant** (`cadet`) | Har bir kursant | Bosh sahifada navbatdagi tasdiqlangan naryadi (sana, joy, lavozim, hisoblagich) va “Mening tarixim”. “Tasdiqlangan naryadlar”: faqat **tasdiqlangan** sutkalar ro‘yxati, sahifasi (o‘qish uchun, o‘z o‘rni ajratilgan) va rasmiy PDF (16-bosqich, CLAUDE.md 63-band). Qoralamalar, jurnal, sabablar, boshqa kursantlarning kartochkalari, statistika, sababli holatlar va zalyotchiklar — yopiq (403). |
 | **Guruh komandiri** (`commander`) | 6 ta guruh komandiri (19-bosqich, CLAUDE.md 67-band) | Kursantning barcha imkoniyatlari + “Mening guruhim”: faqat o‘z guruhi (guruh kursantning guruhidan olinadi), faqat tasdiqlangan sutkalar, kasallik — faqat “kasal, sana–sana”. Hech narsa kiritmaydi; tavsif, hujjat, sabablar, zalyot, statistika, jurnal va admin bo‘limlari — yopiq (403). Boshqa guruh kursanti — 404. |
 
 ## Ruxsatlar jadvali
 
-| Amal | Kalit | Admin | Kursant | Guruh komandiri |
+| Amal | Kalit | Admin | Kadir | Kursant | Guruh komandiri |
 |---|---|---|---|---|
-| Bosh sahifa (rolga qarab) | `home.view` | ✅ | ✅ | ✅ |
-| O‘z parolini almashtirish | `account.password_change` | ✅ | ✅ | ✅ |
-| Tasdiqlangan sutkalarni ko‘rish (kursant — faqat o‘qish uchun) | `day.view_approved` | ✅ | ✅ | ✅ |
-| O‘z kartochkasi va naryad tarixini ko‘rish | `history.own` | — | ✅ | ✅ |
-| Mening guruhim: o‘z guruhi kursantlarining tasdiqlangan naryadlari va “kasal, sana–sana” (faqat ko‘rish) | `group.view` | — | — | ✅ |
-| 2-kurs haftalari va sutkalar holatini ko‘rish | `week.view` | ✅ | — | — |
-| 2-kurs haftasini ochish | `week.open` | ✅ | — | — |
-| Qoralama sutkalarni ko‘rish | `day.view_draft` | ✅ | — | — |
-| Sutka qoralamasini tuzish (ro‘yxatni dastur avtomatik tuzadi) | `day.generate` | ✅ | — | — |
-| Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi) | `day.edit` | ✅ | — | — |
-| Sutkani tasdiqlash | `day.approve` | ✅ | — | — |
-| Tasdiqlangan sutkani qayta ochish (sabab majburiy) | `day.reopen` | ✅ | — | — |
-| Sababli yo‘qliklarni (kasal, ta’til) kiritish | `absence.manage` | ✅ | — | — |
-| Kasallar ro‘yxati: kasallikni kiritish, tahrirlash, muddatni uzaytirish (tavsif bilan), hujjat rasmlari | `sick.manage` | ✅ | — | — |
-| O‘z kasallik hujjatlarini (rasmlarini) ko‘rish — faqat ko‘rish | `documents.own` | — | ✅ | ✅ |
-| O‘z guruhi kursantiga zalyot kiritish va o‘z guruhi zalyotlarini ko‘rish (tahrir va bekor qilish — yo‘q) | `penalty.group` | — | — | ✅ |
-| Zalyotchiklar: jazo naryadini kiritish, tahrirlash, bekor qilish, ko‘rib chiqish va zalyot hisobi | `penalty.manage` | ✅ | — | — |
-| Har qanday kursant kartochkasi, tarixi va statistika | `history.all` | ✅ | — | — |
-| PDF yuklab olish va chop etish (kursant — faqat tasdiqlangan sutkalar) | `pdf.export` | ✅ | ✅ | ✅ |
-| Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv) | `cadets.view` | ✅ | — | — |
-| Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar | `cadets.manage` | ✅ | — | — |
-| Sozlamalar, boshlang‘ich taqsimot va sinov ma’lumotlarini tozalash | `settings.manage` | ✅ | — | — |
-| Django boshqaruv paneli (/admin/) | `admin_panel` | ✅ | — | — |
+| Bosh sahifa (rolga qarab) | `home.view` | ✅ | ✅ | ✅ | ✅ |
+| O‘z parolini almashtirish | `account.password_change` | ✅ | ✅ | ✅ | ✅ |
+| Tasdiqlangan sutkalarni ko‘rish (kursant — faqat o‘qish uchun) | `day.view_approved` | ✅ | ✅ | ✅ | ✅ |
+| O‘z kartochkasi va naryad tarixini ko‘rish | `history.own` | — | — | ✅ | ✅ |
+| Mening guruhim: o‘z guruhi kursantlarining tasdiqlangan naryadlari va “kasal, sana–sana” (faqat ko‘rish) | `group.view` | — | — | — | ✅ |
+| 2-kurs haftalari va sutkalar holatini ko‘rish | `week.view` | ✅ | ✅ | — | — |
+| 2-kurs haftasini ochish | `week.open` | ✅ | ✅ | — | — |
+| Qoralama sutkalarni ko‘rish | `day.view_draft` | ✅ | ✅ | — | — |
+| Sutka qoralamasini tuzish (ro‘yxatni dastur avtomatik tuzadi) | `day.generate` | ✅ | ✅ | — | — |
+| Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi) | `day.edit` | ✅ | ✅ | — | — |
+| Sutkani tasdiqlash | `day.approve` | ✅ | ✅ | — | — |
+| Tasdiqlangan sutkani qayta ochish (sabab majburiy) | `day.reopen` | ✅ | ✅ | — | — |
+| Sababli yo‘qliklarni (kasal, ta’til) kiritish | `absence.manage` | ✅ | ✅ | — | — |
+| Kasallar ro‘yxati: kasallikni kiritish, tahrirlash, muddatni uzaytirish (tavsif bilan), hujjat rasmlari | `sick.manage` | ✅ | ✅ | — | — |
+| O‘z kasallik hujjatlarini (rasmlarini) ko‘rish — faqat ko‘rish | `documents.own` | — | — | ✅ | ✅ |
+| O‘z guruhi kursantiga zalyot kiritish va o‘z guruhi zalyotlarini ko‘rish (tahrir va bekor qilish — yo‘q) | `penalty.group` | — | — | — | ✅ |
+| Zalyotchiklar: jazo naryadini kiritish, tahrirlash, bekor qilish, ko‘rib chiqish va zalyot hisobi | `penalty.manage` | ✅ | ✅ | — | — |
+| Har qanday kursant kartochkasi, tarixi va statistika | `history.all` | ✅ | ✅ | — | — |
+| PDF yuklab olish va chop etish (kursant — faqat tasdiqlangan sutkalar) | `pdf.export` | ✅ | ✅ | ✅ | ✅ |
+| Kursantlar ro‘yxatini ko‘rish (filtr, qidiruv) | `cadets.view` | ✅ | ✅ | — | — |
+| Kursant qo‘shish, tahrirlash, faolsizlantirish, Excel import, akkauntlar | `cadets.manage` | ✅ | ✅ | — | — |
+| Kursantni faolsizlantirish / qayta faollashtirish va lavozim belgilash / olib tashlash | `cadets.status` | ✅ | — | — | — |
+| Sozlamalar, boshlang‘ich taqsimot va sinov ma’lumotlarini tozalash | `settings.manage` | ✅ | — | — | — |
+| Django boshqaruv paneli (/admin/) | `admin_panel` | ✅ | — | — | — |
 
 ## Qanday ishlaydi
 

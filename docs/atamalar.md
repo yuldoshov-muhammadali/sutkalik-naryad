@@ -26,8 +26,15 @@ quyidagi atamalar bir xil tarjima qilinadi.
 | Qoralama / Tasdiqlangan | Черновик / Утверждено | Draft / Approved |
 | Tuzish / Qayta tuzish / Tasdiqlash | Сформировать / Пересформировать / Утвердить | Generate / Regenerate / Approve |
 | Sababli holat | Уважительная причина | Excused absence |
-| Naryadga chiqmaydi (lavozimdagi kursant; 16-bosqichgacha “Naryaddan ozod”) | Не заступает в наряд | Not on the duty roster |
+| Lavozim (kursant lavozimi; 21-bosqichgacha “Naryadga chiqmaydi”, 16-bosqichgacha “Naryaddan ozod”) | Должность | Position |
+| Lavozimsiz | Без должности | No position |
 | Kurs starshinasi | Старшина курса | Course senior cadet |
+| Kurs pisari | Писарь курса | Course clerk |
+| Kaptyorchik | Каптёрщик | Storekeeper |
+| Og‘ir joy | Тяжёлый пост | Hard post |
+| Joylar navbati | Очерёдность постов | Post rotation |
+| Dam olish (naryaddan keyin) | Отдых после наряда | Rest after duty |
+| Dam olmagan | Без отдыха | No rest |
 | Tasdiqlangan naryadlar | Утверждённые наряды | Approved duty rosters |
 | Sababli holat eslatmasi | Напоминание об уважительной причине | Valid reason reminder |
 | Kasallar ro‘yxati | Список больных | Sick list |
@@ -39,6 +46,7 @@ quyidagi atamalar bir xil tarjima qilinadi.
 | Hujjat | Документ | Document |
 | E-NARYAD (platforma nomi, tarjima qilinmaydi) | E-NARYAD | E-NARYAD |
 | Guruh komandiri | Командир группы | Group commander |
+| Kadir (kurs xodimi roli: admin amallari, boshqaruv panelisiz) | Кадир (роль сотрудника курса: действия администратора, без панели управления) | Kadir (course staff role: admin actions, no admin panel) |
 | Mening guruhim | Моя группа | My group |
 | Hozir naryadda | Сейчас в наряде | On duty now |
 | Kasal | Болен | Sick |

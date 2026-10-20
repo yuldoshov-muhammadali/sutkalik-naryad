@@ -54,6 +54,7 @@ class UserRole(models.TextChoices):
     ADMIN = "admin", _lazy("Admin (kurs boshlig‘i)")
     CADET = "cadet", _lazy("Kursant (faqat ko‘rish)")
     COMMANDER = "commander", _lazy("Guruh komandiri (o‘z guruhini ko‘rish)")
+    KADIR = "kadir", _lazy("Kadir (hamma amal, boshqaruv panelisiz)")
 
 
 class AppUserManager(UserManager):
@@ -178,6 +179,15 @@ class StudyGroup(models.Model):
         return self.code
 
 
+# 21-bosqich (5a): lavozim nomlari (uz/ru/en) — “Lavozim” filtri va ustuni
+POSITION_LABELS = {
+    "komandir": _lazy("Guruh komandiri"),
+    "starshina": _lazy("Kurs starshinasi"),
+    "pisar": _lazy("Kurs pisari"),
+    "kaptyor": _lazy("Kaptyorchik"),
+}
+
+
 class Cadet(models.Model):
     """Kursant. O'chirilmaydi — faqat faolsizlantiriladi (tarix saqlanadi)."""
 
@@ -198,7 +208,10 @@ class Cadet(models.Model):
     deactivation_reason = models.CharField(_lazy("faolsizlantirish sababi"), max_length=200, blank=True)
     # Komandirlar va kurs lavozimlari: faol (akkaunti ishlaydi), lekin sutkalik naryadga qo'yilmaydi
     # (CLAUDE.md 2- va 4-bo'lim, 10-bo'lim 56-band). Faqat kursant kartochkasidan, sabab bilan o'zgartiriladi.
-    duty_exempt = models.BooleanField(_lazy("naryadga chiqmaydi"), default=False)
+    # 21-bosqich (5a): sahifalarda faqat lavozim nomi ko'rsatiladi; bu belgi faqat admin formasida
+    duty_exempt = models.BooleanField(
+        _lazy("lavozimda"), default=False, help_text=_lazy("Lavozimi sababli naryad navbatiga kirmaydi")
+    )
     duty_position = models.CharField(
         _lazy("lavozimi"), max_length=100, blank=True, help_text=_lazy("Masalan: Kurs starshinasi, BI-225 guruh komandiri.")
     )
@@ -244,8 +257,35 @@ class Cadet(models.Model):
         return self.duty_exempt and self.duty_position.strip().lower().endswith("guruh komandiri")
 
     @property
+    def position_kind(self) -> str:
+        """Lavozim turi (21-bosqich, 5a): komandir / starshina / pisar / kaptyorchik; boshqa lavozim — "boshqa"."""
+        if not self.duty_exempt:
+            return ""
+        text = self.duty_position.strip().lower()
+        if text.endswith("guruh komandiri"):
+            return "komandir"
+        for kind in ("starshina", "pisar", "kaptyor"):
+            if kind in text:
+                return kind
+        return "boshqa"
+
+    @property
+    def position_label(self) -> str:
+        """Sahifalarda ko'rsatiladigan yagona belgi — lavozim nomi (joriy tilda); boshqa lavozim — o'z matni."""
+        kind = self.position_kind
+        return str(POSITION_LABELS[kind]) if kind in POSITION_LABELS else self.duty_position
+
+    @property
+    def position_label_uz(self) -> str:
+        """Excel/PDF uchun (doim o'zbekcha)."""
+        from django.utils import translation
+
+        with translation.override("uz"):
+            return self.position_label
+
+    @property
     def on_duty(self) -> bool:
-        """Naryadga chiqadi: faol va naryaddan ozod emas."""
+        """Naryadga chiqadi: faol va lavozimda emas."""
         return self.is_active and not self.duty_exempt
 
     def clean(self):
@@ -531,6 +571,8 @@ class Assignment(models.Model):
     source = models.CharField(_lazy("manba"), max_length=10, choices=Source.choices, default=Source.AUTO)
     # 15-bosqich: navbatdan tashqari (jazo) naryadi — adolat hisobiga kirmaydi
     kind = models.CharField(_lazy("naryad turi"), max_length=10, choices=Kind.choices, default=Kind.NORMAL)
+    # 21-bosqich (QOIDA B): kecha naryadda bo'lgan kursantni faqat admin qo'lda qo'yadi — sabab va tasdiq bilan
+    no_rest = models.BooleanField(_lazy("dam olmagan"), default=False)
     penalty = models.ForeignKey(
         "Penalty", verbose_name=_lazy("zalyot"), on_delete=models.PROTECT, null=True, blank=True, related_name="assignments"
     )
@@ -847,8 +889,8 @@ class ChangeLog(models.Model):
         CADET_DEACTIVATE = "cadet_deactivate", _lazy("Kursant faolsizlantirildi")
         CADET_ACTIVATE = "cadet_activate", _lazy("Kursant qayta faollashtirildi")
         CADET_IMPORT = "cadet_import", _lazy("Kursant Excel’dan import qilindi")
-        CADET_EXEMPT = "cadet_exempt", _lazy("Naryadga chiqmaydi deb belgilandi")
-        CADET_UNEXEMPT = "cadet_unexempt", _lazy("Naryadga qaytarildi")
+        CADET_EXEMPT = "cadet_exempt", _lazy("Lavozim belgilandi")
+        CADET_UNEXEMPT = "cadet_unexempt", _lazy("Lavozim olib tashlandi")
         ABSENCE_ADD = "absence_add", _lazy("Sababli holat kiritildi")
         ABSENCE_CHANGE = "absence_change", _lazy("Sababli holat o‘zgartirildi")
         ABSENCE_DELETE = "absence_delete", _lazy("Sababli holat o‘chirildi")
@@ -867,10 +909,12 @@ class ChangeLog(models.Model):
         PENALTY_EDIT = "penalty_edit", _lazy("Zalyot tahrirlandi")
         PENALTY_REVIEW = "penalty_review", _lazy("Zalyot ko‘rib chiqildi")
         TEST_DATA_CLEARED = "test_data_cleared", _lazy("Sinov ma’lumotlari tozalandi")
+        NO_REST = "no_rest", _lazy("Dam olmagan kursant qo‘yildi")
+        POST_ROTATION = "post_rotation", _lazy("Joylar navbati sozlamasi o‘zgartirildi")
 
     REASON_REQUIRED = (
         Action.REPLACE, Action.SWAP, Action.REOPEN, Action.DRAFT_DELETE, Action.CADET_DEACTIVATE,
-        Action.CADET_EXEMPT, Action.CADET_UNEXEMPT, Action.PENALTY_ADD, Action.PENALTY_CANCEL,
+        Action.CADET_EXEMPT, Action.CADET_UNEXEMPT, Action.PENALTY_ADD, Action.PENALTY_CANCEL, Action.NO_REST,
     )
     CADET_ACTIONS = CHANGELOG_CADET_ACTIONS
 
@@ -918,14 +962,14 @@ class ChangeLog(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=~Q(action__in=["replace", "swap", "reopen", "draft_delete", "cadet_deactivate", "cadet_exempt", "cadet_unexempt",
-                                         "penalty_add", "penalty_cancel"])
+                                         "penalty_add", "penalty_cancel", "no_rest"])
                 | ~Q(reason=""),
                 name="change_log_reason_required",
             ),
             models.CheckConstraint(
                 condition=(Q(action__in=CHANGELOG_CADET_ACTIONS) & Q(cadet__isnull=False))
                 | (~Q(action__in=CHANGELOG_CADET_ACTIONS) & Q(day_date__isnull=False))
-                | Q(action="test_data_cleared"),  # 20-bosqich: tozalash yozuvi — na kursant, na sutka
+                | Q(action__in=["test_data_cleared", "post_rotation"]),  # tozalash va sozlama yozuvi — na kursant, na sutka
                 name="change_log_subject_required",
             ),
         ]
@@ -948,6 +992,10 @@ class ChangeLog(models.Model):
 # ---------------------------------------------------------------------------
 # Sozlamalar (yagona yozuv)
 # ---------------------------------------------------------------------------
+
+
+def default_hard_posts() -> list[str]:
+    return list(engine_config.HARD_POSTS_DEFAULT)
 
 
 class Setting(models.Model):
@@ -991,6 +1039,18 @@ class Setting(models.Model):
         _lazy("komandir bir kunda kirita oladigan zalyotlar"), default=5,
         validators=[MinValueValidator(1), MaxValueValidator(50)],
     )
+    # 21-bosqich: joylar navbati va og'ir joylar (o'chiq — eski algoritm, bayt-bayt)
+    post_rotation_enabled = models.BooleanField(
+        _lazy("Joylar navbati va og‘ir joylar (21-bosqich)"), default=True,
+        help_text=_lazy(
+            "Yoqilgan: haftada bitta og‘ir joy, oxirgi joy takrorlanmaydi, 5 ta katta joy navbati. "
+            "O‘chiq: avvalgi tartib. Faqat keyingi tuziladigan sutkalarga ta’sir qiladi."
+        ),
+    )
+    hard_posts = models.JSONField(
+        _lazy("og‘ir joylar"), default=default_hard_posts, blank=True,
+        help_text=_lazy("Bir haftada kursant ko‘pi bilan bittasida turadi. Qizlar yotoqxonasi kirmaydi."),
+    )
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_lazy("kim o‘zgartirdi"),
@@ -1024,6 +1084,14 @@ class Setting(models.Model):
     def load(cls) -> Setting:
         obj, _created = cls.objects.get_or_create(pk=cls.SINGLETON_PK)
         return obj
+
+    def post_rotation(self) -> engine_config.PostRotation | None:
+        """Generator uchun qoidalar; o'chiq bo'lsa None (eski tartib)."""
+        if not self.post_rotation_enabled:
+            return None
+        male = set(engine_config.ROTATION_CHAIN)
+        hard = tuple(c for c in engine_config.ROTATION_CHAIN if c in set(self.hard_posts or ()) & male)
+        return engine_config.PostRotation(hard_posts=hard)
 
     @property
     def course_title(self) -> str:

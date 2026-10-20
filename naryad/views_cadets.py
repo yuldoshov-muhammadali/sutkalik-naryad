@@ -44,7 +44,7 @@ from .cadets import (
     set_exempt,
 )
 from .importers import EXPECTED_COMPOSITION, EXPECTED_TOTAL
-from .models import Absence, Assignment, Cadet, ChangeLog, DutyDay, Gender, SickDocument, StudyGroup
+from .models import POSITION_LABELS, Absence, Assignment, Cadet, ChangeLog, DutyDay, Gender, SickDocument, StudyGroup
 
 SESSION_KEY = "cadet_import"
 
@@ -85,6 +85,7 @@ def cadet_list(request):
     group = request.GET.get("guruh", "")
     gender = request.GET.get("jins", "")
     status = request.GET.get("holat", "")
+    position = request.GET.get("lavozim", "")
     q = normalize_apostrophes(request.GET.get("q", "").strip())
 
     qs = Cadet.objects.select_related("group").annotate(duty_count=approved_count_annotation())
@@ -98,8 +99,15 @@ def cadet_list(request):
         qs = qs.filter(is_active=False)
     elif status == "naryadga":
         qs = qs.filter(is_active=True, duty_exempt=False)
-    elif status in ("lavozimda", "ozod"):  # "ozod" — eski havolalar uchun
+    elif status in ("lavozimda", "ozod"):  # eski havolalar uchun
         qs = qs.filter(duty_exempt=True)
+    # 21-bosqich (5a): “Lavozim” filtri — Hammasi / Guruh komandiri / Kurs starshinasi / Kurs pisari / Kaptyorchik / Lavozimsiz
+    if position == "yoq":
+        qs = qs.filter(duty_exempt=False)
+    elif position == "komandir":
+        qs = qs.filter(duty_exempt=True, duty_position__iendswith="guruh komandiri")
+    elif position in POSITION_LABELS:
+        qs = qs.filter(duty_exempt=True, duty_position__icontains=position)
     if q:
         qs = qs.filter(last_name__icontains=q)  # familiya bo‘yicha qidiruv
     cadets = list(qs.order_by("group__display_order", "last_name", "first_name"))
@@ -111,8 +119,9 @@ def cadet_list(request):
     context = {
         "grouped": grouped.items(),
         "count": len(cadets),
-        "filters": {"guruh": group, "jins": gender, "holat": status, "q": q},
-        "filtered": any([group, gender, status, q]),
+        "filters": {"guruh": group, "jins": gender, "holat": status, "lavozim": position, "q": q},
+        "filtered": any([group, gender, status, position, q]),
+        "positions": [*POSITION_LABELS.items(), ("yoq", _("Lavozimsiz"))],
     }
     if request.headers.get("HX-Request"):
         return render(request, "naryad/cadets/_results.html", context)
@@ -170,7 +179,7 @@ def short_name_preview(request):
 
 
 @require_POST
-@perms.role_required("cadets.manage")
+@perms.role_required("cadets.status")
 def cadet_deactivate(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = DeactivateForm(request.POST)
@@ -188,7 +197,7 @@ def cadet_deactivate(request, pk):
 
 
 @require_POST
-@perms.role_required("cadets.manage")
+@perms.role_required("cadets.status")
 def cadet_activate(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     if cadet.is_active:
@@ -200,20 +209,20 @@ def cadet_activate(request, pk):
 
 
 @require_POST
-@perms.role_required("cadets.manage")
+@perms.role_required("cadets.status")
 def cadet_exempt(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = ExemptForm(request.POST)
     if not cadet.is_active:
-        messages.error(request, _("Faol bo‘lmagan kursantni “naryadga chiqmaydi” deb belgilab bo‘lmaydi — u baribir naryadga tushmaydi."))
+        messages.error(request, _("Faol bo‘lmagan kursantga lavozim belgilab bo‘lmaydi — u baribir naryadga tushmaydi."))
     elif exempt_blocker(cadet):
         messages.error(request, exempt_blocker(cadet))
     elif form.is_valid():
         set_exempt(cadet, form.cleaned_data["position"], form.cleaned_data["reason"], request.user)
         messages.success(
             request,
-            _("%(name)s endi naryadga chiqmaydi (%(position)s). Tarixi saqlanadi.")
-            % {"name": cadet.full_name, "position": cadet.duty_position},
+            _("%(name)s: lavozim belgilandi (%(position)s). Tarixi saqlanadi.")
+            % {"name": cadet.full_name, "position": cadet.position_label},
         )
         for day in open_drafts_with(cadet):
             messages.warning(
@@ -228,17 +237,17 @@ def cadet_exempt(request, pk):
 
 
 @require_POST
-@perms.role_required("cadets.manage")
+@perms.role_required("cadets.status")
 def cadet_unexempt(request, pk):
     cadet = get_object_or_404(Cadet, pk=pk)
     form = UnexemptForm(request.POST)
     if not cadet.duty_exempt:
-        messages.info(request, _("Kursant “naryadga chiqmaydi” deb belgilanmagan."))
+        messages.info(request, _("Kursantga lavozim belgilanmagan."))
     elif form.is_valid():
         clear_exempt(cadet, form.cleaned_data["reason"], request.user)
         messages.success(
             request,
-            _("%(name)s naryadga qaytarildi. Algoritm uni haftalik va jami hisob bo‘yicha avtomatik oldinga qo‘yadi.")
+            _("%(name)s: lavozim olib tashlandi. Algoritm uni haftalik va jami hisob bo‘yicha avtomatik oldinga qo‘yadi.")
             % {"name": cadet.full_name},
         )
     else:
@@ -250,6 +259,24 @@ def cadet_unexempt(request, pk):
 # ---------------------------------------------------------------------------
 # Kartochka
 # ---------------------------------------------------------------------------
+
+
+def post_rotation_card(cadet: Cadet, normal: list[Assignment]) -> dict:
+    """21-bosqich: og'ir joylar soni va joriy tsikl (5 ta katta joy; Markaz kirmaydi) — faqat admin kartochkasida."""
+    from naryad.engine.allocator import current_cycle
+    from naryad.engine.config import CYCLE_POSTS
+    from naryad.engine.models import Record
+
+    hard = stats.hard_posts()
+    records = [
+        Record(day=a.duty_day.date, cadet_id=cadet.pk, post=a.post_slot.post.code, role=a.post_slot.role, group="")
+        for a in sorted(normal, key=lambda a: a.duty_day.date)
+    ]
+    seen = set(current_cycle(records, CYCLE_POSTS))
+    return {
+        "hard_count": sum(1 for r in records if r.post in hard),
+        "cycle": [{"name": stats.POST_SHORT[code], "done": code in seen} for code in CYCLE_POSTS],
+    }
 
 
 @perms.role_required("home.view")
@@ -280,6 +307,7 @@ def cadet_detail(request, pk):
         "by_post": sorted(by_post.items(), key=lambda kv: kv[0].display_order),
         "by_role": sorted(by_role.items()),
         "is_admin": is_admin,
+        "can_status": perms.can(request.user, "cadets.status"),  # faolsizlantirish va lavozim — faqat admin
         "deactivate_form": DeactivateForm() if is_admin else None,
         "exempt_form": ExemptForm(initial={"position": cadet.duty_position}) if is_admin else None,
         "exempt_blocker": exempt_blocker(cadet) if is_admin and not cadet.duty_exempt else None,
@@ -287,6 +315,7 @@ def cadet_detail(request, pk):
         "log": ChangeLog.objects.filter(cadet=cadet).select_related("user")[:20] if is_admin else [],
         "account": getattr(cadet, "user", None) if is_admin else None,
         "comparison": stats.cadet_comparison(cadet),
+        "rotation": post_rotation_card(cadet, normal) if is_admin and cadet.gender == Gender.MALE else None,
         "sick_docs": sick_documents(cadet),
     }
     return render(request, "naryad/cadets/detail.html", context)

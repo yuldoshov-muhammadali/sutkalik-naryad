@@ -30,13 +30,13 @@ from .services import ServiceError
 
 
 def offender_error(cadet: Cadet) -> str | None:
-    """Standart qoidalar: faqat o'g'il, faol, naryaddan ozod bo'lmagan kursant zalyotchik bo'ladi."""
+    """Standart qoidalar: faqat o'g'il, faol, lavozimda bo'lmagan kursant zalyotchik bo'ladi."""
     if cadet.gender != Gender.MALE:
         return _("Zalyotchik faqat o‘g‘il kursant bo‘ladi (jazo o‘rinlari — 1-NO‘J va 1-Yotoqxona o‘g‘illar joyi).")
     if not cadet.is_active:
         return _("%(name)s faol emas — zalyotchik qilib bo‘lmaydi.") % {"name": cadet.short_name}
     if cadet.duty_exempt:
-        return _("%(name)s — %(position)s, naryadga chiqmaydi — avval bu belgini olib tashlang.") % {
+        return _("%(name)s — %(position)s (lavozimda) — avval lavozimni olib tashlang.") % {
             "name": cadet.short_name, "position": cadet.duty_position,
         }
     return None
@@ -289,7 +289,7 @@ class PenaltyForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Standart qoidalar: faqat o'g'il, faol, naryaddan ozod bo'lmagan kursantlar
+        # Standart qoidalar: faqat o'g'il, faol, lavozimda bo'lmagan kursantlar
         self.fields["cadet"].queryset = Cadet.objects.filter(
             gender=Gender.MALE, is_active=True, duty_exempt=False
         ).select_related("group").order_by("group__display_order", "last_name", "first_name")
@@ -373,7 +373,7 @@ def user_label(user) -> str:
     if user is None:
         return "—"
     name = user.get_full_name() or user.username
-    role = {"admin": "admin", "commander": "guruh komandiri"}.get(user.role, user.role)
+    role = {"admin": "admin", "kadir": "kadir", "commander": "guruh komandiri"}.get(user.role, user.role)
     return f"{name} ({role})"
 
 
