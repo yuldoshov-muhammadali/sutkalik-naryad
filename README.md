@@ -213,3 +213,4 @@ docker compose -f docker-compose.prod.yml exec web python manage.py load_roster
 - Zaxira har kuni 03:00 da `backups/` ga yoziladi (30 kun saqlanadi).
 - Tiklash: `sh scripts/restore.sh backups/<fayl>.dump`.
 - To‘liq qadam-baqadam yo‘riqnoma (VPS, internetsiz ichki tarmoq, Railway, yangilash, tiklash): [`docs/joylashtirish.md`](docs/joylashtirish.md).
+<!-- deploy 1.13.1 -->
