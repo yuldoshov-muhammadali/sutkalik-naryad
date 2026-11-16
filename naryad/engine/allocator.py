@@ -16,6 +16,12 @@ Joylar navbati (21-bosqich): `rotation=PostRotation(...)` berilsa — QOIDA A (h
 oxirgi joy takrorlanmasin, 5 ta katta joy tsikli va og'ir joylar muvozanati saralash kalitiga kiradi.
 `rotation=None` (standart) bo'lsa, natija avvalgidek (bayt-bayt). Kecha turgan kursant (jazo naryadi ham)
 generator tomonidan HECH QACHON qo'yilmaydi — ikkala holatda ham.
+
+Povtor (23-bosqich): `repeats` berilsa, oldingi sutkada e'tiroz olgan joy tarkibi shu joyga (o'sha lavozimlarda)
+qayta qo'yiladi — QOIDA B ulardan istisno. Povtor guruhi o'z joyida qoladi, shu joyga navbati kelgan guruh
+povtor guruhining navbatdagi joyiga o'tadi va uning bu joydagi navbati “o'tdi” hisoblanadi. Povtor naryadi
+shaxsiy hisobga kirmaydi; keyingi sutkalarning guruhlar aylanishi amalda kim qayerda turganidan davom etadi.
+`repeats` bo'sh bo'lsa, natija avvalgidek (bayt-bayt).
 """
 
 from __future__ import annotations
@@ -42,6 +48,7 @@ from .models import (
     FEMALE,
     KIND_NORMAL,
     KIND_PENALTY,
+    KIND_REPEAT,
     MALE,
     Absence,
     Assignment,
@@ -51,6 +58,7 @@ from .models import (
     Offender,
     PickResult,
     Record,
+    RepeatPost,
     Slot,
 )
 
@@ -102,8 +110,9 @@ def duty_bounds(day: dt.date) -> tuple[dt.datetime, dt.datetime]:
 class History:
     """Tasdiqlangan yozuvlar ustidan tez so'rovlar (faqat `before` sanasidan oldingilar).
 
-    `records` — faqat oddiy naryadlar: adolat hisobi, saralash kaliti va guruhlar aylanishi shulardan.
-    `all_records` — jazo naryadlari bilan: faqat “kecha turgan” cheklovi uchun (15-bosqich).
+    `records` — faqat oddiy naryadlar: adolat hisobi va saralash kaliti shulardan.
+    `rotation_records` — oddiy va povtor naryadlari: guruhlar aylanishi (amalda qaysi guruh qayerda turgani, 23-bosqich).
+    `all_records` — jazo va povtor naryadlari bilan: faqat “kecha turgan” cheklovi uchun (15-bosqich).
     """
 
     def __init__(self, records: Iterable[Record], before: dt.date):
@@ -112,6 +121,7 @@ class History:
             (r for r in records if r.day < before), key=lambda r: (r.day, r.post, r.position)
         )
         self.records: list[Record] = [r for r in self.all_records if r.kind == KIND_NORMAL]
+        self.rotation_records: list[Record] = [r for r in self.all_records if r.kind in (KIND_NORMAL, KIND_REPEAT)]
         self.by_cadet: dict[int, list[Record]] = {}
         for r in self.records:
             self.by_cadet.setdefault(r.cadet_id, []).append(r)
@@ -215,7 +225,7 @@ def rotate_groups(
         hist = History(history, before=day or dt.date.max)
 
     male_codes = set(ROTATION_CHAIN)
-    male_records = [r for r in hist.records if r.post in male_codes]
+    male_records = [r for r in hist.rotation_records if r.post in male_codes]
 
     if not male_records:
         if initial_rotation is None:
@@ -253,6 +263,24 @@ def previous_group_by_post(day_records: Iterable[Record], groups: Sequence[str])
     if len(mapping) != len(ROTATION_CHAIN):
         raise AllocationError(f"Oxirgi sutkadan guruh taqsimotini tiklab bo‘lmadi: {mapping}")
     return mapping
+
+
+def apply_repeats(
+    group_by_post: Mapping[str, str], repeats: Iterable[RepeatPost]
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Povtor (23-bosqich): povtor guruhi o'z joyida qoladi, shu joyga navbati kelgan guruh povtor guruhining
+    navbatdagi joyiga o'tadi. Qaytaradi: (yangi joy -> guruh taqsimoti, povtor joyi -> navbati o'tgan guruh)."""
+    mapping = dict(group_by_post)
+    skipped: dict[str, str] = {}
+    by_post = {r.post: r.group for r in repeats if r.post in ROTATION_CHAIN and r.group}
+    for code in ROTATION_CHAIN:  # zanjir tartibida (ketma-ket ikki joy povtorda bo'lsa ham to'g'ri)
+        group = by_post.get(code)
+        if group is None or mapping[code] == group or group not in mapping.values():
+            continue
+        freed = next(c for c, g in mapping.items() if g == group)
+        skipped[code] = mapping[code]
+        mapping[freed], mapping[code] = mapping[code], group
+    return mapping, skipped
 
 
 def _validate_mapping(mapping: Mapping[str, str], groups: Sequence[str]) -> None:
@@ -374,6 +402,8 @@ def place_offenders(
     history: History,
     absences: Iterable[Absence] = (),
     per_post: int = PENALTY_PER_POST_DEFAULT,
+    taken: Iterable[int] = (),
+    occupied: Iterable[tuple[str, int]] = (),
 ) -> tuple[list[Assignment], list[str]]:
     """Faol zalyotchiklarni jazo o'rinlariga qo'yadi: 1-NO‘J yoki 1-Yotoqxona, posbon o'rni.
 
@@ -381,20 +411,26 @@ def place_offenders(
     - har joyga ko'pi bilan `per_post` ta (posbon o'rinlari oxiridan olinadi);
     - joy navbatma-navbat: oxirgi jazo naryadi 1-NO‘J da bo'lsa — endi 1-Yotoqxona (iloji bo'lsa);
     - qat'iy cheklovlar o'zgarmaydi: faol emas, sababli yo'q, kecha turgan kursant qo'yilmaydi —
-      ogohlantirish yoziladi; o'rin qolmasa — keyingi sutkaga qoladi.
+      ogohlantirish yoziladi; o'rin qolmasa — keyingi sutkaga qoladi;
+    - `taken` / `occupied` — povtorda turgan kursantlar va ular egallagan o'rinlar (23-bosqich).
     """
     placed: list[Assignment] = []
     warnings: list[str] = []
     if not offenders:
         return placed, warnings
     absences = list(absences)
+    taken = set(taken)
+    occupied = set(occupied)
     yesterday_ids = {r.cadet_id for r in history.on_day(day - dt.timedelta(days=1))}
     free: dict[str, list[Slot]] = {
-        code: [s for s in reversed(POSTS_BY_CODE[code].slots) if s.role == PENALTY_ROLE][: max(0, per_post)]
+        code: [
+            s for s in [s for s in reversed(POSTS_BY_CODE[code].slots) if s.role == PENALTY_ROLE][: max(0, per_post)]
+            if (code, s.position) not in occupied
+        ]
         for code in PENALTY_POSTS
     }
     for o in sorted(offenders, key=lambda o: (o.since, -o.remaining, o.cadet_id)):
-        if o.remaining <= 0:
+        if o.remaining <= 0 or o.cadet_id in taken:
             continue
         cadet = cadets_by_id.get(o.cadet_id)
         name = cadet.display_name if cadet is not None else f"#{o.cadet_id}"
@@ -430,6 +466,7 @@ def generate_day(
     offenders: Sequence[Offender] = (),
     penalty_per_post: int = PENALTY_PER_POST_DEFAULT,
     rotation: PostRotation | None = None,
+    repeats: Sequence[RepeatPost] = (),
 ) -> DayResult:
     """Bitta sutka qoralamasini tuzadi.
 
@@ -439,7 +476,9 @@ def generate_day(
     - bir kursant bir sutkada faqat bitta o'rinda;
     - nomzod yetmasa o'rin bo'sh qoladi va ogohlantirish yoziladi;
     - faol zalyotchiklar (bo'lsa) avval jazo o'rinlariga qo'yiladi, shu joy guruhi shuncha kam beradi;
-    - `rotation` (21-bosqich) faqat o'g'il bolalar joylariga ta'sir qiladi; Qizlar yotoqxonasi — eski kalit.
+    - `rotation` (21-bosqich) faqat o'g'il bolalar joylariga ta'sir qiladi; Qizlar yotoqxonasi — eski kalit;
+    - `repeats` (23-bosqich): povtor tarkibi hammadan oldin o'z o'rinlariga qo'yiladi (kecha turgani to'siq emas);
+      faol emas, lavozimdagi yoki sababli yo'q kursantning o'rni bo'sh qoladi — ogohlantirish, admin qo'lda to'ldiradi.
     """
     absences = list(absences)
     hist = History(history, before=day)
@@ -447,13 +486,34 @@ def generate_day(
     groups = sorted({c.group for c in cadets if c.gender == MALE})
 
     group_by_post = rotate_groups(groups, hist, day=day, initial_rotation=initial_rotation)
+    group_by_post, skipped = apply_repeats(group_by_post, repeats)
 
     taken: set[int] = set()
     assignments: dict[tuple[str, int], Assignment] = {}
     warnings: list[str] = []
     picks: dict[str, PickResult] = {}
 
-    placed, penalty_warnings = place_offenders(day, offenders, by_id, hist, absences, penalty_per_post)
+    # Povtor: o'tgan sutkadagi tarkib xuddi o'sha o'rinlarga (bo'sh qolganlari ham admin uchun band)
+    repeat_slots: set[tuple[str, int]] = set()
+    for rp in repeats:
+        post = POSTS_BY_CODE[rp.post]
+        for position, cid in rp.cadets:
+            slot = next(s for s in post.slots if s.position == position)
+            repeat_slots.add((rp.post, position))
+            cadet = by_id.get(cid)
+            if cadet is None or not cadet.active or _is_absent(cid, day, absences) or cid in taken:
+                name = cadet.display_name if cadet is not None else f"#{cid}"
+                warnings.append(
+                    f"Povtor: {name} ({post.name}) faol emas, lavozimda yoki sababli yo‘q — o‘rin bo‘sh qoldi."
+                    " O‘rinni admin (kurs boshlig‘i) qo‘lda to‘ldiradi."
+                )
+                continue
+            taken.add(cid)
+            assignments[(rp.post, position)] = Assignment(slot=slot, cadet_id=cid, group=cadet.group, kind=KIND_REPEAT)
+
+    placed, penalty_warnings = place_offenders(
+        day, offenders, by_id, hist, absences, penalty_per_post, taken=taken, occupied=repeat_slots
+    )
     warnings.extend(penalty_warnings)
     for a in placed:
         taken.add(a.cadet_id)
@@ -469,7 +529,9 @@ def generate_day(
 
     for post_code, pool, group in jobs:
         post = POSTS_BY_CODE[post_code]
-        free_slots = [s for s in post.slots if (post_code, s.position) not in assignments]
+        free_slots = [
+            s for s in post.slots if (post_code, s.position) not in assignments and (post_code, s.position) not in repeat_slots
+        ]
         # Faol zalyotchik oddiy navbatda faqat 1-NO‘J / 1-Yotoqxonada (o'z guruhi bilan) tura oladi
         barred = () if post_code in PENALTY_POSTS else active_offenders
         rules = rotation if group is not None else None
@@ -505,6 +567,7 @@ def generate_day(
         assignments=ordered,
         warnings=warnings,
         picks=picks,
+        repeat_posts={rp.post: skipped.get(rp.post) for rp in repeats},
     )
 
 

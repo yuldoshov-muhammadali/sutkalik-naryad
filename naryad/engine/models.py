@@ -20,6 +20,9 @@ ROLE_GUARD = "posbon"
 # Naryad turi (15-bosqich): oddiy navbat yoki navbatdan tashqari (jazo) naryadi
 KIND_NORMAL = "normal"
 KIND_PENALTY = "penalty"
+# 23-bosqich: povtor — e'tiroz olgan joy tarkibi keyingi sutkada xuddi o'sha joyda qayta turadi.
+# Shaxsiy hisobga (adolat, saralash kaliti, statistika) kirmaydi; guruhlar aylanishi va “kecha turgan” cheklovida hisoblanadi.
+KIND_REPEAT = "repeat"
 
 ROLE_TITLES = {
     ROLE_DUTY: "Navbatchi",
@@ -102,6 +105,19 @@ class Offender:
     since: dt.date
     remaining: int
     last_post: str | None = None
+
+
+@dataclass(frozen=True)
+class RepeatPost:
+    """Povtor (23-bosqich): oldingi sutkada `post` joyida turgan tarkib shu sutkada xuddi o'sha joyda qayta turadi.
+
+    group — o'g'il bolalar joyida shu joyni bergan guruh (qizlarda None); cadets — (joy ichidagi tartib, kursant id),
+    lavozimlar o'zgarmaydi.
+    """
+
+    post: str
+    group: str | None
+    cadets: tuple[tuple[int, int], ...]
 
 
 @dataclass(frozen=True)
@@ -203,6 +219,8 @@ class DayResult:
     assignments: list[Assignment]
     warnings: list[str] = field(default_factory=list)
     picks: dict[str, PickResult] = field(default_factory=dict)  # joy kodi -> tanlash tafsiloti
+    # 23-bosqich: povtor joylari -> navbati o'tgan guruh (shu joyga navbati kelgan, lekin turmagan; qizlarda None)
+    repeat_posts: dict[str, str | None] = field(default_factory=dict)
 
     @property
     def filled(self) -> list[Assignment]:

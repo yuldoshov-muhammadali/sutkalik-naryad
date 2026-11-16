@@ -15,7 +15,7 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_POST
 
 from . import absences as absence_service
-from . import days, i18n, services
+from . import days, i18n, repeats, services
 from . import permissions as perms
 from .dashboard import current_duty_date, fmt_day
 from .models import Absence, Assignment, ChangeLog, DutyDay, DutyWeek, Gender, PostSlot, Setting
@@ -175,6 +175,8 @@ def day_detail(request, date):
         # 21-bosqich: joylar navbati — sariq ogohlantirishlar va tushuntirish jadvali (faqat admin)
         context["rotation_notices"] = days.rotation_notices(duty_day)
         context["explanations"] = days.explanations(duty_day)
+        # 23-bosqich: povtor — shu sutkada belgilanganlar (keyingi sutkada turiladi) va shu sutkada turilayotganlar
+        context.update(repeats.page_context(date, duty_day, perms.can(request.user, "day.repeat")))
     return render(request, "naryad/days/day.html", context)
 
 
@@ -284,6 +286,41 @@ def day_reopen(request, date):
         messages.error(request, str(exc))
     else:
         messages.warning(request, _("%(day)s sutkasining tasdig‘i bekor qilindi — qoralama holatida.") % {"day": f"{date:%d.%m.%Y}"})
+    return redirect(day_url(date))
+
+
+@require_POST
+@perms.role_required("day.repeat")
+def day_repeat(request, date):
+    """Povtor belgilash (23-bosqich): joy tarkibi keyingi sutkada xuddi o'sha joyda qayta turadi."""
+    date = parse_date(date)
+    try:
+        regenerated = repeats.mark(
+            date, int(request.POST.get("post") or 0), request.POST.get("reason", ""), request.user, request.POST.get("version")
+        )
+    except (services.ServiceError, ValueError) as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("Povtor belgilandi: tarkib %(day)s sutkasida xuddi o‘sha joyda turadi.") % {
+            "day": f"{date + dt.timedelta(days=1):%d.%m.%Y}",
+        })
+        if regenerated:
+            messages.warning(request, _("Keyingi sutka qoralamasi povtor bilan qayta tuzildi."))
+    return redirect(day_url(date))
+
+
+@require_POST
+@perms.role_required("day.repeat")
+def day_repeat_cancel(request, date, repeat_id):
+    date = parse_date(date)
+    try:
+        regenerated = repeats.cancel(date, repeat_id, request.POST.get("reason", ""), request.user, request.POST.get("version"))
+    except services.ServiceError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("Povtor bekor qilindi."))
+        if regenerated:
+            messages.warning(request, _("Keyingi sutka qoralamasi qayta tuzildi."))
     return redirect(day_url(date))
 
 

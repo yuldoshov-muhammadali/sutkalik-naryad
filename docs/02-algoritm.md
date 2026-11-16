@@ -123,6 +123,21 @@ o‘g‘il bolalar 11/12/12/14/16/13, eski → yangi.
 - “Tanlash tartibi*” — tanlash paytida shu haftada hali turmagan nomzod “oxirgi naryadi shu joy” sababli keyinroqqa
   qolgan holatlar (3-o‘rin 4-o‘rindan oldin). Hafta yakunida hamma bir martadan turgan (“avval hamma 1 marta” — 0).
 
+## 3b. Povtor — takroriy naryad (23-bosqich, 1.14.0)
+
+Admin tasdiqlangan D sutkada X joyni “povtor” deb belgilasa (`naryad/repeats.py`), D+1 sutka tuzilganda
+`generate_day(repeats=[RepeatPost(X, P, tarkib)])`:
+
+1. Zanjir odatdagidek suriladi (`rotate_groups`): D+1 da X ga N (D da zanjirda X dan oldingi joydagi guruh), P esa X dan keyingi joyga tushadi.
+2. `apply_repeats`: P X da qoladi, N P ning joyiga (X dan keyingi) o‘tadi; `repeat_posts[X] = N` — N ning X dagi navbati o‘tdi.
+3. Povtor tarkibi hammadan oldin o‘z o‘rinlariga `kind = repeat` bilan qo‘yiladi; kecha turgani to‘siq emas. Faol emas / sababli /
+   lavozimdagi kursantning o‘rni bo‘sh qoladi (generator boshqasini qo‘ymaydi).
+4. Zalyotchiklar va qolgan joylar odatdagidek (povtor o‘rinlari band).
+
+Tarix: `History.records` — faqat oddiy naryadlar (povtor adolat va saralash kalitiga kirmaydi); `History.rotation_records` — oddiy +
+povtor (D+2 zanjiri amalda kim qayerda turganidan: P → X dan keyingi joy, N → undan keyingi); `all_records` — hammasi (“kecha turgan”).
+Povtor bo‘lmasa natija bayt-bayt avvalgidek.
+
 ## 4. Qat’iy cheklovlar
 
 - **Lavozimdagi kursantlar** (guruh komandiri, kurs starshinasi, kurs pisari, kaptyorchik — CLAUDE.md 2-bo‘lim) nomzodlar hovuziga umuman kirmaydi: `services.engine_cadets()` ularni algoritmga bermaydi, almashtirish oynasida ular faqat lavozim nomi bilan (“Guruh komandiri (lavozimda)”) tanlab bo‘lmaydigan qilib ko‘rsatiladi. Algoritmning o‘zi (`naryad/engine/`) va saralash kaliti o‘zgarmagan.

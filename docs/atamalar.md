@@ -68,6 +68,8 @@ quyidagi atamalar bir xil tarjima qilinadi.
 | Tanbeh | Взыскание | Reprimand |
 | Ichki tartib-qoidalarni buzish | Нарушение внутреннего распорядка | Breach of internal regulations |
 | Naryadda uxlab qolish | Сон на посту | Sleeping on duty |
+| Povtor (takroriy naryad) | Повтор | Repeat duty |
+| Navbati o‘tdi | Очередь прошла | Turn passed |
 
 ## Joy nomlari va PDF qatorlari (interfeysda; PDF’da doim o‘zbekcha)
 

@@ -2,6 +2,17 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar: [SemVer](https://semver.org/).
 
+## [1.14.0] — 2026-11-16
+
+23-bosqich: povtor — takroriy naryad (CLAUDE.md 72-band). Povtor bo‘lmasa, algoritm natijasi bayt-bayt avvalgidek (84 sutkalik etalon xesh).
+
+### Qo‘shildi
+- **Povtor belgilash** (admin va kadir, yangi ruxsat `day.repeat`): tasdiqlangan sutka sahifasida “Povtor…” → joy va sabab (majburiy). Keyingi sutka hali tasdiqlanmagan bo‘lsa belgilanadi va bekor qilinadi; keyingi sutka qoralamasi bo‘lsa, avtomatik qayta tuziladi. Jurnalda “Povtor belgilandi” / “Povtor bekor qilindi”. Sutka tasdig‘i bekor qilinsa, unda belgilangan povtor ham bekor bo‘ladi.
+- **Avtomatik chiqishi:** keyingi sutka tuzilganda e’tiroz olgan tarkib xuddi o‘sha joyga, o‘sha lavozimlarda qo‘yiladi (“kecha turgan” cheklovi ulardan istisno). Povtordagi kursant kasal, faolsiz yoki lavozimda bo‘lsa — o‘rni bo‘sh qoladi, admin qo‘lda to‘ldiradi. Qizlar yotoqxonasiga ham.
+- **Guruhlar navbati:** povtor guruhi o‘z joyida qoladi, shu joyga navbati kelgan guruh povtor guruhining navbatdagi joyiga o‘tadi — uning bu joydagi navbati o‘tgan hisoblanadi, kursantlariga hech narsa yozilmaydi. Keyingi sutkalarda zanjir amalda kim qayerda turganidan davom etadi.
+- **Hisob:** povtor naryadi (`Assignment.kind = repeat`) shaxsiy hisobga kirmaydi — saralash kaliti, adolat, statistika, guruhlar kesimi, kursant sonlari. Sutka sahifasida “Povtor” belgisi va izoh (faqat admin), kursant kartochkasi tarixida “Povtor (hisobga kirmaydi)”. Rasmiy PDF o‘zgarmagan.
+- Migratsiya 0021 (`post_repeat` jadvali, `GroupPostAssignment.is_repeat` / `skipped_group`). Testlar: `tests/test_repeat.py` (10).
+
 ## [1.13.1] — 2026-10-20
 
 ### O‘zgardi

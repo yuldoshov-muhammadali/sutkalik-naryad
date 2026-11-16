@@ -30,6 +30,7 @@ Platformada **to‘rt rol** bor (22-bosqichdan: admin, kadir, kursant, guruh kom
 | Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi) | `day.edit` | ✅ | ✅ | — | — |
 | Sutkani tasdiqlash | `day.approve` | ✅ | ✅ | — | — |
 | Tasdiqlangan sutkani qayta ochish (sabab majburiy) | `day.reopen` | ✅ | ✅ | — | — |
+| Povtor belgilash va bekor qilish (sabab majburiy, jurnalga yoziladi) | `day.repeat` | ✅ | ✅ | — | — |
 | Sababli yo‘qliklarni (kasal, ta’til) kiritish | `absence.manage` | ✅ | ✅ | — | — |
 | Kasallar ro‘yxati: kasallikni kiritish, tahrirlash, muddatni uzaytirish (tavsif bilan), hujjat rasmlari | `sick.manage` | ✅ | ✅ | — | — |
 | O‘z kasallik hujjatlarini (rasmlarini) ko‘rish — faqat ko‘rish | `documents.own` | — | — | ✅ | ✅ |

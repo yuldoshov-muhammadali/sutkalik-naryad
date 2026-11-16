@@ -94,6 +94,8 @@ def urls(w) -> dict[str, str]:
         "day_swap": reverse("day_swap", args=[m, w["slot"].post_id]),
         "day_approve": reverse("day_approve", args=[m]),
         "day_reopen": reverse("day_reopen", args=[s]),
+        "day_repeat": reverse("day_repeat", args=[s]),  # 23-bosqich: povtor
+        "day_repeat_cancel": reverse("day_repeat_cancel", args=[s, 1]),
         "day_log": reverse("day_log", args=[s]),
         "day_delete": reverse("day_delete", args=[m]),
         "day_pdf:approved": reverse("day_pdf", args=[s]),
@@ -177,14 +179,14 @@ COMMANDER_GET = {
 MODIFYING = ["cadet_create", "cadet_import", "cadet_edit", "cadet_deactivate", "cadet_activate", "cadet_exempt",
              "cadet_unexempt", "week_open",
              "day_generate", "day_replace", "day_swap", "day_approve", "day_reopen", "day_delete",
-             "absence_list", "absence_end", "absence_delete",
+             "day_repeat", "day_repeat_cancel", "absence_list", "absence_end", "absence_delete",
              "sick_create", "sick_edit", "sick_extend", "sick_recover", "sick_delete",
              "sick_doc_upload", "sick_doc_replace", "sick_doc_delete", "penalty_list", "penalty_cancel",
              "penalty_edit", "penalty_review", "penalty_review_all", "clear_test_data_run"]
 PUBLIC = {"login"}
 # Faqat POST qabul qiladigan manzillar: GET so'rovi hamma uchun 405 (ruxsat POST'da tekshiriladi)
 POST_ONLY = {"logout", "set_language", "penalty_cancel", "cadet_deactivate", "cadet_activate", "cadet_exempt", "cadet_unexempt", "week_open", "day_generate", "day_approve", "day_reopen",
-             "day_delete", "absence_end", "absence_delete", "sick_extend", "sick_recover", "sick_delete",
+             "day_delete", "day_repeat", "day_repeat_cancel", "absence_end", "absence_delete", "sick_extend", "sick_recover", "sick_delete",
              "sick_doc_upload", "sick_doc_replace", "sick_doc_delete", "penalty_review", "penalty_review_all", "clear_test_data_run"}
 
 

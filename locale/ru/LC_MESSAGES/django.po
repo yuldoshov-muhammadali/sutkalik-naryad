@@ -3943,3 +3943,124 @@ msgstr "Вам выдан временный пароль. Чтобы продо
 
 msgid "Parolni saqlash"
 msgstr "Сохранить пароль"
+
+# 23-bosqich: povtor
+msgid "povtor"
+msgstr "повтор"
+
+msgid "Povtor"
+msgstr "Повтор"
+
+msgid "povtorlar"
+msgstr "повторы"
+
+msgid "navbati o‘tgan guruh"
+msgstr "группа, чья очередь прошла"
+
+msgid "e’tiroz olingan sutka"
+msgstr "сутки с замечанием"
+
+msgid "kim belgiladi"
+msgstr "кто отметил"
+
+msgid "belgilangan vaqti"
+msgstr "время отметки"
+
+msgid "Povtor belgilandi"
+msgstr "Повтор назначен"
+
+msgid "Povtor bekor qilindi"
+msgstr "Повтор отменён"
+
+msgid "Povtor bekor qilindi."
+msgstr "Повтор отменён."
+
+msgid "Povtor belgilash va bekor qilish (sabab majburiy, jurnalga yoziladi)"
+msgstr ""
+"Назначение и отмена повтора (причина обязательна, записывается в журнал)"
+
+msgid "Zalyotchik %(name)s bugun povtorda turibdi (jazo hisobiga o‘tmaydi)."
+msgstr "Залётчик %(name)s сегодня стоит в повторе (в счёт взыскания не идёт)."
+
+msgid "Povtorni faqat tasdiqlangan sutkada belgilash mumkin."
+msgstr "Повтор можно назначить только в утверждённых сутках."
+
+msgid ""
+"Keyingi sutka (%(day)s) tasdiqlangan — povtorni belgilash yoki bekor qilish "
+"uchun avval uning tasdig‘ini bekor qiling."
+msgstr ""
+"Следующие сутки (%(day)s) утверждены — чтобы назначить или отменить повтор, "
+"сначала отмените их утверждение."
+
+msgid ""
+"Keyingi sutka (%(day)s) ochilgan 2-kurs haftasiga tegishli emas — povtor "
+"faqat keyingi sutkada turiladi."
+msgstr ""
+"Следующие сутки (%(day)s) не относятся к открытой неделе 2-го курса — повтор"
+" несётся только в следующие сутки."
+
+msgid ""
+"%(post)s: %(group)s guruhi (%(names)s) %(day)s sutkasidan povtorda — shaxsiy"
+" hisobga kirmaydi."
+msgstr ""
+"%(post)s: группа %(group)s (%(names)s) в повторе с суток %(day)s — в личный "
+"учёт не входит."
+
+msgid ""
+"%(post)s: %(names)s %(day)s sutkasidan povtorda — shaxsiy hisobga kirmaydi."
+msgstr ""
+"%(post)s: %(names)s в повторе с суток %(day)s — в личный учёт не входит."
+
+msgid "%(group)s guruhining bu joydagi navbati o‘tdi."
+msgstr "Очередь группы %(group)s на этом посту прошла."
+
+msgid "Povtor sababi majburiy."
+msgstr "Причина повтора обязательна."
+
+msgid "Joyni tanlang."
+msgstr "Выберите пост."
+
+msgid "Bu joy uchun povtor allaqachon belgilangan."
+msgstr "Для этого поста повтор уже назначен."
+
+msgid "Bu joyda povtorga qoldiriladigan kursant yo‘q."
+msgstr "На этом посту нет курсантов для повтора."
+
+msgid "Povtorni bekor qilish sababi majburiy."
+msgstr "Причина отмены повтора обязательна."
+
+msgid "Povtor belgilandi: tarkib %(day)s sutkasida xuddi o‘sha joyda turadi."
+msgstr "Повтор назначен: состав заступит на тот же пост в сутки %(day)s."
+
+msgid "Keyingi sutka qoralamasi povtor bilan qayta tuzildi."
+msgstr "Черновик следующих суток пересформирован с учётом повтора."
+
+msgid "Keyingi sutka qoralamasi qayta tuzildi."
+msgstr "Черновик следующих суток пересформирован."
+
+msgid "Povtor…"
+msgstr "Повтор…"
+
+msgid ""
+"E’tiroz olgan joy tarkibi keyingi sutkada xuddi o‘sha joyda, o‘sha "
+"lavozimlarda qayta turadi. Povtor shaxsiy hisobga kirmaydi; shu joyga "
+"navbati kelgan guruhning navbati o‘tgan hisoblanadi."
+msgstr ""
+"Состав поста, получивший замечание, в следующие сутки снова заступает на тот"
+" же пост в тех же должностях. Повтор в личный учёт не входит; очередь "
+"группы, которой полагался этот пост, считается прошедшей."
+
+msgid "Bekor qilish sababi (majburiy)"
+msgstr "Причина отмены (обязательно)"
+
+msgid "Povtorni bekor qilish"
+msgstr "Отменить повтор"
+
+msgid "Povtorga qoldirish"
+msgstr "Оставить на повтор"
+
+msgid "Povtor — shaxsiy hisobga kirmaydi, rasmiy PDF’da ko‘rsatilmaydi"
+msgstr "Повтор — в личный учёт не входит, в официальном PDF не показывается"
+
+msgid "Povtor (hisobga kirmaydi)"
+msgstr "Повтор (не учитывается)"

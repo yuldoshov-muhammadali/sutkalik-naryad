@@ -3839,3 +3839,128 @@ msgstr ""
 
 msgid "Parolni saqlash"
 msgstr "Save password"
+
+# 23-bosqich: povtor
+msgid "povtor"
+msgstr "repeat duty"
+
+msgid "Povtor"
+msgstr "Repeat duty"
+
+msgid "povtorlar"
+msgstr "repeat duties"
+
+msgid "navbati o‘tgan guruh"
+msgstr "group whose turn passed"
+
+msgid "e’tiroz olingan sutka"
+msgstr "duty day with a remark"
+
+msgid "kim belgiladi"
+msgstr "marked by"
+
+msgid "belgilangan vaqti"
+msgstr "marked at"
+
+msgid "Povtor belgilandi"
+msgstr "Repeat duty marked"
+
+msgid "Povtor bekor qilindi"
+msgstr "Repeat duty cancelled"
+
+msgid "Povtor bekor qilindi."
+msgstr "Repeat duty cancelled."
+
+msgid "Povtor belgilash va bekor qilish (sabab majburiy, jurnalga yoziladi)"
+msgstr "Mark and cancel repeat duty (reason required, logged)"
+
+msgid "Zalyotchik %(name)s bugun povtorda turibdi (jazo hisobiga o‘tmaydi)."
+msgstr ""
+"Disciplinary offender %(name)s is on repeat duty today (does not count "
+"towards the penalty)."
+
+msgid "Povtorni faqat tasdiqlangan sutkada belgilash mumkin."
+msgstr "Repeat duty can only be marked on an approved duty day."
+
+msgid ""
+"Keyingi sutka (%(day)s) tasdiqlangan — povtorni belgilash yoki bekor qilish "
+"uchun avval uning tasdig‘ini bekor qiling."
+msgstr ""
+"The next duty day (%(day)s) is approved — to mark or cancel repeat duty, "
+"first cancel its approval."
+
+msgid ""
+"Keyingi sutka (%(day)s) ochilgan 2-kurs haftasiga tegishli emas — povtor "
+"faqat keyingi sutkada turiladi."
+msgstr ""
+"The next duty day (%(day)s) is not in an open 2nd-year week — repeat duty is"
+" served only on the next duty day."
+
+msgid ""
+"%(post)s: %(group)s guruhi (%(names)s) %(day)s sutkasidan povtorda — shaxsiy"
+" hisobga kirmaydi."
+msgstr ""
+"%(post)s: group %(group)s (%(names)s) is on repeat duty from %(day)s — not "
+"counted in personal records."
+
+msgid ""
+"%(post)s: %(names)s %(day)s sutkasidan povtorda — shaxsiy hisobga kirmaydi."
+msgstr ""
+"%(post)s: %(names)s on repeat duty from %(day)s — not counted in personal "
+"records."
+
+msgid "%(group)s guruhining bu joydagi navbati o‘tdi."
+msgstr "Group %(group)s's turn at this post has passed."
+
+msgid "Povtor sababi majburiy."
+msgstr "A reason for repeat duty is required."
+
+msgid "Joyni tanlang."
+msgstr "Select a post."
+
+msgid "Bu joy uchun povtor allaqachon belgilangan."
+msgstr "Repeat duty is already marked for this post."
+
+msgid "Bu joyda povtorga qoldiriladigan kursant yo‘q."
+msgstr "There are no cadets at this post to keep on repeat duty."
+
+msgid "Povtorni bekor qilish sababi majburiy."
+msgstr "A reason for cancelling repeat duty is required."
+
+msgid "Povtor belgilandi: tarkib %(day)s sutkasida xuddi o‘sha joyda turadi."
+msgstr ""
+"Repeat duty marked: the same team will serve at the same post on %(day)s."
+
+msgid "Keyingi sutka qoralamasi povtor bilan qayta tuzildi."
+msgstr "The next duty day's draft was regenerated with the repeat duty."
+
+msgid "Keyingi sutka qoralamasi qayta tuzildi."
+msgstr "The next duty day's draft was regenerated."
+
+msgid "Povtor…"
+msgstr "Repeat duty…"
+
+msgid ""
+"E’tiroz olgan joy tarkibi keyingi sutkada xuddi o‘sha joyda, o‘sha "
+"lavozimlarda qayta turadi. Povtor shaxsiy hisobga kirmaydi; shu joyga "
+"navbati kelgan guruhning navbati o‘tgan hisoblanadi."
+msgstr ""
+"The team that received a remark serves again the next duty day at the same "
+"post in the same positions. Repeat duty is not counted in personal records; "
+"the turn of the group due at this post is considered passed."
+
+msgid "Bekor qilish sababi (majburiy)"
+msgstr "Reason for cancelling (required)"
+
+msgid "Povtorni bekor qilish"
+msgstr "Cancel repeat duty"
+
+msgid "Povtorga qoldirish"
+msgstr "Keep on repeat duty"
+
+msgid "Povtor — shaxsiy hisobga kirmaydi, rasmiy PDF’da ko‘rsatilmaydi"
+msgstr ""
+"Repeat duty — not counted in personal records, not shown in the official PDF"
+
+msgid "Povtor (hisobga kirmaydi)"
+msgstr "Repeat duty (not counted)"
