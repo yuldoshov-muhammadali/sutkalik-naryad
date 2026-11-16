@@ -50,8 +50,8 @@
       {% for row in section.rows %}
       <tr>
         <td>{% if row.slot.show_label %}{{ row.slot.print_label }}{% endif %}</td>
-        <td>{% if row.cadet %}{{ row.cadet.short_name }}{% else %}<span class="empty">— bo‘sh —</span>{% endif %}</td>
-        <td class="group">{% if row.assignment %}{{ row.assignment.group.code }}{% endif %}</td>
+        <td>{% if row.cadet %}{{ row.cadet.short_name }}{% elif row.outsider %}{{ row.outsider.full_name }}{% else %}<span class="empty">— bo‘sh —</span>{% endif %}</td>
+        <td class="group">{% if row.assignment %}{{ row.assignment.group.code }}{% elif row.outsider %}{{ row.outsider.group_name }}{% endif %}</td>
       </tr>
       {% endfor %}
     {% endfor %}

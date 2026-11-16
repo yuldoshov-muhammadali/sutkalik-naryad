@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Boshqa kurs kursantini qo‘shish" %}{% endblock %}
+{% block content %}{% include "naryad/days/_outsider.html" with standalone=True %}{% endblock %}

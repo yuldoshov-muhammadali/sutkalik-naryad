@@ -2,6 +2,19 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar: [SemVer](https://semver.org/).
 
+## [1.15.0] — 2026-11-16
+
+24-bosqich: almashtirishda barcha guruhlar va boshqa kurs kursanti (CLAUDE.md 73-band). Generator (algoritm) tanlovi o‘zgarmagan.
+
+### O‘zgardi (qoida, foydalanuvchi tasdiqlagan)
+- **Almashtirish oynasida barcha guruhlar va lavozimdagilar:** kurs boshlig‘i topshirig‘i bilan boshqa guruh kursantini va lavozimdagi kursantni (komandir, starshina, pisar, kaptyorchik) qo‘lda qo‘yish mumkin. Tartib: shu joy guruhi (eng munosibi birinchi) → “Boshqa guruhlar” → “Lavozimdagilar”. Jins, faol emas, kasal / sababli, bir sutkada ikki o‘rin va “kecha turgan” cheklovlari qoladi. Naryad kursantning o‘z tarixiga yoziladi.
+- **Guruhlar zanjiri** endi saqlangan guruh → joy taqsimotidan davom etadi — joyda boshqa guruh yoki boshqa kurs kursanti tursa ham zanjir buzilmaydi, joy guruhining navbati o‘tadi.
+
+### Qo‘shildi
+- **“Boshqa kurs” tugmasi** (har qatorda, admin / kadir): platformada yo‘q boshqa kurs kursantining ism-familiyasi, kursi (1 / 3 / 4) va guruhi qo‘lda kiritiladi, sabab majburiy, jurnalga yoziladi. O‘rindagi kursantga hech narsa yozilmaydi; boshqa kurs kursantining statistikasi yuritilmaydi. Joy to‘liq boshqa kursga berilsa ham guruh navbati o‘tadi.
+- Sutka sahifasida ism, “N-kurs” belgisi va guruh; **PDF shakli o‘zgarmagan** — F.I.Sh. va Guruh ustunlarida kiritilgan ma’lumot.
+- Migratsiya 0022 (`outsider_assignment`). Testlar: `tests/test_outsider.py` (10); eski “boshqa guruh / lavozimdagi taqiqlangan” testlari yangi qoidaga moslandi.
+
 ## [1.14.0] — 2026-11-16
 
 23-bosqich: povtor — takroriy naryad (CLAUDE.md 72-band). Povtor bo‘lmasa, algoritm natijasi bayt-bayt avvalgidek (84 sutkalik etalon xesh).

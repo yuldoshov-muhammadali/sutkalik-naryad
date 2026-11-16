@@ -159,7 +159,8 @@ def test_forbidden_replacements(draft, admin):
         pk__in=draft.assignments.values("cadet_id")
     ).first()
 
-    assert "boshqa guruhdan" in try_replace(draft, s, other_group)
+    # 24-bosqich: boshqa guruh kursantini qo'yish mumkin (kurs boshlig‘i topshirig‘i) — bu yerda faqat band bo'lgani uchun
+    assert "boshqa guruhdan" not in try_replace(draft, s, other_group)
     assert "Qizlar faqat Qizlar yotoqxonasida" in try_replace(draft, s, girl)
     assert "O‘g‘il bolani Qizlar yotoqxonasiga" in try_replace(draft, slot("qizlar", 1), boy)
     same_day = assigned(draft, "noj1", 2).cadet

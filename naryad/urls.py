@@ -48,6 +48,7 @@ urlpatterns = [
     path("sutka/<str:date>/tuzish/", views_days.day_generate, name="day_generate"),
     path("sutka/<str:date>/almashtirish/<int:slot_id>/", views_days.day_replace, name="day_replace"),
     path("sutka/<str:date>/lavozim/<int:post_id>/", views_days.day_swap, name="day_swap"),
+    path("sutka/<str:date>/boshqa-kurs/<int:slot_id>/", views_days.day_outsider, name="day_outsider"),
     path("sutka/<str:date>/tasdiqlash/", views_days.day_approve, name="day_approve"),
     path("sutka/<str:date>/bekor-qilish/", views_days.day_reopen, name="day_reopen"),
     path("sutka/<str:date>/povtor/", views_days.day_repeat, name="day_repeat"),

@@ -205,8 +205,12 @@ def rotate_groups(
     history: Iterable[Record] | History,
     day: dt.date | None = None,
     initial_rotation: Mapping[str, str] | None = None,
+    previous_rotation: Mapping[str, str] | None = None,
 ) -> dict[str, str]:
     """Bugungi sutka uchun o'g'il bolalar joyi -> guruh taqsimoti.
+
+    `previous_rotation` (24-bosqich) — oxirgi tasdiqlangan sutkaning saqlangan guruh -> joy taqsimoti. Berilsa, zanjir
+    shundan davom etadi (joyda boshqa guruh yoki boshqa kurs kursanti turgan bo'lsa ham guruh navbati o'tgan hisoblanadi).
 
     Har guruh oxirgi 2-kurs sutkasidagi joyidan zanjirdagi keyingi joyga o'tadi
     (Markaz → 1-NO‘J → … → Patrul → Markaz). Oxirgi sutka oldingi haftada bo'lsa
@@ -218,6 +222,13 @@ def rotate_groups(
     groups = list(groups)
     if len(groups) != len(ROTATION_CHAIN) or len(set(groups)) != len(groups):
         raise AllocationError(f"Aynan {len(ROTATION_CHAIN)} ta turli guruh kerak, berildi: {groups}")
+
+    n = len(ROTATION_CHAIN)
+    if previous_rotation is not None:
+        _validate_mapping(previous_rotation, groups)
+        mapping = {ROTATION_CHAIN[(i + 1) % n]: previous_rotation[code] for i, code in enumerate(ROTATION_CHAIN)}
+        _validate_mapping(mapping, groups)
+        return mapping
 
     if isinstance(history, History):
         hist = history
@@ -237,7 +248,6 @@ def rotate_groups(
     last_day = male_records[-1].day
     previous = previous_group_by_post([r for r in male_records if r.day == last_day], groups)
     # Kechagi i-joydagi guruh bugun (i+1)-joyga o'tadi
-    n = len(ROTATION_CHAIN)
     mapping = {ROTATION_CHAIN[(i + 1) % n]: previous[code] for i, code in enumerate(ROTATION_CHAIN)}
     _validate_mapping(mapping, groups)
     return mapping
@@ -467,6 +477,7 @@ def generate_day(
     penalty_per_post: int = PENALTY_PER_POST_DEFAULT,
     rotation: PostRotation | None = None,
     repeats: Sequence[RepeatPost] = (),
+    previous_rotation: Mapping[str, str] | None = None,
 ) -> DayResult:
     """Bitta sutka qoralamasini tuzadi.
 
@@ -478,14 +489,17 @@ def generate_day(
     - faol zalyotchiklar (bo'lsa) avval jazo o'rinlariga qo'yiladi, shu joy guruhi shuncha kam beradi;
     - `rotation` (21-bosqich) faqat o'g'il bolalar joylariga ta'sir qiladi; Qizlar yotoqxonasi — eski kalit;
     - `repeats` (23-bosqich): povtor tarkibi hammadan oldin o'z o'rinlariga qo'yiladi (kecha turgani to'siq emas);
-      faol emas, lavozimdagi yoki sababli yo'q kursantning o'rni bo'sh qoladi — ogohlantirish, admin qo'lda to'ldiradi.
+      faol emas, lavozimdagi yoki sababli yo'q kursantning o'rni bo'sh qoladi — ogohlantirish, admin qo'lda to'ldiradi;
+    - `previous_rotation` (24-bosqich): oxirgi tasdiqlangan sutkaning saqlangan guruh -> joy taqsimoti (zanjir manbai).
     """
     absences = list(absences)
     hist = History(history, before=day)
     by_id = {c.id: c for c in cadets}
     groups = sorted({c.group for c in cadets if c.gender == MALE})
 
-    group_by_post = rotate_groups(groups, hist, day=day, initial_rotation=initial_rotation)
+    group_by_post = rotate_groups(
+        groups, hist, day=day, initial_rotation=initial_rotation, previous_rotation=previous_rotation
+    )
     group_by_post, skipped = apply_repeats(group_by_post, repeats)
 
     taken: set[int] = set()

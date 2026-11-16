@@ -107,6 +107,22 @@ def approved_history(before: dt.date | None = None) -> list[em.Record]:
     ]
 
 
+def previous_rotation(day: dt.date) -> dict[str, str] | None:
+    """Oxirgi tasdiqlangan sutkaning saqlangan guruh -> joy taqsimoti (24-bosqich: zanjir manbai).
+
+    Joyda boshqa guruh yoki boshqa kurs kursanti turgan bo'lsa ham, guruhning navbati o'tgan hisoblanadi.
+    To'liq (6 ta) bo'lmasa — None: zanjir avvalgidek tarixdagi yozuvlardan tiklanadi."""
+    last = (
+        DutyDay.objects.filter(status=DutyDay.Status.APPROVED, date__lt=day, group_posts__isnull=False)
+        .order_by("-date")
+        .first()
+    )
+    if last is None:
+        return None
+    rows = {g.post.code: g.group.code for g in last.group_posts.select_related("post", "group")}
+    return rows if set(rows) == set(ROTATION_CHAIN) else None
+
+
 def engine_absences(day: dt.date) -> list[em.Absence]:
     """Shu sutkani qamrab olgan sababli yo'qliklar."""
     qs = Absence.objects.filter(start_date__lte=day, end_date__gte=day)
@@ -212,6 +228,7 @@ def save_day_result(
 
     duty_day.assignments.all().delete()
     duty_day.group_posts.all().delete()
+    duty_day.outsiders.all().delete()  # 24-bosqich: qayta tuzilganda qo'lda kiritilgan boshqa kurs kursantlari ham
 
     GroupPostAssignment.objects.bulk_create(
         GroupPostAssignment(
@@ -283,6 +300,7 @@ def generate_draft(
         penalty_per_post=setting.penalty_per_post,
         rotation=setting.post_rotation(),  # 21-bosqich: o'chiq bo'lsa None — eski tartib
         repeats=engine_repeats(day),  # 23-bosqich: oldingi sutkada belgilangan povtorlar
+        previous_rotation=previous_rotation(day),  # 24-bosqich: zanjir saqlangan taqsimotdan
     )
     # ChangeLog.details — saqlanadigan matn, doim o'zbekcha (tarjima qilinmaydi)
     details = "Qayta tuzildi: avvalgi qoralama almashtirildi." if existing is not None else ""
