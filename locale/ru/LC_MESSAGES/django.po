@@ -4064,3 +4064,89 @@ msgstr "Повтор — в личный учёт не входит, в офиц
 
 msgid "Povtor (hisobga kirmaydi)"
 msgstr "Повтор (не учитывается)"
+
+# 24-bosqich: boshqa guruh / boshqa kurs kursanti
+msgid "1-kurs"
+msgstr "1-й курс"
+
+msgid "3-kurs"
+msgstr "3-й курс"
+
+msgid "4-kurs"
+msgstr "4-й курс"
+
+msgid "F.I.Sh. (PDF’dagidek)"
+msgstr "Ф.И.О. (как в PDF)"
+
+msgid "kurs"
+msgstr "курс"
+
+msgid "boshqa kurs kursanti"
+msgstr "курсант другого курса"
+
+msgid "boshqa kurs kursantlari"
+msgstr "курсанты других курсов"
+
+msgid "Boshqa kurs kursanti qo‘yildi"
+msgstr "Поставлен курсант другого курса"
+
+msgid "Ism-familiyani yozing."
+msgstr "Введите фамилию и имя."
+
+msgid "Ism-familiya juda uzun (ko‘pi bilan 100 belgi)."
+msgstr "Слишком длинное имя (не более 100 символов)."
+
+msgid "Guruhni yozing."
+msgstr "Введите группу."
+
+msgid "Guruh nomi juda uzun (ko‘pi bilan 30 belgi)."
+msgstr "Слишком длинное название группы (не более 30 символов)."
+
+msgid "Kursni tanlang."
+msgstr "Выберите курс."
+
+msgid "%(slot)s: boshqa kurs kursanti qo‘yildi."
+msgstr "%(slot)s: поставлен курсант другого курса."
+
+msgid "Boshqa kurs kursantini qo‘shish"
+msgstr "Добавить курсанта другого курса"
+
+msgid ""
+"Platformada yo‘q boshqa kurs kursanti. O‘rindagi kursantning tarixiga hech "
+"narsa yozilmaydi; boshqa kurs kursantining statistikasi yuritilmaydi. Joy "
+"guruhining navbati o‘tgan hisoblanadi."
+msgstr ""
+"Курсант другого курса, которого нет на платформе. В историю курсанта, "
+"стоявшего на этом месте, ничего не записывается; статистика курсанта другого"
+" курса не ведётся. Очередь группы этого поста считается прошедшей."
+
+msgid "Ism-familiya (PDF’da shunday chiqadi)"
+msgstr "Фамилия и имя (так будет в PDF)"
+
+msgid "masalan: Karimov A"
+msgstr "например: Karimov A"
+
+msgid "Kurs"
+msgstr "Курс"
+
+msgid "masalan: BI-324"
+msgstr "например: BI-324"
+
+msgid "Boshqa kurs kursanti — platformada yo‘q, statistikasi yuritilmaydi"
+msgstr "Курсант другого курса — нет на платформе, статистика не ведётся"
+
+msgid "Boshqa kurs"
+msgstr "Другой курс"
+
+msgid ""
+"Jazo o‘rni: boshqa faol zalyotchik qo‘yilsa — jazo naryadi bo‘lib qoladi, "
+"boshqa kursant qo‘yilsa — oddiy naryad."
+msgstr ""
+"Место наряда вне очереди: если поставить другого активного залётчика — "
+"останется нарядом вне очереди, другого курсанта — обычный наряд."
+
+msgid "Boshqa guruhlar"
+msgstr "Другие группы"
+
+msgid "Lavozimdagilar"
+msgstr "На должностях"

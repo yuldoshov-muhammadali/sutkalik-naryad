@@ -70,6 +70,8 @@ quyidagi atamalar bir xil tarjima qilinadi.
 | Naryadda uxlab qolish | Сон на посту | Sleeping on duty |
 | Povtor (takroriy naryad) | Повтор | Repeat duty |
 | Navbati o‘tdi | Очередь прошла | Turn passed |
+| Boshqa kurs kursanti | Курсант другого курса | Cadet from another year |
+| Lavozimdagilar | На должностях | Holding positions |
 
 ## Joy nomlari va PDF qatorlari (interfeysda; PDF’da doim o‘zbekcha)
 

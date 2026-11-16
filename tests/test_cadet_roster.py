@@ -198,10 +198,10 @@ def test_no_exempt_word_anywhere_position_label_stays(client, admin, lang):
     label = {"uz": "Kurs starshinasi", "ru": "Старшина курса", "en": "Course senior cadet"}[lang]
     for name in ("cadet_list", "cadet_list_filter", "cadet_detail", "stats"):
         assert label in pages[name], (lang, name)
-    # almashtirish oynasida — shu joy guruhining lavozimdagi kursanti, lavozim nomi bilan
+    # almashtirish oynasida — lavozimdagi kursant lavozim nomi bilan (24-bosqich: tanlash mumkin)
     holder = Cadet.objects.get(group=draft.group_posts.get(post__code="noj1").group, duty_exempt=True)
     with translation.override(lang):
-        assert f"{holder.position_label} (" in pages["day_replace"], lang
+        assert str(holder.position_label) in pages["day_replace"], lang
     assert draft.status == DutyDay.Status.DRAFT
 
 

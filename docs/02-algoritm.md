@@ -138,6 +138,13 @@ Tarix: `History.records` — faqat oddiy naryadlar (povtor adolat va saralash ka
 povtor (D+2 zanjiri amalda kim qayerda turganidan: P → X dan keyingi joy, N → undan keyingi); `all_records` — hammasi (“kecha turgan”).
 Povtor bo‘lmasa natija bayt-bayt avvalgidek.
 
+## 3c. Zanjir manbai — saqlangan taqsimot (24-bosqich, 1.15.0)
+
+`services.generate_draft` dvigatelga `previous_rotation` — oxirgi tasdiqlangan sutkaning saqlangan guruh → joy taqsimotini
+(`GroupPostAssignment`) beradi; `rotate_groups` zanjirni shundan suradi. Shuning uchun joyda qo‘lda qo‘yilgan boshqa guruh kursanti
+yoki boshqa kurs kursanti (`OutsiderAssignment`, tarixga kirmaydi) bo‘lsa ham joy guruhining navbati o‘tgan hisoblanadi.
+Taqsimot to‘liq bo‘lmasa yoki berilmasa — avvalgidek tarixdagi yozuvlardan (natija bayt-bayt avvalgidek).
+
 ## 4. Qat’iy cheklovlar
 
 - **Lavozimdagi kursantlar** (guruh komandiri, kurs starshinasi, kurs pisari, kaptyorchik — CLAUDE.md 2-bo‘lim) nomzodlar hovuziga umuman kirmaydi: `services.engine_cadets()` ularni algoritmga bermaydi, almashtirish oynasida ular faqat lavozim nomi bilan (“Guruh komandiri (lavozimda)”) tanlab bo‘lmaydigan qilib ko‘rsatiladi. Algoritmning o‘zi (`naryad/engine/`) va saralash kaliti o‘zgarmagan.

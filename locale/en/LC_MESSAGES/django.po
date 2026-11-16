@@ -3964,3 +3964,89 @@ msgstr ""
 
 msgid "Povtor (hisobga kirmaydi)"
 msgstr "Repeat duty (not counted)"
+
+# 24-bosqich: boshqa guruh / boshqa kurs kursanti
+msgid "1-kurs"
+msgstr "1st year"
+
+msgid "3-kurs"
+msgstr "3rd year"
+
+msgid "4-kurs"
+msgstr "4th year"
+
+msgid "F.I.Sh. (PDF’dagidek)"
+msgstr "Full name (as in the PDF)"
+
+msgid "kurs"
+msgstr "year"
+
+msgid "boshqa kurs kursanti"
+msgstr "cadet from another year"
+
+msgid "boshqa kurs kursantlari"
+msgstr "cadets from other years"
+
+msgid "Boshqa kurs kursanti qo‘yildi"
+msgstr "Cadet from another year placed"
+
+msgid "Ism-familiyani yozing."
+msgstr "Enter the full name."
+
+msgid "Ism-familiya juda uzun (ko‘pi bilan 100 belgi)."
+msgstr "The name is too long (100 characters at most)."
+
+msgid "Guruhni yozing."
+msgstr "Enter the group."
+
+msgid "Guruh nomi juda uzun (ko‘pi bilan 30 belgi)."
+msgstr "The group name is too long (30 characters at most)."
+
+msgid "Kursni tanlang."
+msgstr "Select the year."
+
+msgid "%(slot)s: boshqa kurs kursanti qo‘yildi."
+msgstr "%(slot)s: cadet from another year placed."
+
+msgid "Boshqa kurs kursantini qo‘shish"
+msgstr "Add a cadet from another year"
+
+msgid ""
+"Platformada yo‘q boshqa kurs kursanti. O‘rindagi kursantning tarixiga hech "
+"narsa yozilmaydi; boshqa kurs kursantining statistikasi yuritilmaydi. Joy "
+"guruhining navbati o‘tgan hisoblanadi."
+msgstr ""
+"A cadet from another year who is not on the platform. Nothing is recorded in"
+" the history of the cadet who held this place; no statistics are kept for "
+"the other-year cadet. The turn of this post's group is considered passed."
+
+msgid "Ism-familiya (PDF’da shunday chiqadi)"
+msgstr "Full name (as it will appear in the PDF)"
+
+msgid "masalan: Karimov A"
+msgstr "e.g. Karimov A"
+
+msgid "Kurs"
+msgstr "Year"
+
+msgid "masalan: BI-324"
+msgstr "e.g. BI-324"
+
+msgid "Boshqa kurs kursanti — platformada yo‘q, statistikasi yuritilmaydi"
+msgstr "Cadet from another year — not on the platform, no statistics kept"
+
+msgid "Boshqa kurs"
+msgstr "Other year"
+
+msgid ""
+"Jazo o‘rni: boshqa faol zalyotchik qo‘yilsa — jazo naryadi bo‘lib qoladi, "
+"boshqa kursant qo‘yilsa — oddiy naryad."
+msgstr ""
+"Extra-duty place: another active offender keeps it as extra duty; any other "
+"cadet makes it a regular duty."
+
+msgid "Boshqa guruhlar"
+msgstr "Other groups"
+
+msgid "Lavozimdagilar"
+msgstr "Holding positions"

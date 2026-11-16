@@ -32,6 +32,7 @@ from .models import (
     Gender,
     GroupPostAssignment,
     InitialRotation,
+    OutsiderAssignment,
     Penalty,
     Post,
     PostSlot,
@@ -79,6 +80,7 @@ def reason_text(code: str, note: str) -> str:
 class Row:
     slot: PostSlot
     assignment: Assignment | None
+    outsider: OutsiderAssignment | None = None  # 24-bosqich: boshqa kurs kursanti (platformada yo'q)
 
     @property
     def cadet(self) -> Cadet | None:
@@ -110,17 +112,19 @@ def sections(duty_day: DutyDay | None) -> list[Section]:
     """Rasmiy shakl tartibida 7 bo'lim (bo'sh o'rinlar bilan)."""
     group_by_post = {}
     by_slot = {}
+    outsiders = {}
     if duty_day is not None:
         group_by_post = {g.post_id: g.group.code for g in duty_day.group_posts.select_related("group")}
         by_slot = {
             a.post_slot_id: a
             for a in duty_day.assignments.select_related("cadet__group", "group", "post_slot")
         }
+        outsiders = {o.post_slot_id: o for o in duty_day.outsiders.all()}
     out = []
     for post in Post.objects.order_by("display_order").prefetch_related("slots"):
         section = Section(post=post, group_code=group_by_post.get(post.pk))
         for slot in sorted(post.slots.all(), key=lambda s: s.position):
-            section.rows.append(Row(slot=slot, assignment=by_slot.get(slot.pk)))
+            section.rows.append(Row(slot=slot, assignment=by_slot.get(slot.pk), outsider=outsiders.get(slot.pk)))
         out.append(section)
     return out
 
@@ -137,9 +141,10 @@ def day_issues(duty_day: DutyDay) -> list[Issue]:
     """Qoralamadagi joriy muammolar (tasdiqlashga to'sqinlik qiladi)."""
     issues: list[Issue] = []
     filled = {a.post_slot_id: a for a in duty_day.assignments.select_related("cadet__group", "post_slot__post")}
+    outsider_slots = set(duty_day.outsiders.values_list("post_slot_id", flat=True))  # 24-bosqich: o'rin band
     empty_by_post: dict[Post, int] = {}
     for slot in PostSlot.objects.select_related("post"):
-        if slot.pk not in filled:
+        if slot.pk not in filled and slot.pk not in outsider_slots:
             empty_by_post[slot.post] = empty_by_post.get(slot.post, 0) + 1
     for post, n in sorted(empty_by_post.items(), key=lambda kv: kv[0].display_order):
         issues.append(Issue("empty", ngettext(
@@ -161,7 +166,8 @@ def day_issues(duty_day: DutyDay) -> list[Issue]:
             issues.append(Issue("inactive", _("%(name)s (%(slot)s) faol emas — almashtiring yoki qayta tuzing.") % {
                 "name": a.cadet.short_name, "slot": _(a.post_slot.print_label),
             }))
-        elif a.cadet.duty_exempt:
+        elif a.cadet.duty_exempt and a.source == Assignment.Source.AUTO:
+            # 24-bosqich: lavozimdagi kursantni admin qo'lda qo'yishi mumkin — faqat generator qo'ygan bo'lsa to'siq
             issues.append(
                 Issue("exempt", _("%(name)s (%(slot)s) — %(position)s (lavozimda) — almashtiring yoki qayta tuzing.") % {
                     "name": a.cadet.short_name, "slot": _(a.post_slot.print_label), "position": a.cadet.position_label,
@@ -369,6 +375,8 @@ class Candidate:
     excluded: str = ""  # bo'sh bo'lmasa — nega tanlab bo'lmaydi
     best: bool = False
     offender: bool = False  # faol zalyotchik (jazo o'rniga qo'yiladi)
+    # 24-bosqich: oynadagi bo'lim — shu joy guruhi (yoki qizlar navbati) / boshqa guruhlar / lavozimdagilar
+    section: str = "own"
     # 21-bosqich: joylar navbati belgilari (ogohlantirish, taqiq emas) va “dam olmagan” (faqat admin, sabab + tasdiq)
     no_rest: bool = False
     hard_conflict: bool = False  # shu hafta og'ir joyda turgan (og'ir joyga)
@@ -385,14 +393,20 @@ def candidate_from_score(cadet: Cadet, s, **extra) -> Candidate:
     )
 
 
+SECTION_OWN, SECTION_OTHER, SECTION_EXEMPT = "own", "other", "exempt"
+
+
 def candidate_pool(duty_day: DutyDay, slot: PostSlot) -> list[Cadet]:
+    """24-bosqich: barcha guruhlarning shu jinsdagi kursantlari (lavozimdagilar ham) — kurs boshlig‘i topshirig‘i bilan."""
     qs = Cadet.objects.select_related("group").filter(gender=slot.post.gender)
-    if slot.post.gender == Gender.MALE:
-        gpa = GroupPostAssignment.objects.filter(duty_day=duty_day, post=slot.post).select_related("group").first()
-        if gpa is None:
-            return []
-        qs = qs.filter(group=gpa.group)
-    return list(qs.order_by("last_name"))
+    return list(qs.order_by("group__display_order", "last_name", "first_name"))
+
+
+def slot_group_id(duty_day: DutyDay, slot: PostSlot) -> int | None:
+    """O'g'il bolalar joyida shu sutkada joyni bergan guruh (qizlarda None — umumiy navbat)."""
+    if slot.post.gender != Gender.MALE:
+        return None
+    return GroupPostAssignment.objects.filter(duty_day=duty_day, post=slot.post).values_list("group_id", flat=True).first()
 
 
 def is_penalty_slot(duty_day: DutyDay, slot: PostSlot) -> bool:
@@ -413,8 +427,14 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
             error = replacement_error(duty_day, slot, p.cadet)
             offenders_first.append(Candidate(p.cadet, excluded=error or "", offender=True))
     everyone = [c for c in candidate_pool(duty_day, slot) if current is None or c.pk != current.cadet_id]
-    exempt = [c for c in everyone if c.duty_exempt]  # algoritm hovuziga kirmaydi, ro'yxat oxirida sababi bilan
-    pool = [c for c in everyone if not c.duty_exempt]
+    own_group = slot_group_id(duty_day, slot)
+
+    def section_of(c: Cadet) -> str:
+        if c.duty_exempt:
+            return SECTION_EXEMPT  # lavozimdagilar — ro'yxat oxirida, lavozimi bilan (24-bosqich: tanlash mumkin)
+        return SECTION_OWN if own_group is None or c.group_id == own_group else SECTION_OTHER
+
+    pool = everyone
     by_id = {c.pk: c for c in pool}
     taken = set(
         Assignment.objects.filter(duty_day=duty_day).exclude(post_slot=slot).values_list("cadet_id", flat=True)
@@ -434,15 +454,16 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
         rotation,
     )
     out = [c for c in offenders_first if not c.excluded]
-    for i, s in enumerate(pick.ranking):
-        out.append(candidate_from_score(by_id[s.cadet_id], s, best=(i == 0)))
+    listed: list[Candidate] = []
+    for s in pick.ranking:
+        listed.append(candidate_from_score(by_id[s.cadet_id], s, section=section_of(by_id[s.cadet_id])))
     if rotation is not None:
         # QOIDA B: kecha turgan kursantni generator qo'ymaydi; admin — faqat shu oynada, sabab va tasdiq bilan
         for cid, reason in list(pick.excluded.items()):
             if reason == EXCLUDED_YESTERDAY and replacement_error(duty_day, slot, by_id[cid], allow_no_rest=True) is None:
                 del pick.excluded[cid]
                 s = score_candidate(services.to_engine_cadet(by_id[cid]), slot.post.code, duty_day.date, history, rotation)
-                out.append(candidate_from_score(by_id[cid], s, no_rest=True))
+                listed.append(candidate_from_score(by_id[cid], s, no_rest=True, section=section_of(by_id[cid])))
     sick = {
         ab.cadet_id: ab for ab in Absence.objects.filter(
             reason_type=Absence.Reason.SICK, start_date__lte=duty_day.date, end_date__gte=duty_day.date, cadet_id__in=pick.excluded
@@ -450,15 +471,21 @@ def replacement_candidates(duty_day: DutyDay, slot: PostSlot) -> list[Candidate]
     }
     for cid, reason in pick.excluded.items():
         if cid in sick:  # 17-bosqich: kasallar ro'yxatidagi kursant — sababi “Kasal” (tavsifsiz)
-            out.append(Candidate(by_id[cid], excluded=sick_text(sick[cid])))
+            listed.append(Candidate(by_id[cid], excluded=sick_text(sick[cid]), section=section_of(by_id[cid])))
             continue
-        out.append(Candidate(by_id[cid], excluded=_(reason)))  # algoritm sababi — joriy tilda (i18n_data.ENGINE_TEXTS)
-    for c in exempt:
-        out.append(Candidate(c, excluded=exempt_text(c)))
+        # algoritm sababi — joriy tilda (i18n_data.ENGINE_TEXTS)
+        listed.append(Candidate(by_id[cid], excluded=_(reason), section=section_of(by_id[cid])))
+    # 24-bosqich: avval shu joy guruhi (algoritm tartibida), keyin boshqa guruhlar va lavozimdagilar (guruh, familiya);
+    # har bo'limda tanlab bo'lmaydiganlar oxirida
+    for section in (SECTION_OWN, SECTION_OTHER, SECTION_EXEMPT):
+        part = [c for c in listed if c.section == section]
+        if section != SECTION_OWN:
+            part.sort(key=lambda c: (c.cadet.group.display_order, c.cadet.last_name, c.cadet.first_name))
+        out += [c for c in part if not c.excluded] + [c for c in part if c.excluded]
     out += [c for c in offenders_first if c.excluded]
-    if out and not out[0].excluded and not out[0].no_rest:
-        for c in out:
-            c.best = False
+    for c in out:
+        c.best = False
+    if out and not out[0].excluded and not out[0].no_rest and out[0].section == SECTION_OWN:
         out[0].best = True
     return out
 
@@ -494,10 +521,6 @@ def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet, allow_no_
         return _("Bu kursant allaqachon shu o‘rinda.")
     if not cadet.is_active:
         return _("%(name)s faol emas (%(reason)s).") % {"name": cadet.short_name, "reason": cadet.deactivation_reason}
-    if cadet.duty_exempt:
-        return _("%(name)s — %(position)s, sutkalik naryadga qo‘yilmaydi.") % {
-            "name": cadet.short_name, "position": cadet.position_label,
-        }
     if cadet.gender != post.gender:
         if post.gender == Gender.FEMALE:
             return _("O‘g‘il bolani Qizlar yotoqxonasiga qo‘yib bo‘lmaydi.")
@@ -509,13 +532,7 @@ def replacement_error(duty_day: DutyDay, slot: PostSlot, cadet: Cadet, allow_no_
             "%(name)s faol zalyotchik — oddiy navbatda faqat 1-NO‘J yoki 1-Yotoqxonada (o‘z guruhi bilan) turadi, "
             "boshqa joylarga qo‘yilmaydi."
         ) % {"name": cadet.short_name}
-    if post.gender == Gender.MALE and not (penalty_slot and is_offender):
-        gpa = GroupPostAssignment.objects.filter(duty_day=duty_day, post=post).select_related("group").first()
-        if gpa and gpa.group_id != cadet.group_id:
-            return _(
-                "%(post)s bu sutkada %(group)s guruhiga tegishli — boshqa guruhdan "
-                "(%(other)s) kursant qo‘yib bo‘lmaydi."
-            ) % {"post": _(post.name), "group": gpa.group.code, "other": cadet.group.code}
+    # 24-bosqich: boshqa guruh va lavozimdagi kursantni ham qo'yish mumkin (kurs boshlig‘i topshirig‘i, bildirgi asosida)
     other = Assignment.objects.filter(duty_day=duty_day, cadet=cadet).exclude(post_slot=slot).select_related("post_slot").first()
     if other is not None:
         return _("%(name)s shu sutkada boshqa o‘rinda turibdi: %(slot)s.") % {
@@ -583,6 +600,11 @@ def replace_cadet(
 
     current = Assignment.objects.filter(duty_day=duty_day, post_slot=slot).select_related("cadet").first()
     old_cadet = current.cadet if current else None
+    # 24-bosqich: o'rinda boshqa kurs kursanti bo'lsa — u olib tashlanadi
+    outsider = OutsiderAssignment.objects.filter(duty_day=duty_day, post_slot=slot).first()
+    old_outsider = outsider.full_name if outsider else ""
+    if outsider is not None:
+        outsider.delete()
     # Jazo o'rniga boshqa faol zalyotchik qo'yilsa — jazo naryadi, shu guruh kursanti qo'yilsa — oddiy naryad
     penalty = None
     if current is not None and current.kind == Assignment.Kind.PENALTY:
@@ -615,7 +637,11 @@ def replace_cadet(
         reason=reason,
         reason_code=reason_code,
         user=user,
-        details=(f"{old_cadet.short_name} → {cadet.short_name}" if old_cadet else f"Bo‘sh o‘ringa {cadet.short_name}")
+        details=(
+            f"{old_cadet.short_name} → {cadet.short_name}" if old_cadet
+            else f"Boshqa kurs kursanti {old_outsider} → {cadet.short_name}" if old_outsider
+            else f"Bo‘sh o‘ringa {cadet.short_name}"
+        )
         + f" ({slot.print_label})",
     )
     if no_rest:  # alohida jurnal yozuvi (saqlanadigan matn — o'zbekcha)
@@ -626,6 +652,72 @@ def replace_cadet(
         )
     bump(duty_day)
     return assignment
+
+
+OUTSIDER_COURSES = {value for value, _label in OutsiderAssignment.COURSES}
+
+
+@transaction.atomic
+def place_outsider(
+    date: dt.date, slot_id: int, full_name: str, course, group_name: str, reason_code: str, note: str, user, expected_version,
+) -> OutsiderAssignment:
+    """24-bosqich: o'ringa boshqa kurs kursantini qo'lda qo'yadi (ism-familiya, kurs, guruh).
+
+    O'rindagi kursant olib tashlanadi — uning tarixiga hech narsa yozilmaydi; boshqa kurs kursantining statistikasi
+    yuritilmaydi. O'rin guruhining navbati o'tgan hisoblanadi (zanjir saqlangan taqsimotdan). Sabab majburiy.
+    """
+    duty_day = lock_draft(date, expected_version)
+    reason = reason_text(reason_code, note)
+    full_name = " ".join((full_name or "").split())
+    group_name = " ".join((group_name or "").split())
+    if not full_name:
+        raise ServiceError(_("Ism-familiyani yozing."))
+    if len(full_name) > 100:
+        raise ServiceError(_("Ism-familiya juda uzun (ko‘pi bilan 100 belgi)."))
+    if not group_name:
+        raise ServiceError(_("Guruhni yozing."))
+    if len(group_name) > 30:
+        raise ServiceError(_("Guruh nomi juda uzun (ko‘pi bilan 30 belgi)."))
+    try:
+        course = int(course)
+    except (TypeError, ValueError):
+        course = 0
+    if course not in OUTSIDER_COURSES:
+        raise ServiceError(_("Kursni tanlang."))
+    slot = PostSlot.objects.select_related("post").get(pk=slot_id)
+
+    current = Assignment.objects.filter(duty_day=duty_day, post_slot=slot).select_related("cadet").first()
+    old_cadet = current.cadet if current else None
+    previous = OutsiderAssignment.objects.filter(duty_day=duty_day, post_slot=slot).first()
+    old_outsider = previous.full_name if previous else ""
+    if current is not None:
+        current.delete()
+    if previous is not None:
+        previous.delete()
+    outsider = OutsiderAssignment.objects.create(
+        duty_day=duty_day, post_slot=slot, full_name=full_name, course=course, group_name=group_name, created_by=user,
+    )
+
+    if old_cadet is not None and reason_code in ABSENCE_REASONS:
+        covered = Absence.objects.filter(cadet=old_cadet, start_date__lte=date, end_date__gte=date).exists()
+        if not covered:
+            Absence.objects.create(
+                cadet=old_cadet, start_date=date, end_date=date, reason_type=reason_code,
+                note=f"Qo‘lda almashtirishda avtomatik ({date:%d.%m.%Y} sutkasi)", created_by=user,  # saqlanadi — o'zbekcha
+            )
+            ChangeLog.objects.create(
+                action=ChangeLog.Action.ABSENCE_ADD, cadet=old_cadet, user=user,
+                details=f"{reason_label_uz(reason_code)}: {date:%d.%m.%Y} (sutkada almashtirilgani uchun avtomatik)",
+            )
+
+    who = old_cadet.short_name if old_cadet else (f"Boshqa kurs kursanti {old_outsider}" if old_outsider else "Bo‘sh o‘rin")
+    ChangeLog.objects.create(  # saqlanadigan matn — o'zbekcha
+        duty_day=duty_day, action=ChangeLog.Action.OUTSIDER_ADD, post_slot=slot, old_cadet=old_cadet,
+        reason=reason, reason_code=reason_code, user=user,
+        details=f"{who} → {full_name} ({course}-kurs, {group_name}) ({slot.print_label})",
+    )
+    bump(duty_day)
+    return outsider
 
 
 @transaction.atomic

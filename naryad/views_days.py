@@ -18,7 +18,7 @@ from . import absences as absence_service
 from . import days, i18n, repeats, services
 from . import permissions as perms
 from .dashboard import current_duty_date, fmt_day
-from .models import Absence, Assignment, ChangeLog, DutyDay, DutyWeek, Gender, PostSlot, Setting
+from .models import Absence, Assignment, ChangeLog, DutyDay, DutyWeek, Gender, OutsiderAssignment, PostSlot, Setting
 
 
 def parse_date(value: str) -> dt.date:
@@ -222,6 +222,7 @@ def day_replace(request, date, slot_id):
         "duty_day": duty_day,
         "slot": slot,
         "current": current,
+        "outsider": duty_day.outsiders.filter(post_slot=slot).first(),  # 24-bosqich
         "candidates": candidates,
         "no_rest_ids": {str(c.cadet.pk) for c in candidates if c.no_rest},
         "no_rest_warning": days.NO_REST_WARNING,
@@ -232,6 +233,40 @@ def day_replace(request, date, slot_id):
         "back": day_url(date),
     }
     template = "naryad/days/_replace.html" if request.headers.get("HX-Request") else "naryad/days/replace_page.html"
+    return render(request, template, context)
+
+
+@perms.role_required("day.edit")
+def day_outsider(request, date, slot_id):
+    """24-bosqich: o'ringa boshqa kurs kursantini qo'lda qo'yish (ism-familiya, kurs, guruh)."""
+    date = parse_date(date)
+    duty_day = get_object_or_404(DutyDay, date=date)
+    slot = get_object_or_404(PostSlot.objects.select_related("post"), pk=slot_id)
+    error = None
+    if request.method == "POST":
+        try:
+            days.place_outsider(
+                date, slot.pk, request.POST.get("full_name", ""), request.POST.get("course"), request.POST.get("group_name", ""),
+                request.POST.get("reason", ""), request.POST.get("note", ""), request.user, request.POST.get("version"),
+            )
+        except services.ServiceError as exc:
+            error = str(exc)
+            duty_day.refresh_from_db()
+        else:
+            messages.success(request, _("%(slot)s: boshqa kurs kursanti qo‘yildi.") % {"slot": _(slot.print_label)})
+            return htmx_redirect(request, day_url(date))
+    context = {
+        "duty_day": duty_day,
+        "slot": slot,
+        "current": duty_day.assignments.filter(post_slot=slot).select_related("cadet").first(),
+        "outsider": duty_day.outsiders.filter(post_slot=slot).first(),
+        "courses": OutsiderAssignment.COURSES,
+        "reasons": days.CHANGE_REASONS,
+        "error": error,
+        "posted": request.POST if request.method == "POST" else {},
+        "back": day_url(date),
+    }
+    template = "naryad/days/_outsider.html" if request.headers.get("HX-Request") else "naryad/days/outsider_page.html"
     return render(request, template, context)
 
 

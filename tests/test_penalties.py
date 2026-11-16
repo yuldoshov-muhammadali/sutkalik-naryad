@@ -262,9 +262,9 @@ def test_replacement_rules_for_penalty_slot(admin):
     penalties.add(other, "tartib", "y", MONDAY, 1, admin)  # tuzilgandan keyin kiritildi
     cands = days.replacement_candidates(day, pen.post_slot)
     assert cands[0].offender and cands[0].cadet == other and not cands[0].excluded
-    # boshqa guruhning oddiy kursanti — yo'q (guruh qoidasi)
+    # 24-bosqich: boshqa guruhning oddiy kursanti ham qo'yilishi mumkin (oddiy naryad bo'ladi)
     stranger = boy(INITIAL_ROTATION["oquv"], 2)
-    assert days.replacement_error(day, pen.post_slot, stranger)
+    assert days.replacement_error(day, pen.post_slot, stranger) is None or stranger.pk in busy
     # faol zalyotchikni boshqa joyga (Markaz) qo'lda qo'yib bo'lmaydi
     markaz_slot = PostSlot.objects.get(post__code="markaz")
     assert "faol zalyotchik" in days.replacement_error(day, markaz_slot, other)

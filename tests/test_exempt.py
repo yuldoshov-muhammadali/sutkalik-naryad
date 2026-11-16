@@ -176,18 +176,21 @@ def test_smallest_group_week_has_no_empty_slots(admin):
 # ---------------------------------------------------------------------------
 
 
-def test_manual_placement_of_exempt_is_rejected(admin):
+def test_manual_placement_of_exempt_is_allowed(admin):
+    """24-bosqich: lavozimdagi kursantni admin qo'lda qo'ya oladi (kurs boshlig‘i topshirig‘i); generator qo'ymaydi."""
     DutyWeek.objects.create(start_date=SUNDAY, created_by=admin)
     draft = services.generate_draft(SUNDAY, admin)
     group = StudyGroup.objects.get(code=INITIAL_ROTATION["noj1"])
     exempt = Cadet.objects.get(group=group, duty_exempt=True)
+    assert not draft.assignments.filter(cadet__duty_exempt=True).exists()
     slot = PostSlot.objects.get(post__code="noj1", position=1)
     candidates = days.replacement_candidates(draft, slot)
-    excluded = {c.cadet.pk: c.excluded for c in candidates if c.excluded}
-    assert excluded[exempt.pk] == "Guruh komandiri (lavozimda)"  # 21-bosqich (5a): faqat lavozim nomi
-    assert all(not c.cadet.duty_exempt for c in candidates if not c.excluded)
-    with pytest.raises(ServiceError, match="sutkalik naryadga qo‘yilmaydi"):
-        days.replace_cadet(SUNDAY, slot.pk, exempt.pk, "sababli", "", admin, draft.version)
+    row = next(c for c in candidates if c.cadet.pk == exempt.pk)
+    assert not row.excluded and row.section == "exempt"
+    assert candidates[-1].section == "exempt" or candidates[-1].excluded  # lavozimdagilar ro'yxat oxirida
+    days.replace_cadet(SUNDAY, slot.pk, exempt.pk, "sababli", "", admin, draft.version)
+    draft.refresh_from_db()
+    assert not [i for i in days.day_issues(draft) if i.kind == "exempt"]  # qo'lda qo'yilgan — tasdiqlashga to'siq emas
 
 
 def test_exempt_in_draft_blocks_approval(admin, client):

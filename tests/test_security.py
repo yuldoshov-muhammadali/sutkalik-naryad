@@ -92,6 +92,7 @@ def urls(w) -> dict[str, str]:
         "day_generate": reverse("day_generate", args=[m]),
         "day_replace": reverse("day_replace", args=[m, w["slot"].pk]),
         "day_swap": reverse("day_swap", args=[m, w["slot"].post_id]),
+        "day_outsider": reverse("day_outsider", args=[m, w["slot"].pk]),  # 24-bosqich: boshqa kurs kursanti
         "day_approve": reverse("day_approve", args=[m]),
         "day_reopen": reverse("day_reopen", args=[s]),
         "day_repeat": reverse("day_repeat", args=[s]),  # 23-bosqich: povtor
@@ -178,7 +179,7 @@ COMMANDER_GET = {
 }
 MODIFYING = ["cadet_create", "cadet_import", "cadet_edit", "cadet_deactivate", "cadet_activate", "cadet_exempt",
              "cadet_unexempt", "week_open",
-             "day_generate", "day_replace", "day_swap", "day_approve", "day_reopen", "day_delete",
+             "day_generate", "day_replace", "day_swap", "day_outsider", "day_approve", "day_reopen", "day_delete",
              "day_repeat", "day_repeat_cancel", "absence_list", "absence_end", "absence_delete",
              "sick_create", "sick_edit", "sick_extend", "sick_recover", "sick_delete",
              "sick_doc_upload", "sick_doc_replace", "sick_doc_delete", "penalty_list", "penalty_cancel",

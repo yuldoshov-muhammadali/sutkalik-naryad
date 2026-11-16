@@ -627,6 +627,38 @@ class Assignment(models.Model):
         super().save(*args, **kwargs)
 
 
+class OutsiderAssignment(models.Model):
+    """Boshqa kurs kursanti (24-bosqich): platformada yo'q, o'rinni qo'lda egallaydi — ism-familiya, kurs va guruh
+    qo'lda yoziladi. Statistika va shaxsiy tarix yuritilmaydi; o'rin guruhining navbati o'tgan hisoblanadi.
+    Bir o'rinda yoki Assignment, yoki OutsiderAssignment bo'ladi (xizmatlarda tekshiriladi)."""
+
+    COURSES = [(1, _lazy("1-kurs")), (3, _lazy("3-kurs")), (4, _lazy("4-kurs"))]
+
+    duty_day = models.ForeignKey(DutyDay, verbose_name=_lazy("sutka"), on_delete=models.CASCADE, related_name="outsiders")
+    post_slot = models.ForeignKey(PostSlot, verbose_name=_lazy("o‘rin"), on_delete=models.PROTECT, related_name="+")
+    full_name = models.CharField(_lazy("F.I.Sh. (PDF’dagidek)"), max_length=100)
+    course = models.PositiveSmallIntegerField(_lazy("kurs"), choices=COURSES)
+    group_name = models.CharField(_lazy("guruh"), max_length=30)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_lazy("kim kiritdi"), on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+",
+    )
+    created_at = models.DateTimeField(_lazy("kiritilgan vaqti"), auto_now_add=True)
+
+    class Meta:
+        db_table = "outsider_assignment"
+        ordering = ["duty_day", "post_slot__post__display_order", "post_slot__position"]
+        verbose_name = _lazy("boshqa kurs kursanti")
+        verbose_name_plural = _lazy("boshqa kurs kursantlari")
+        constraints = [
+            models.UniqueConstraint(fields=["duty_day", "post_slot"], name="outsider_unique_day_slot"),
+            models.CheckConstraint(condition=Q(course__in=[1, 3, 4]), name="outsider_course_valid"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.full_name} ({self.course}-kurs, {self.group_name})"
+
+
 class PublishedDuty(models.Model):
     """Kursantga e'lon qilingan naryad (14-bosqich): sutka tasdiqlanganda kursantlar shu yerga yoziladi.
 
@@ -951,11 +983,12 @@ class ChangeLog(models.Model):
         POST_ROTATION = "post_rotation", _lazy("Joylar navbati sozlamasi o‘zgartirildi")
         REPEAT_ADD = "repeat_add", _lazy("Povtor belgilandi")
         REPEAT_CANCEL = "repeat_cancel", _lazy("Povtor bekor qilindi")
+        OUTSIDER_ADD = "outsider_add", _lazy("Boshqa kurs kursanti qo‘yildi")
 
     REASON_REQUIRED = (
         Action.REPLACE, Action.SWAP, Action.REOPEN, Action.DRAFT_DELETE, Action.CADET_DEACTIVATE,
         Action.CADET_EXEMPT, Action.CADET_UNEXEMPT, Action.PENALTY_ADD, Action.PENALTY_CANCEL, Action.NO_REST,
-        Action.REPEAT_ADD, Action.REPEAT_CANCEL,
+        Action.REPEAT_ADD, Action.REPEAT_CANCEL, Action.OUTSIDER_ADD,
     )
     CADET_ACTIONS = CHANGELOG_CADET_ACTIONS
 
@@ -1003,7 +1036,8 @@ class ChangeLog(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=~Q(action__in=["replace", "swap", "reopen", "draft_delete", "cadet_deactivate", "cadet_exempt", "cadet_unexempt",
-                                         "penalty_add", "penalty_cancel", "no_rest", "repeat_add", "repeat_cancel"])
+                                         "penalty_add", "penalty_cancel", "no_rest", "repeat_add", "repeat_cancel",
+                                         "outsider_add"])
                 | ~Q(reason=""),
                 name="change_log_reason_required",
             ),
