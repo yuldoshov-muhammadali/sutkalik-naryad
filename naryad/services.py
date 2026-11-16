@@ -214,7 +214,12 @@ def save_day_result(
     duty_day.group_posts.all().delete()
 
     GroupPostAssignment.objects.bulk_create(
-        GroupPostAssignment(duty_day=duty_day, post=posts[code], group=groups[group])
+        GroupPostAssignment(
+            duty_day=duty_day, post=posts[code], group=groups[group],
+            # 23-bosqich: povtor joyi va shu joyda navbati o'tgan guruh
+            is_repeat=code in result.repeat_posts,
+            skipped_group=groups[result.repeat_posts[code]] if result.repeat_posts.get(code) else None,
+        )
         for code, group in result.group_by_post.items()
     )
     Assignment.objects.bulk_create(
@@ -265,6 +270,7 @@ def generate_draft(
             )
         )
     from .penalties import engine_offenders  # aylana importdan qochish
+    from .repeats import engine_repeats
 
     setting = Setting.load()
     result = generate_day(
@@ -276,6 +282,7 @@ def generate_draft(
         offenders=engine_offenders(day),
         penalty_per_post=setting.penalty_per_post,
         rotation=setting.post_rotation(),  # 21-bosqich: o'chiq bo'lsa None — eski tartib
+        repeats=engine_repeats(day),  # 23-bosqich: oldingi sutkada belgilangan povtorlar
     )
     # ChangeLog.details — saqlanadigan matn, doim o'zbekcha (tarjima qilinmaydi)
     details = "Qayta tuzildi: avvalgi qoralama almashtirildi." if existing is not None else ""

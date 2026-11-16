@@ -179,6 +179,8 @@ def build_rows(cadets: list[Cadet], period: Period) -> list[CadetRow]:
         if a.kind == Assignment.Kind.PENALTY:
             row.penalty += 1
             continue
+        if a.kind == Assignment.Kind.REPEAT:  # 23-bosqich: povtor shaxsiy hisobga kirmaydi
+            continue
         post = a.post_slot.post.code
         row.by_post[post] = row.by_post.get(post, 0) + 1
         row.by_role[a.post_slot.role] = row.by_role.get(a.post_slot.role, 0) + 1
@@ -307,7 +309,8 @@ class GroupSection:
 
 
 def group_sections(period: Period) -> list[GroupSection]:
-    gpa = period.filter(GroupPostAssignment.objects.filter(duty_day__status=DutyDay.Status.APPROVED))
+    # 23-bosqich: povtor joyi guruh hisobiga kirmaydi
+    gpa = period.filter(GroupPostAssignment.objects.filter(duty_day__status=DutyDay.Status.APPROVED, is_repeat=False))
     counts = Counter((g.group_id, g.post.code) for g in gpa.select_related("post"))
     totals = Counter(
         a["group_id"] for a in approved_assignments(period).filter(post_slot__post__gender=Gender.MALE).values("group_id")

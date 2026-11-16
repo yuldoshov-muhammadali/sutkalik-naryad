@@ -527,6 +527,12 @@ class GroupPostAssignment(models.Model):
         Post, verbose_name=_lazy("joy"), on_delete=models.PROTECT, limit_choices_to={"gender": Gender.MALE}
     )
     group = models.ForeignKey(StudyGroup, verbose_name=_lazy("guruh"), on_delete=models.PROTECT)
+    # 23-bosqich: povtor — guruh shu joyda oldingi sutkadan qayta turibdi (guruhlar statistikasiga kirmaydi);
+    # skipped_group — shu joyga navbati kelgan, lekin turmagan guruh (uning bu joydagi navbati o'tdi)
+    is_repeat = models.BooleanField(_lazy("povtor"), default=False)
+    skipped_group = models.ForeignKey(
+        StudyGroup, verbose_name=_lazy("navbati o‘tgan guruh"), on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
 
     class Meta:
         db_table = "group_post_assignment"
@@ -557,6 +563,7 @@ class Assignment(models.Model):
     class Kind(models.TextChoices):
         NORMAL = em.KIND_NORMAL, _lazy("Oddiy")
         PENALTY = em.KIND_PENALTY, _lazy("Navbatdan tashqari (jazo)")
+        REPEAT = em.KIND_REPEAT, _lazy("Povtor")  # 23-bosqich: shaxsiy hisobga kirmaydi
 
     duty_day = models.ForeignKey(DutyDay, verbose_name=_lazy("sutka"), on_delete=models.CASCADE, related_name="assignments")
     post_slot = models.ForeignKey(PostSlot, verbose_name=_lazy("o‘rin"), on_delete=models.PROTECT, related_name="+")
@@ -588,7 +595,8 @@ class Assignment(models.Model):
             models.UniqueConstraint(fields=["duty_day", "cadet"], name="assignment_unique_day_cadet"),
             models.CheckConstraint(condition=Q(source__in=["auto", "manual"]), name="assignment_source_valid"),
             models.CheckConstraint(
-                condition=(Q(kind="normal") & Q(penalty__isnull=True)) | (Q(kind="penalty") & Q(penalty__isnull=False)),
+                condition=(Q(kind__in=["normal", "repeat"]) & Q(penalty__isnull=True))
+                | (Q(kind="penalty") & Q(penalty__isnull=False)),
                 name="assignment_kind_penalty_consistent",
             ),
         ]
@@ -638,6 +646,36 @@ class PublishedDuty(models.Model):
 
     def __str__(self) -> str:
         return f"{self.day_date:%d.%m.%Y}: {self.cadet}"
+
+
+class PostRepeat(models.Model):
+    """Povtor (23-bosqich): tasdiqlangan sutkada shu joy tarkibi e'tiroz oldi — keyingi sutkada xuddi o'sha joyda,
+    xuddi o'sha tarkibda qayta turadi. Keyingi sutka tuzilganda avtomatik qo'yiladi; shaxsiy hisobga kirmaydi."""
+
+    source_day = models.ForeignKey(
+        DutyDay, verbose_name=_lazy("e’tiroz olingan sutka"), on_delete=models.CASCADE, related_name="repeats"
+    )
+    post = models.ForeignKey(Post, verbose_name=_lazy("joy"), on_delete=models.PROTECT, related_name="+")
+    reason = models.TextField(_lazy("sabab"))
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_lazy("kim belgiladi"), on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+",
+    )
+    created_at = models.DateTimeField(_lazy("belgilangan vaqti"), auto_now_add=True)
+
+    class Meta:
+        db_table = "post_repeat"
+        ordering = ["source_day", "post__display_order"]
+        verbose_name = _lazy("povtor")
+        verbose_name_plural = _lazy("povtorlar")
+        constraints = [models.UniqueConstraint(fields=["source_day", "post"], name="post_repeat_unique_day_post")]
+
+    def __str__(self) -> str:
+        return f"{self.source_day.date:%d.%m.%Y} — {self.post}"
+
+    @property
+    def repeat_date(self) -> dt.date:
+        return self.source_day.date + dt.timedelta(days=1)
 
 
 # ---------------------------------------------------------------------------
@@ -911,10 +949,13 @@ class ChangeLog(models.Model):
         TEST_DATA_CLEARED = "test_data_cleared", _lazy("Sinov ma’lumotlari tozalandi")
         NO_REST = "no_rest", _lazy("Dam olmagan kursant qo‘yildi")
         POST_ROTATION = "post_rotation", _lazy("Joylar navbati sozlamasi o‘zgartirildi")
+        REPEAT_ADD = "repeat_add", _lazy("Povtor belgilandi")
+        REPEAT_CANCEL = "repeat_cancel", _lazy("Povtor bekor qilindi")
 
     REASON_REQUIRED = (
         Action.REPLACE, Action.SWAP, Action.REOPEN, Action.DRAFT_DELETE, Action.CADET_DEACTIVATE,
         Action.CADET_EXEMPT, Action.CADET_UNEXEMPT, Action.PENALTY_ADD, Action.PENALTY_CANCEL, Action.NO_REST,
+        Action.REPEAT_ADD, Action.REPEAT_CANCEL,
     )
     CADET_ACTIONS = CHANGELOG_CADET_ACTIONS
 
@@ -962,7 +1003,7 @@ class ChangeLog(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=~Q(action__in=["replace", "swap", "reopen", "draft_delete", "cadet_deactivate", "cadet_exempt", "cadet_unexempt",
-                                         "penalty_add", "penalty_cancel", "no_rest"])
+                                         "penalty_add", "penalty_cancel", "no_rest", "repeat_add", "repeat_cancel"])
                 | ~Q(reason=""),
                 name="change_log_reason_required",
             ),

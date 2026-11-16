@@ -146,7 +146,7 @@
     <li class="flex items-center justify-between gap-3 px-4 py-3">
       <div class="min-w-0">
         <p class="font-medium">{% translate a.post_slot.post.name %}</p>
-        <p class="text-xs text-slate-500">{{ a.post_slot.get_role_display }}{% if a.kind == 'penalty' %} · <span class="font-semibold text-gold-800">{% translate "Navbatdan tashqari naryad" %}</span>{% endif %}{% if a.group_id != cadet.group_id %} · {% blocktranslate with code=a.group.code %}o‘sha paytda {{ code }}{% endblocktranslate %}{% endif %}</p>
+        <p class="text-xs text-slate-500">{{ a.post_slot.get_role_display }}{% if a.kind == 'penalty' %} · <span class="font-semibold text-gold-800">{% translate "Navbatdan tashqari naryad" %}</span>{% elif a.kind == 'repeat' %} · <span class="font-semibold text-brand-800">{% translate "Povtor (hisobga kirmaydi)" %}</span>{% endif %}{% if a.group_id != cadet.group_id %} · {% blocktranslate with code=a.group.code %}o‘sha paytda {{ code }}{% endblocktranslate %}{% endif %}</p>
       </div>
       <span class="shrink-0 text-sm tabular-nums text-slate-600">{{ a.duty_day.date|date:"d.m.Y" }}</span>
     </li>

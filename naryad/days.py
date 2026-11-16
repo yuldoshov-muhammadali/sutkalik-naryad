@@ -89,6 +89,11 @@ class Row:
         """Jazo o'rni (zalyotchik, 15-bosqich) — sutka sahifasida “Zalyot” belgisi (PDF’da yo'q)."""
         return bool(self.assignment and self.assignment.kind == Assignment.Kind.PENALTY)
 
+    @property
+    def is_repeat(self) -> bool:
+        """Povtor (23-bosqich) — sutka sahifasida “Povtor” belgisi (faqat admin; PDF’da yo'q)."""
+        return bool(self.assignment and self.assignment.kind == Assignment.Kind.REPEAT)
+
 
 @dataclass
 class Section:
@@ -223,7 +228,9 @@ def penalty_notices(duty_day: DutyDay) -> list[str]:
             continue
         cadet = cadets[o.cadet_id]
         values = {"name": cadet.short_name}
-        if a is not None:
+        if a is not None and a.kind == Assignment.Kind.REPEAT:
+            out.append(_("Zalyotchik %(name)s bugun povtorda turibdi (jazo hisobiga o‘tmaydi).") % values)
+        elif a is not None:
             out.append(_("Zalyotchik %(name)s bugun guruhi bilan oddiy navbatda turibdi (jazo hisobiga o‘tmaydi).") % values)
         elif not cadet.is_active or cadet.duty_exempt:
             out.append(_("Zalyotchik %(name)s faol emas yoki lavozimda — bugun qo‘yilmadi.") % values)
@@ -639,11 +646,13 @@ def swap_slots(date: dt.date, slot_a_id: int, slot_b_id: int, reason_code: str, 
     if Assignment.Kind.PENALTY in (a.kind, b.kind):
         raise ServiceError(_("Jazo naryadidagi zalyotchik faqat posbon bo‘ladi — uning lavozimini almashtirib bo‘lmaydi."))
     slot_a, slot_b = a.post_slot, b.post_slot
-    data = [(slot_b, a.cadet, a.group, a.no_rest), (slot_a, b.cadet, b.group, b.no_rest)]
+    # naryad turi (oddiy / povtor — 23-bosqich) kursant bilan birga ko'chadi
+    data = [(slot_b, a.cadet, a.group, a.no_rest, a.kind), (slot_a, b.cadet, b.group, b.no_rest, b.kind)]
     Assignment.objects.filter(pk__in=[a.pk, b.pk]).delete()
-    for slot, cadet, group, no_rest in data:
+    for slot, cadet, group, no_rest, kind in data:
         Assignment.objects.create(
-            duty_day=duty_day, post_slot=slot, cadet=cadet, group=group, source=Assignment.Source.MANUAL, no_rest=no_rest
+            duty_day=duty_day, post_slot=slot, cadet=cadet, group=group, source=Assignment.Source.MANUAL, no_rest=no_rest,
+            kind=kind,
         )
     ChangeLog.objects.create(
         duty_day=duty_day,
@@ -710,6 +719,9 @@ def reopen(date: dt.date, reason: str, user, expected_version) -> DutyDay:
     duty_day.version += 1
     duty_day.save()
     ChangeLog.objects.create(duty_day=duty_day, action=ChangeLog.Action.REOPEN, reason=reason.strip(), user=user)
+    from .repeats import drop_on_reopen  # aylana importdan qochish
+
+    drop_on_reopen(duty_day, reason.strip(), user)  # 23-bosqich: shu sutkada belgilangan povtorlar bekor bo'ladi
     penalties.sync(penalties.day_penalty_ids(duty_day), user)  # hisob qaytadi
     return duty_day
 

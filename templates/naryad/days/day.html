@@ -49,6 +49,12 @@
   <ul class="mt-1 list-disc space-y-1 pl-5">{% for n in rotation_notices %}<li>{{ n }}</li>{% endfor %}</ul>
 </div>
 {% endif %}
+{% if repeats_here and can.day_view_draft %}
+<div class="mt-4 rounded-xl border border-slate-200 bg-brand-50 p-4 text-sm text-brand-900" role="status" data-testid="repeat-notices">
+  <p class="font-semibold">{% translate "Povtor" %}</p>
+  <ul class="mt-1 list-disc space-y-1 pl-5">{% for r in repeats_here %}<li>{{ r.text }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
 
 {# --- amallar --- #}
 {% if can.day_view_draft %}
@@ -109,6 +115,40 @@
       {% endif %}
     </details>
     {% endif %}
+    {% if can.day_repeat %}
+    <details class="w-full sm:w-auto" data-testid="repeat-panel"{% if repeats_marked %} open{% endif %}>
+      <summary class="cursor-pointer list-none rounded-lg px-4 py-2 text-sm font-semibold text-brand-900 ring-1 ring-brand-800 hover:bg-brand-50">{% translate "Povtor…" %}</summary>
+      <div class="mt-2 space-y-2 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:w-96">
+        <p class="text-sm text-slate-600">{% translate "E’tiroz olgan joy tarkibi keyingi sutkada xuddi o‘sha joyda, o‘sha lavozimlarda qayta turadi. Povtor shaxsiy hisobga kirmaydi; shu joyga navbati kelgan guruhning navbati o‘tgan hisoblanadi." %}</p>
+        {% for r in repeats_marked %}
+        <form method="post" action="{% url 'day_repeat_cancel' date|date:'Y-m-d' r.repeat.pk %}" class="space-y-2 rounded-lg bg-brand-50 p-3" data-testid="repeat-marked">
+          {% csrf_token %}<input type="hidden" name="version" value="{{ duty_day.version }}">
+          <p class="text-sm font-medium text-brand-900">{{ r.text }}</p>
+          <p class="text-xs text-slate-600">{% translate "Sabab" %}: {{ r.repeat.reason }}</p>
+          {% if not repeat_blocker %}
+          <label class="block text-sm font-medium">{% translate "Bekor qilish sababi (majburiy)" %}
+            <input type="text" name="reason" required maxlength="300" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base"></label>
+          <button type="submit" class="w-full rounded-lg px-4 py-2 text-sm font-semibold text-red-700 ring-1 ring-red-300 hover:bg-red-50">{% translate "Povtorni bekor qilish" %}</button>
+          {% endif %}
+        </form>
+        {% endfor %}
+        {% if repeat_blocker %}
+        <p class="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">{{ repeat_blocker }}</p>
+        {% elif repeat_posts %}
+        <form method="post" action="{% url 'day_repeat' date|date:'Y-m-d' %}" class="space-y-2" data-testid="repeat-form">
+          {% csrf_token %}<input type="hidden" name="version" value="{{ duty_day.version }}">
+          <label class="block text-sm font-medium">{% translate "Joy" %}
+            <select name="post" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base">
+              {% for p in repeat_posts %}<option value="{{ p.pk }}">{% translate p.name %}</option>{% endfor %}
+            </select></label>
+          <label class="block text-sm font-medium">{% translate "Sabab (majburiy)" %}
+            <input type="text" name="reason" required maxlength="300" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-base"></label>
+          <button type="submit" class="w-full rounded-lg bg-brand-800 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-900">{% translate "Povtorga qoldirish" %}</button>
+        </form>
+        {% endif %}
+      </div>
+    </details>
+    {% endif %}
   {% endif %}
 </div>
 {% endif %}
@@ -143,7 +183,7 @@
       {% for row in section.rows %}
       <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-2.5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6rem_8rem] {% if cadet_view %}{% if row.cadet and row.cadet.pk == my_cadet_id %}bg-brand-50 ring-2 ring-inset ring-brand-400{% endif %}{% elif not row.assignment %}bg-red-50{% elif row.is_penalty %}bg-gold-50{% endif %}"{% if cadet_view %}{% if row.cadet and row.cadet.pk == my_cadet_id %} data-testid="my-row" aria-current="true"{% endif %}{% elif row.is_penalty %} data-testid="penalty-row"{% endif %}>
         <span class="col-span-2 text-xs text-slate-500 md:col-span-1 md:text-sm md:text-slate-800">{% if row.slot.show_label %}{% translate row.slot.print_label %}{% else %}<span class="md:invisible">{% translate row.slot.print_label %}</span>{% endif %}</span>
-        <span class="min-w-0 break-words font-medium">{% if row.cadet and cadet_view %}{{ row.cadet.short_name }}{% if row.cadet.pk == my_cadet_id %} <span class="whitespace-nowrap rounded bg-brand-800 px-1.5 py-0.5 text-xs font-semibold text-white">{% translate "Siz" %}</span>{% endif %}{% elif row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="{% translate "qo‘lda" %}">✎</span>{% endif %}{% if row.is_penalty %} <span class="whitespace-nowrap rounded bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-brand-950" title="{% translate "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Zalyot" %}</span>{% endif %}{% if row.assignment.no_rest %} <span class="whitespace-nowrap rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800" data-testid="no-rest-badge" title="{% translate "Bu kursant kecha naryadda bo‘lgan, dam olmagan" %}">{% translate "dam olmagan" %}</span>{% endif %}{% else %}<span class="text-red-700">{% translate "— bo‘sh —" %}</span>{% endif %}</span>
+        <span class="min-w-0 break-words font-medium">{% if row.cadet and cadet_view %}{{ row.cadet.short_name }}{% if row.cadet.pk == my_cadet_id %} <span class="whitespace-nowrap rounded bg-brand-800 px-1.5 py-0.5 text-xs font-semibold text-white">{% translate "Siz" %}</span>{% endif %}{% elif row.cadet %}{{ row.cadet.short_name }}{% if row.assignment.source == 'manual' %} <span class="text-xs font-normal text-amber-700" title="{% translate "qo‘lda" %}">✎</span>{% endif %}{% if row.is_penalty %} <span class="whitespace-nowrap rounded bg-gold-400 px-1.5 py-0.5 text-xs font-semibold text-brand-950" title="{% translate "Navbatdan tashqari (jazo) naryadi — rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Zalyot" %}</span>{% endif %}{% if row.is_repeat %} <span class="whitespace-nowrap rounded bg-brand-800 px-1.5 py-0.5 text-xs font-semibold text-white" data-testid="repeat-badge" title="{% translate "Povtor — shaxsiy hisobga kirmaydi, rasmiy PDF’da ko‘rsatilmaydi" %}">{% translate "Povtor" %}</span>{% endif %}{% if row.assignment.no_rest %} <span class="whitespace-nowrap rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800" data-testid="no-rest-badge" title="{% translate "Bu kursant kecha naryadda bo‘lgan, dam olmagan" %}">{% translate "dam olmagan" %}</span>{% endif %}{% else %}<span class="text-red-700">{% translate "— bo‘sh —" %}</span>{% endif %}</span>
         <span class="text-sm text-slate-600 md:order-none">{% if row.assignment %}{{ row.assignment.group.code }}{% endif %}</span>
         <span class="col-span-2 md:col-span-1 md:text-right">
           {% if editable %}

@@ -47,6 +47,8 @@ PERMISSIONS: dict[str, tuple[str, frozenset[str]]] = {
     "day.edit": (_lazy("Qoralamani qo‘lda tuzatish (sabab majburiy, jurnalga yoziladi)"), STAFF),
     "day.approve": (_lazy("Sutkani tasdiqlash"), STAFF),
     "day.reopen": (_lazy("Tasdiqlangan sutkani qayta ochish (sabab majburiy)"), STAFF),
+    # 23-bosqich: povtor — e'tiroz olgan joy tarkibi keyingi sutkada qayta turadi (shaxsiy hisobga kirmaydi)
+    "day.repeat": (_lazy("Povtor belgilash va bekor qilish (sabab majburiy, jurnalga yoziladi)"), STAFF),
     "absence.manage": (_lazy("Sababli yo‘qliklarni (kasal, ta’til) kiritish"), STAFF),
     "sick.manage": (_lazy("Kasallar ro‘yxati: kasallikni kiritish, tahrirlash, muddatni uzaytirish (tavsif bilan), hujjat rasmlari"), STAFF),
     "documents.own": (_lazy("O‘z kasallik hujjatlarini (rasmlarini) ko‘rish — faqat ko‘rish"), CADETS),
